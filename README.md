@@ -1,2 +1,2 @@
 # dco-elasticsearch
-DCO ElasticSearch
+DCO Faceted Search using ElasticSearch
