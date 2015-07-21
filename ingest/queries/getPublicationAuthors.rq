@@ -1,0 +1,22 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX vitro: <http://vitro.mannlib.cornell.edu/ns/vitro/0.7#>
+PREFIX dco: <http://info.deepcarbon.net/schema#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX vitro-public: <http://vitro.mannlib.cornell.edu/ns/vitro/public#>
+PREFIX vivo: <http://vivoweb.org/ontology/core#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT DISTINCT ?uri ?name ?researchArea ?rank
+WHERE {
+  {publication} vivo:relatedBy ?authorship .
+  ?authorship vivo:relates ?uri .
+  OPTIONAL { ?authorship vivo:rank ?rank . }
+  OPTIONAL { ?uri vivo:hasResearchArea [ rdfs:label ?ra ] . BIND(str(?ra) AS ?researchArea) }
+  ?uri a foaf:Person .
+  ?uri rdfs:label ?label .
+  BIND(str(?label) AS ?name) .
+} GROUP BY ?uri ?name ?researchArea ?rank ORDER BY ?rank
