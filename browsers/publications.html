@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>DCO Publication Browser</title>
+
+    <script type="text/javascript" src="facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
+    <link rel="stylesheet" href="facetview2/vendor/bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
+    <script type="text/javascript" src="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
+
+    <script type="text/javascript" src="facetview2/es.js"></script>
+    <script type="text/javascript" src="facetview2/bootstrap2.facetview.theme.js"></script>
+    <script type="text/javascript" src="facetview2/jquery.facetview2.js"></script>
+    <link rel="stylesheet" href="facetview2/css/facetview.css">
+
+    <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            $('.facet-view-simple').facetview({
+                search_url: 'http://localhost:9200/dco/publication/_search',
+                page_size: 20,
+                sort: [{"_score" : {"order" : "desc"}}],
+                sharesave_link: true,
+                search_button: true,
+                default_freetext_fuzzify: "*",
+                default_facet_operator: "AND",
+                default_facet_order: "count",
+                default_facet_size: 15,
+                facets: [
+                    {'field': 'mostSpecificType', 'display': 'Type'},
+                    {'field': 'community.name.exact', 'display': 'Community'},
+                    {'field': 'subjectArea.name.exact', 'display': 'Subject Area'},
+                    {'field': 'authors.name.exact', 'size': 20, 'display': 'Author'},
+                    {'field': 'publicationYear', 'display': 'Publication Year'},
+                    {'field': 'presentedAt.name.exact', 'display': 'Presented At'}
+                ],
+                search_sortby: [
+                    {'display':'Title','field':'title.exact'},
+                    {'display':'Date','field':'publicationYear'}
+                ],
+                render_result_record: function(options, record)
+                {
+
+                    var doiUrl = "https://dx.doi.org/"+record["doi"];
+
+                    var html = "<tr><td>";
+
+                    if (record["doi"]) {
+                        html += "<strong><a href=\""+doiUrl+"\">" + record["title"] + "</a></strong>";
+                    } else {
+                        html += "<strong>" + record["title"] + "</strong>";
+                    }
+
+                    if (record["publicationYear"]) {
+                        html += "&emsp;<small>(" + record["publicationYear"] + ")</small>";
+                    }
+
+                    /*html += "<br/><em><a href=\"" + record["dcoId"] + "\">" + record["dcoId"] + "</a></em>";*/
+
+                    if (record["mostSpecificType"]) {
+                        html += "<br />Type: " + record["mostSpecificType"];
+                    }
+
+                    if (record["community"]) {
+                        html += "<br /><span>Community: <a href=\"" + record["community"]["uri"] + "\">" + record["community"]["name"] + "</a></span>";
+                    }
+
+                    if (record["authors"]) {
+                        html += "<br /><span><small>Authors: ";
+                        for (var i = 0; i < record["authors"].length; i++) {
+                            html += "<a href=\"" + record["authors"][i]["uri"] + "\">" + record["authors"][i]["name"] + "</a>";
+                            if (i < record["authors"].length - 1) {
+                                html += "; ";
+                            }
+                        }
+                        html += "</small></span>";
+                    }
+
+                    if (record["subjectArea"]) {
+                        html += "<br /><span>Subject Areas: ";
+
+                        for(var i = 0; i < record["subjectArea"].length; i++) {
+                            html += "<a href=\"" + record["subjectArea"][i]["uri"] + "\">" + record["subjectArea"][i]["name"] + "</a>";
+                            if (i < record["subjectArea"].length - 1) {
+                                html += "; ";
+                            }
+                        }
+
+                        html += "</span>"
+                    }
+
+                    if (record["presentedAt"]) {
+                        html += "<br /><span>Presented at: <a href=\""+record["presentedAt"]["uri"]+"\">"+record["presentedAt"]["name"]+"</a></span>";
+                    }
+
+                    // Badges
+
+                    html += "<br />";
+
+                    if (record["doi"]) {
+                        var escapedDOI = encodeURIComponent(record["doi"]).replace(/-/g, "--");
+                        html += "<a href=\"" + doiUrl + "\"><img style='vertical-align: middle' src='http://img.shields.io/badge/DOI-"+escapedDOI+"-00BFFF.svg'/></a>&emsp;";
+                    }
+
+                    var escapedDCOId= encodeURIComponent(record["dcoId"].substring(25)).replace(/-/g, "--");
+                    html += "<a href=\""+record["dcoId"]+"\"><img style='vertical-align: middle' src='http://img.shields.io/badge/metadata-"+escapedDCOId+"-red.svg'/></a>";
+
+                    html += "</td></tr>";
+                    return html;
+                },
+                selected_filters_in_facet: true,
+                show_filter_field : true,
+                show_filter_logic: true
+            });
+        });
+    </script>
+
+
+    <style type="text/css">
+        .facet-view-simple{
+            width:1170px;
+            height:600px;
+            margin:20px auto 0 auto;
+        }
+    </style>
+
+</head>
+<body>
+<div class="facet-view-simple"></div>
+</body>
+</html>
