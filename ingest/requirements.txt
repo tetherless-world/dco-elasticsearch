@@ -1,0 +1,2 @@
+rdflib>=4.2
+SPARQLWrapper>= 1.6.4
