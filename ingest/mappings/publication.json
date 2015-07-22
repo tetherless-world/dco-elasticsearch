@@ -37,8 +37,18 @@
               }
             }
           },
-          "research_areas":{
-            "type":"string"
+          "researchAreas":{
+            "type":"multi_field",
+            "fields": {
+              "researchAreas": {
+                "type": "string",
+                "index": "analyzed"
+              },
+              "exact": {
+                "type": "string",
+                "index": "not_analyzed"
+              }
+            }
           },
           "uri":{
             "type":"string",
