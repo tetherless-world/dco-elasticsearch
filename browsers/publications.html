@@ -18,7 +18,7 @@
     <script type="text/javascript">
         jQuery(document).ready(function($) {
             $('.facet-view-simple').facetview({
-                search_url: 'http://localhost:9200/dco/publication/_search',
+                search_url: '//localhost:9200/dco/publication/_search',
                 page_size: 20,
                 sort: [{"_score" : {"order" : "desc"}}],
                 sharesave_link: true,
@@ -102,11 +102,11 @@
 
                     if (record["doi"]) {
                         var escapedDOI = encodeURIComponent(record["doi"]).replace(/-/g, "--");
-                        html += "<a href=\"" + doiUrl + "\"><img style='vertical-align: middle' src='http://img.shields.io/badge/DOI-"+escapedDOI+"-00BFFF.svg'/></a>&emsp;";
+                        html += "<a href=\"" + doiUrl + "\"><img style='vertical-align: middle' src='//img.shields.io/badge/DOI-"+escapedDOI+"-00BFFF.svg'/></a>&emsp;";
                     }
 
                     var escapedDCOId= encodeURIComponent(record["dcoId"].substring(25)).replace(/-/g, "--");
-                    html += "<a href=\""+record["dcoId"]+"\"><img style='vertical-align: middle' src='http://img.shields.io/badge/metadata-"+escapedDCOId+"-red.svg'/></a>";
+                    html += "<a href=\""+record["dcoId"]+"\"><img style='vertical-align: middle' src='//img.shields.io/badge/metadata-"+escapedDCOId+"-red.svg'/></a>";
 
                     html += "</td></tr>";
                     return html;
