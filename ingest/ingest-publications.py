@@ -2,6 +2,7 @@ __author__ = 'szednik'
 
 from SPARQLWrapper import SPARQLWrapper, JSON
 import json
+import pprint
 
 
 def load_file(filepath):
@@ -98,16 +99,24 @@ def get_publication_authors(publication):
         name = rs['name']['value'].strip()
         rank = rs['rank']['value'] if 'rank' in rs else None
         uri = rs['uri']['value'].strip()
-        researchArea = rs['researchArea']['value'].strip() if 'researchArea' in rs else None
+        research_area = rs['researchArea']['value'].strip() if 'researchArea' in rs else None
+        org = rs['org']['value'] if 'org' in rs else None
+        org_name = rs['orgName']['value'] if 'orgName' in rs else None
 
         if name not in authors:
             authors.update({name: {"name": name, "uri": uri, "rank": rank}})
 
-        if researchArea:
+        if research_area:
             if "researchArea" not in authors[name]:
-                authors[name]["researchArea"] = [researchArea]
+                authors[name]["researchArea"] = [research_area]
             else:
-                authors[name]["researchArea"].append(researchArea)
+                authors[name]["researchArea"].append(research_area)
+
+        if org:
+            if "organization" not in authors[name]:
+                authors[name]["organization"] = [{"uri": org, "name": org_name}]
+            else:
+                authors[name]["organization"].append({"uri": org, "name": org_name})
 
     author_list = [author for name, author in authors.items()]
 
@@ -135,7 +144,7 @@ for publication in get_publications():
         records.append(json.dumps(get_metadata(get_id(pub["dcoId"]))))
         records.append(json.dumps(pub))
     else:
-        print(publication)
+        print("no DCO-ID: "+publication)
 
 with open("publications.bulk", "w") as bulk_file:
     bulk_file.write('\n'.join(records))

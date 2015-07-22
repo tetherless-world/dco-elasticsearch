@@ -10,13 +10,14 @@ PREFIX vitro-public: <http://vitro.mannlib.cornell.edu/ns/vitro/public#>
 PREFIX vivo: <http://vivoweb.org/ontology/core#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
-SELECT DISTINCT ?uri ?name ?researchArea ?rank
+SELECT DISTINCT ?uri ?name ?researchArea ?org ?orgName ?rank
 WHERE {
   {publication} vivo:relatedBy ?authorship .
   ?authorship vivo:relates ?uri .
   OPTIONAL { ?authorship vivo:rank ?rank . }
   OPTIONAL { ?uri vivo:hasResearchArea [ rdfs:label ?ra ] . BIND(str(?ra) AS ?researchArea) }
+  OPTIONAL { ?uri dco:inOrganization ?org . ?org rdfs:label ?orgl . BIND(str(?orgl) AS ?orgName ) }
   ?uri a foaf:Person .
   ?uri rdfs:label ?label .
   BIND(str(?label) AS ?name) .
-} GROUP BY ?uri ?name ?researchArea ?rank ORDER BY ?rank
+} GROUP BY ?uri ?name ?researchArea ?org ?orgName ?rank ORDER BY ?rank
