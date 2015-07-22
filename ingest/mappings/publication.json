@@ -37,10 +37,10 @@
               }
             }
           },
-          "researchAreas":{
+          "researchArea":{
             "type":"multi_field",
             "fields": {
-              "researchAreas": {
+              "researchArea": {
                 "type": "string",
                 "index": "analyzed"
               },
