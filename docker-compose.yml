@@ -1,7 +1,7 @@
 
-dco-es:
+elasticsearch:
   image: elasticsearch:1.6
-  hostname: es
+  hostname: search
   domainname: info.deepcarbon.net
   ports:
   - "0.0.0.0:49200:9200"
@@ -10,8 +10,10 @@ dco-es:
   - /data/elasticsearch:/usr/share/elasticsearch/data
   restart: on-failure:3
 
-dco-faceted-search:
+search:
   image: nginx
+  hostname: facets
+  domainname: info.deepcarbon.net
   ports:
   - "0.0.0.0:49157:80"
   - "0.0.0.0:49158:443"
