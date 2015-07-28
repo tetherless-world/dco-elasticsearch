@@ -1,3 +1,6 @@
 [submodule "browsers/facetview2"]
 	path = browsers/facetview2
 	url = https://github.com/tetherless-world/facetview2
+[submodule "html/facetview2"]
+	path = html/facetview2
+	url = https://github.com/tetherless-world/facetview2
