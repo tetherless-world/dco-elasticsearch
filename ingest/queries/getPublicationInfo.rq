@@ -11,7 +11,7 @@ PREFIX vivo: <http://vivoweb.org/ontology/core#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX bibo: <http://purl.org/ontology/bibo/>
 
-SELECT DISTINCT ?title ?dcoId ?mostSpecificType ?doi ?publicationYear ?community ?communityName ?venue ?venueName ?abstract ?subjectArea ?subjectAreaLabel
+SELECT DISTINCT ?title ?dcoId ?mostSpecificType ?doi ?publicationYear ?community ?communityName ?venue ?venueName ?event ?eventName ?abstract ?subjectArea ?subjectAreaLabel
 WHERE {
   {publication} rdfs:label ?label .
   BIND(str(?label) AS ?title) .
@@ -19,7 +19,8 @@ WHERE {
   OPTIONAL { {publication} dco:hasDcoId ?dcoId . }
   OPTIONAL { {publication} dco:yearOfPublication ?publicationYear . }
   OPTIONAL { {publication} dco:associatedDCOCommunity ?community . ?community rdfs:label ?clbl . BIND(str(?clbl) AS ?communityName) . }
-  OPTIONAL { {publication} bibo:presentedAt ?venue . ?venue rdfs:label ?vlbl . BIND(str(?vlbl) AS ?venueName) . }
+  OPTIONAL { {publication} bibo:presentedAt ?event . ?event rdfs:label ?elbl . BIND(str(?elbl) AS ?eventName) . }
+  OPTIONAL { {publication} vivo:hasPublicationVenue ?venue . ?venue rdfs:label ?vlbl . BIND(str(?vlbl) AS ?venueName) . }
   OPTIONAL { {publication} bibo:abstract ?abstract . }
   OPTIONAL { {publication} vivo:hasSubjectArea ?subjectArea . ?subjectArea rdfs:label ?salbl . BIND(str(?salbl) AS ?subjectAreaLabel) . }
   OPTIONAL { {publication} bibo:doi ?doi_str . BIND(str(?doi_str) AS ?doi) . }

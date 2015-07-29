@@ -51,6 +51,8 @@ def get_publication_info(publication):
         title = rs["title"]["value"].strip()
         venue = rs["venue"]["value"].strip() if "venue" in rs else None
         venue_name = rs["venueName"]["value"].strip() if "venueName" in rs else None
+        event = rs["event"]["value"].strip() if "event" in rs else None
+        event_name = rs["eventName"]["value"].strip() if "eventName" in rs else None
         abstract = rs["abstract"]["value"].strip() if "abstract" in rs else None
         publication_year = rs["publicationYear"]["value"] if "publicationYear" in rs else None
         subject_area = rs["subjectArea"]["value"] if "subjectArea" in rs else None
@@ -75,7 +77,10 @@ def get_publication_info(publication):
             info.update({"community": {"uri": community, "name": community_name}})
 
         if venue:
-            info.update({"presentedAt": {"uri": venue, "name": venue_name}})
+            info.update({"publishedIn": {"uri": venue, "name": venue_name}})
+
+        if event:
+            info.update({"presentedAt": {"uri": event, "name": event_name}})
 
         if abstract:
             info.update({"abstract": abstract})
@@ -83,8 +88,7 @@ def get_publication_info(publication):
         if subject_area:
             if "subjectArea" not in info:
                 info["subjectArea"] = [{"uri": subject_area, "name": subject_area_name}]
-            else:
-                if not any(subject_area in sa["uri"] for sa in info["subjectArea"]):
+            elif not any(subject_area in sa["uri"] for sa in info["subjectArea"]):
                     info["subjectArea"].append({"uri": subject_area, "name": subject_area_name})
     return info
 
@@ -109,13 +113,13 @@ def get_publication_authors(publication):
         if research_area:
             if "researchArea" not in authors[name]:
                 authors[name]["researchArea"] = [research_area]
-            else:
+            elif research_area not in authors[name]["researchArea"]:
                 authors[name]["researchArea"].append(research_area)
 
         if org:
             if "organization" not in authors[name]:
                 authors[name]["organization"] = [{"uri": org, "name": org_name}]
-            else:
+            elif not any(org in _org["uri"] for _org in authors[name]["organization"]):
                 authors[name]["organization"].append({"uri": org, "name": org_name})
 
     author_list = [author for name, author in authors.items()]
@@ -143,6 +147,7 @@ for publication in get_publications():
     if "dcoId" in pub and pub["dcoId"] is not None:
         records.append(json.dumps(get_metadata(get_id(pub["dcoId"]))))
         records.append(json.dumps(pub))
+        print(pub["dcoId"])
     else:
         print("no DCO-ID: "+publication)
 
