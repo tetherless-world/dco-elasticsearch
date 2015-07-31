@@ -14,6 +14,7 @@
     <script type="text/javascript" src="facetview2/bootstrap2.facetview.theme.js"></script>
     <script type="text/javascript" src="facetview2/jquery.facetview2.js"></script>
     <link rel="stylesheet" href="facetview2/css/facetview.css">
+    <link rel="stylesheet" href="browsers.css">
 
     <script type="text/javascript">
         jQuery(document).ready(function($) {
@@ -36,7 +37,8 @@
                     {'field': 'publishedIn.name.exact', 'display': 'Published In'},
                     {'field': 'presentedAt.name.exact', 'display': 'Presented At Event'},
                     {'field': 'authors.organization.name.exact', 'display': 'Author Organization'},
-                    {'field': 'authors.researchArea.exact', 'display': 'Author Research Area'}
+                    {'field': 'authors.researchArea.exact', 'display': 'Author Research Area'},
+                    {'field': 'isDcoPublication', 'display': 'Show only DCO-member authored publications'}
                 ],
                 search_sortby: [
                     {'display':'Title','field':'title.exact'},
@@ -116,9 +118,43 @@
                 },
                 selected_filters_in_facet: true,
                 show_filter_field : true,
-                show_filter_logic: true
+                show_filter_logic: true,
+                post_init_callback: function(options, context) {
+                    // On initial load activate the isDcoPublication filter
+                    options.active_filters = {'isDcoPublication': ['T']}
+                },
+                post_render_callback: function(options, context) {
+                    if(options.active_filters["isDcoPublication"] != null) {
+                        // if the isDcoPublication filter is active set ensure the checkbox is checked
+                        $("#is-dco-publication-checkbox").attr("checked", true);
+                    } else if (!$("a.facetview_filterchoice[data-field='isDcoPublication'][data-value='T']").length) {
+                        // if the isDcoPublication filter is not active and is not a valid option
+                        // (there are no remaining DCO publications in the result set) then disable the checkbox
+                        $("#is-dco-publication-checkbox").attr("disabled", true);
+                    } else {
+                        // if the isDcoPublication filter is not active is a valid option ensure it is enabled
+                        $("#is-dco-publication-checkbox").attr("disabled", false);
+                    }
+                }
             });
         });
+
+        // add the DCO publication control checkbox to the interface
+        // TODO move to a pre_search_callback?
+        $(".facetview_search_options_container")
+                .after("<input id='is-dco-publication-checkbox' type='checkbox'>&nbsp;Only show DCO-member authored publications</input>");
+
+        // set checkbox to control isDcoPublication filter on selection/deselection
+        $("#is-dco-publication-checkbox")
+                .change(function() {
+                    if(this.checked) {
+                        $("a.facetview_filterchoice[data-field='isDcoPublication'][data-value='T']").click();
+                    } else {
+
+                        $("a.facetview_clear[data-field='isDcoPublication'][data-value='T']").click();
+                    }
+                });
+
     </script>
 
 

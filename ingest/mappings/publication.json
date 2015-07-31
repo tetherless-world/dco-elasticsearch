@@ -102,6 +102,9 @@
         "type":"string",
         "index": "not_analyzed"
       },
+      "isDcoPublication":{
+        "type":"boolean"
+      },
       "keywords":{
         "type":"multi_field",
         "fields":{
