@@ -2,6 +2,8 @@ __author__ = 'szednik'
 
 from SPARQLWrapper import SPARQLWrapper, JSON
 import json
+import multiprocessing
+import itertools
 import pprint
 
 
@@ -49,6 +51,12 @@ def get_publication_info(publication):
         community_name = rs["communityName"]["value"].strip() if 'communityName' in rs else None
         dco_id = rs["dcoId"]["value"].strip() if "dcoId" in rs else None
         title = rs["title"]["value"].strip()
+
+        is_dco_publication = True \
+            if "isDcoPublication" in rs \
+               and "yes" == rs["isDcoPublication"]["value"].strip().lower() \
+            else False
+
         venue = rs["venue"]["value"].strip() if "venue" in rs else None
         venue_name = rs["venueName"]["value"].strip() if "venueName" in rs else None
         event = rs["event"]["value"].strip() if "event" in rs else None
@@ -61,7 +69,7 @@ def get_publication_info(publication):
         doi = rs["doi"]["value"] if "doi" in rs else None
 
         if "uri" not in info:
-            info = {"uri": publication, "title": title, "dcoId": dco_id}
+            info = {"uri": publication, "title": title, "dcoId": dco_id, "isDcoPublication": is_dco_publication}
 
         if publication_year:
             info.update({"publicationYear": int(publication_year)})
@@ -133,11 +141,7 @@ def get_publication_authors(publication):
         return author_list
 
 
-### Main ###
-
-records = []
-
-for publication in get_publications():
+def process_publication(publication):
     pub = get_publication_info(publication)
     authors = get_publication_authors(publication)
 
@@ -145,11 +149,17 @@ for publication in get_publications():
         pub.update({"authors": authors})
 
     if "dcoId" in pub and pub["dcoId"] is not None:
-        records.append(json.dumps(get_metadata(get_id(pub["dcoId"]))))
-        records.append(json.dumps(pub))
         print(pub["dcoId"])
+        return [json.dumps(get_metadata(get_id(pub["dcoId"]))), json.dumps(pub)]
     else:
         print("no DCO-ID: "+publication)
+        return []
+
+
+### Main ###
+
+pool = multiprocessing.Pool(8)
+records = list(itertools.chain.from_iterable(pool.map(process_publication, get_publications())))
 
 with open("publications.bulk", "w") as bulk_file:
     bulk_file.write('\n'.join(records))
