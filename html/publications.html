@@ -50,6 +50,10 @@
                     var doiUrl = "https://dx.doi.org/"+record["doi"];
 
                     var html = "<tr><td>";
+                    
+                    if (record["isDcoPublication"]) {
+                        html += "<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>&nbsp;";
+                    }
 
                     if (record["doi"]) {
                         html += "<strong><a href=\""+doiUrl+"\" target=\"_blank\">" + record["title"] + "</a></strong>";
