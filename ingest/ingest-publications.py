@@ -2,6 +2,7 @@ __author__ = 'szednik'
 
 from SPARQLWrapper import SPARQLWrapper, JSON
 import json
+from rdflib import Namespace, RDF
 import multiprocessing
 import itertools
 import pprint
@@ -15,9 +16,19 @@ def load_file(filepath):
 get_publication_authors_query = load_file("queries/getPublicationAuthors.rq")
 get_publication_info_query = load_file("queries/getPublicationInfo.rq")
 get_publications_query = load_file("queries/listPublications.rq")
+describe_publication_query = load_file("queries/describePublication.rq")
 
 vivo_endpoint = "http://deepcarbon.tw.rpi.edu:3030/VIVO/query"
 sparql = SPARQLWrapper(vivo_endpoint)
+
+PROV = Namespace("http://www.w3.org/ns/prov#")
+BIBO = Namespace("http://purl.org/ontology/bibo/")
+VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
+VIVO = Namespace('http://vivoweb.org/ontology/core#')
+VITRO = Namespace("http://vitro.mannlib.cornell.edu/ns/vitro/0.7#")
+OBO = Namespace("http://purl.obolibrary.org/obo/")
+DCO = Namespace("http://info.deepcarbon.net/schema#")
+FOAF = Namespace("http://xmlns.com/foaf/0.1/")
 
 
 def get_metadata(id):
@@ -28,7 +39,7 @@ def get_id(dco_id):
     return dco_id[dco_id.rfind('/') + 1:]
 
 
-def query(query):
+def select(query):
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
@@ -36,125 +47,132 @@ def query(query):
 
 
 def get_publications():
-    r = query(get_publications_query)
+    r = select(get_publications_query)
     return [rs["publication"]["value"] for rs in r]
 
 
-def get_publication_info(publication):
-    _query = get_publication_info_query.replace("{publication}", "<" + publication + ">")
-    r = query(_query)
-
-    info = {}
-
-    for rs in r:
-        community = rs["community"]["value"].strip() if 'community' in rs else None
-        community_name = rs["communityName"]["value"].strip() if 'communityName' in rs else None
-        dco_id = rs["dcoId"]["value"].strip() if "dcoId" in rs else None
-        title = rs["title"]["value"].strip()
-
-        is_dco_publication = True \
-            if "isDcoPublication" in rs \
-               and "yes" == rs["isDcoPublication"]["value"].strip().lower() \
-            else False
-
-        venue = rs["venue"]["value"].strip() if "venue" in rs else None
-        venue_name = rs["venueName"]["value"].strip() if "venueName" in rs else None
-        event = rs["event"]["value"].strip() if "event" in rs else None
-        event_name = rs["eventName"]["value"].strip() if "eventName" in rs else None
-        abstract = rs["abstract"]["value"].strip() if "abstract" in rs else None
-        publication_year = rs["publicationYear"]["value"] if "publicationYear" in rs else None
-        subject_area = rs["subjectArea"]["value"] if "subjectArea" in rs else None
-        subject_area_name = rs["subjectAreaLabel"]["value"] if "subjectAreaLabel" in rs else None
-        most_specific_type = rs["mostSpecificType"]["value"] if "mostSpecificType" in rs else None
-        doi = rs["doi"]["value"] if "doi" in rs else None
-
-        if "uri" not in info:
-            info = {"uri": publication, "title": title, "dcoId": dco_id, "isDcoPublication": is_dco_publication}
-
-        if publication_year:
-            info.update({"publicationYear": int(publication_year)})
-
-        if doi:
-            doi = doi.replace("doi:", "")
-            info.update({"doi": doi})
-
-        if most_specific_type:
-            info.update({"mostSpecificType": most_specific_type})
-
-        if community:
-            info.update({"community": {"uri": community, "name": community_name}})
-
-        if venue:
-            info.update({"publishedIn": {"uri": venue, "name": venue_name}})
-
-        if event:
-            info.update({"presentedAt": {"uri": event, "name": event_name}})
-
-        if abstract:
-            info.update({"abstract": abstract})
-
-        if subject_area:
-            if "subjectArea" not in info:
-                info["subjectArea"] = [{"uri": subject_area, "name": subject_area_name}]
-            elif not any(subject_area in sa["uri"] for sa in info["subjectArea"]):
-                    info["subjectArea"].append({"uri": subject_area, "name": subject_area_name})
-    return info
-
-
-def get_publication_authors(publication):
-    _query = get_publication_authors_query.replace("{publication}", "<" + publication + ">")
-    r = query(_query)
-
-    authors = {}
-
-    for rs in r:
-        name = rs['name']['value'].strip()
-        rank = rs['rank']['value'] if 'rank' in rs else None
-        uri = rs['uri']['value'].strip()
-        research_area = rs['researchArea']['value'].strip() if 'researchArea' in rs else None
-        org = rs['org']['value'] if 'org' in rs else None
-        org_name = rs['orgName']['value'] if 'orgName' in rs else None
-
-        if name not in authors:
-            authors.update({name: {"name": name, "uri": uri, "rank": rank}})
-
-        if research_area:
-            if "researchArea" not in authors[name]:
-                authors[name]["researchArea"] = [research_area]
-            elif research_area not in authors[name]["researchArea"]:
-                authors[name]["researchArea"].append(research_area)
-
-        if org:
-            if "organization" not in authors[name]:
-                authors[name]["organization"] = [{"uri": org, "name": org_name}]
-            elif not any(org in _org["uri"] for _org in authors[name]["organization"]):
-                authors[name]["organization"].append({"uri": org, "name": org_name})
-
-    author_list = [author for name, author in authors.items()]
-
-    try:
-        ranked_author_list = sorted(author_list, key=lambda a: a["rank"])
-        for a in ranked_author_list:
-            a.pop("rank")
-        return ranked_author_list
-    except TypeError:
-        return author_list
-
-
 def process_publication(publication):
-    pub = get_publication_info(publication)
-    authors = get_publication_authors(publication)
-
-    if authors:
-        pub.update({"authors": authors})
-
+    pub = create_publication_doc(publication)
     if "dcoId" in pub and pub["dcoId"] is not None:
-        print(pub["dcoId"])
         return [json.dumps(get_metadata(get_id(pub["dcoId"]))), json.dumps(pub)]
     else:
-        print("no DCO-ID: "+publication)
         return []
 
+
+def describe_publication(publication):
+    q = describe_publication_query.replace("?publication", "<"+publication+">")
+    sparql.setQuery(q)
+
+    try:
+        return sparql.query().convert()
+    except RuntimeWarning:
+        pass
+
+
+def create_publication_doc(publication):
+    graph = describe_publication(publication)
+
+    pub = graph.resource(publication)
+
+    try:
+        title = pub.label().toPython()
+    except AttributeError:
+        print("missing title:", publication)
+        return {}
+
+    dco_id = list(pub.objects(DCO.hasDcoId))
+    dco_id = dco_id[0].label().toPython() if dco_id and dco_id[0].label() else None
+
+    is_dco_publication = list(pub.objects(DCO.isDCOPublication))
+    is_dco_publication = True if is_dco_publication and is_dco_publication[0].toPython() == "YES" else False
+
+    doc = {"uri": publication, "title": title, "dcoId": dco_id, "isDcoPublication": is_dco_publication}
+
+    abstract = list(pub.objects(BIBO.abstract))
+    abstract = abstract[0].toPython() if abstract else None
+    if abstract:
+        doc.update({"abstract": abstract})
+
+    most_specific_type = list(pub.objects(VITRO.mostSpecificType))
+    most_specific_type = most_specific_type[0].label().toPython() if most_specific_type and most_specific_type[0].label() else None
+    if most_specific_type:
+            doc.update({"mostSpecificType": most_specific_type})
+
+    publication_year = list(pub.objects(DCO.yearOfPublication))
+    publication_year = publication_year[0] if publication_year else None
+    if publication_year:
+        doc.update({"publicationYear": str(publication_year)})
+
+    dco_community = list(pub.objects(DCO.associatedDCOCommunity))
+    dco_community = dco_community[0] if dco_community else None
+    if dco_community and dco_community.label():
+        doc.update({"community": {"uri": str(dco_community.identifier), "name": dco_community.label().toPython()}})
+    elif dco_community:
+        print("community label missing:", str(dco_community.identifier))
+
+    event = list(pub.objects(BIBO.presentedAt))
+    event = event[0] if event else None
+    if event and event.label():
+        doc.update({"presentedAt": {"uri": str(event.identifier), "name": event.label().toPython()}})
+    elif event:
+        print("event missing label:", str(event.identifier))
+
+    venue = list(pub.objects(VIVO.hasPublicationVenue))
+    venue = venue[0] if venue else None
+    if venue and venue.label():
+        doc.update({"publishedIn": {"uri": str(venue.identifier), "name": venue.label().toPython()}})
+    elif venue:
+        print("venue missing label:", str(venue.identifier))
+
+    subject_areas = []
+    for subject_area in pub.objects(VIVO.hasSubjectArea):
+        subject_areas.append({"uri": str(subject_area.identifier), "name": subject_area.label().toPython()})
+
+    if subject_areas:
+        doc.update({"subjectArea": subject_areas})
+
+    authors = []
+    authorships = [faux for faux in pub.objects(VIVO.relatedBy) if has_type(faux, VIVO.Authorship)]
+    for authorship in authorships:
+
+        author = [person for person in authorship.objects(VIVO.relates) if has_type(person, FOAF.Person)][0]
+        name = author.label().toPython() if author else None
+
+        obj = {"uri": str(author.identifier), "name": name}
+
+        rank = list(authorship.objects(VIVO.rank))
+        rank = rank[0].toPython() if rank else None
+        if rank:
+            obj.update({"rank": rank})
+        else:
+            print("authorship missing rank:", str(authorship.identifier))
+
+        research_areas = [research_area.label().toPython() for research_area in author.objects(VIVO.hasResearchArea)]
+        if research_areas:
+            obj.update({"researchArea": research_areas})
+
+        authors.append(obj)
+
+        org = list(author.objects(DCO.inOrganization))
+        org = org[0] if org else None
+        if org and org.label():
+            obj.update({"organization": {"uri": str(org.identifier), "name": org.label().toPython()}})
+
+    try:
+        authors = sorted(authors, key=lambda a: a["rank"])
+    except KeyError:
+        pass
+
+    doc.update({"authors": authors})
+
+    return doc
+
+
+def has_type(resource, type):
+    for rtype in resource.objects(RDF.type):
+        if str(rtype.identifier) == str(type):
+            return True
+    return False
 
 ### Main ###
 
@@ -163,4 +181,3 @@ records = list(itertools.chain.from_iterable(pool.map(process_publication, get_p
 
 with open("publications.bulk", "w") as bulk_file:
     bulk_file.write('\n'.join(records))
-
