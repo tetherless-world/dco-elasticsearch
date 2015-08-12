@@ -164,7 +164,7 @@ def create_publication_doc(publication):
             obj.update({"organization": {"uri": str(org.identifier), "name": org.label().toPython()}})
 
     try:
-        authors = sorted(authors, key=lambda a: a["rank"])
+        authors = sorted(authors, key=lambda a: a["rank"]) if len(authors) > 1 else authors
     except KeyError:
         pass
 
