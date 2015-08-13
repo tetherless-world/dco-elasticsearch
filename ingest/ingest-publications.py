@@ -149,8 +149,6 @@ def create_publication_doc(publication):
         rank = rank[0].toPython() if rank else None
         if rank:
             obj.update({"rank": rank})
-        else:
-            print("authorship missing rank:", str(authorship.identifier))
 
         research_areas = [research_area.label().toPython() for research_area in author.objects(VIVO.hasResearchArea)]
         if research_areas:
@@ -166,7 +164,7 @@ def create_publication_doc(publication):
     try:
         authors = sorted(authors, key=lambda a: a["rank"]) if len(authors) > 1 else authors
     except KeyError:
-        pass
+        print("missing rank for one or more authors of:", publication)
 
     doc.update({"authors": authors})
 
