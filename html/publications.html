@@ -124,9 +124,10 @@
                 show_filter_field : true,
                 show_filter_logic: true,
                 post_init_callback: function(options, context) {
-                    // On initial load activate the isDcoPublication filter
-                    options.active_filters = {'isDcoPublication': ['T']}
+                    // on initial load activate the isDcoPublication filter
+                    options.active_filters = {'isDcoPublication': ['T']};
 
+                    // add the dco publication checkbox to the UI
                     $(".facetview_search_options_container")
                             .after("<input id='is-dco-publication-checkbox' type='checkbox'>&nbsp;Only show DCO-member authored publications</input>&nbsp;<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>");
 
