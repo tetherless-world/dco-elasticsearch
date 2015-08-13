@@ -110,12 +110,12 @@
                     html += "<br />";
 
                     if (record["doi"]) {
-                        var escapedDOI = encodeURIComponent(record["doi"]).replace(/-/g, "--");
-                        html += "<a href=\"" + doiUrl + "\" target=\"_blank\"><img style='vertical-align: middle' src='//img.shields.io/badge/DOI-"+escapedDOI+"-00BFFF.svg'/></a>&emsp;";
+                        var escapedDOI = encodeURIComponent(record["doi"]);
+                        html += "<a href=\"" + doiUrl + "\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=DOI&text="+escapedDOI+"&color=66CCFF'/></a>&emsp;";
                     }
 
-                    var escapedDCOId= encodeURIComponent(record["dcoId"].substring(25)).replace(/-/g, "--");
-                    html += "<a href=\""+record["dcoId"]+"\" target=\"_blank\"><img style='vertical-align: middle' src='//img.shields.io/badge/metadata-"+escapedDCOId+"-red.svg'/></a>";
+                    var escapedDCOId= encodeURIComponent(record["dcoId"].substring(25));
+                    html += "<a href=\""+record["dcoId"]+"\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=metadata&text="+escapedDCOId+"&color=D14719'/></a>";
 
                     html += "</td></tr>";
                     return html;
@@ -126,6 +126,20 @@
                 post_init_callback: function(options, context) {
                     // On initial load activate the isDcoPublication filter
                     options.active_filters = {'isDcoPublication': ['T']}
+
+                    $(".facetview_search_options_container")
+                            .after("<input id='is-dco-publication-checkbox' type='checkbox'>&nbsp;Only show DCO-member authored publications</input>&nbsp;<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>");
+
+                    // set checkbox to control isDcoPublication filter on selection/deselection
+                    $("#is-dco-publication-checkbox")
+                            .change(function() {
+                                if(this.checked) {
+                                    $("a.facetview_filterchoice[data-field='isDcoPublication'][data-value='T']").click();
+                                } else {
+
+                                    $("a.facetview_clear[data-field='isDcoPublication'][data-value='T']").click();
+                                }
+                            });
                 },
                 post_render_callback: function(options, context) {
                     if(options.active_filters["isDcoPublication"] != null) {
@@ -142,22 +156,6 @@
                 }
             });
         });
-
-        // add the DCO publication control checkbox to the interface
-        // TODO move to a pre_search_callback?
-        $(".facetview_search_options_container")
-                .after("<input id='is-dco-publication-checkbox' type='checkbox'>&nbsp;Only show DCO-member authored publications</input>&nbsp;<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>");
-
-        // set checkbox to control isDcoPublication filter on selection/deselection
-        $("#is-dco-publication-checkbox")
-                .change(function() {
-                    if(this.checked) {
-                        $("a.facetview_filterchoice[data-field='isDcoPublication'][data-value='T']").click();
-                    } else {
-
-                        $("a.facetview_clear[data-field='isDcoPublication'][data-value='T']").click();
-                    }
-                });
 
     </script>
 
