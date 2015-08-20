@@ -1,8 +1,8 @@
 
 elasticsearch:
   image: elasticsearch:1.6
-  hostname: search
-  domainname: info.deepcarbon.net
+  hostname: es
+  domainname: data.deepcarbon.net
   ports:
   - "0.0.0.0:49200:9200"
   volumes:
