@@ -177,12 +177,12 @@ def has_type(resource, type):
     return False
 
 
-def publish(bulk, endpoint, rebuild_index, mapping):
+def publish(bulk, endpoint, rebuild, mapping):
 
     # if configured to rebuild_index
     # Delete and then re-create to publication index (via PUT request)
 
-    if rebuild_index:
+    if rebuild:
         requests.delete(endpoint)
         r = requests.put(endpoint)
         if r.status_code != requests.codes.ok:
@@ -220,8 +220,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--threads', default=8, help='number of threads to use (default = 8)')
     parser.add_argument('--es', default="http://data.deepcarbon.net/es", help="elasticsearch service URL")
-    parser.add_argument('--publish', default=False, help="publish to elasticsearch? (default = False)")
-    parser.add_argument('--rebuild-index', default=False, help="rebuild elasticsearch index? (default = False)")
+    parser.add_argument('--publish', default=False, action="store_true", help="publish to elasticsearch?")
+    parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")
     parser.add_argument('--mapping', default="../mappings/publication.json", help="publication elasticsearch mapping document")
     parser.add_argument('out', metavar='OUT', help='elasticsearch bulk ingest file')
 
@@ -236,4 +236,4 @@ if __name__ == "__main__":
 
     # publish the results to elasticsearch if "--publish" was specified on the command line
     if args.publish:
-        publish(bulk=records, endpoint=args.es, rebuild_index=args.rebuild_index, mapping=args.mapping)
+        publish(bulk=records, endpoint=args.es, rebuild=args.rebuild, mapping=args.mapping)
