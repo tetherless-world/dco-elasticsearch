@@ -5,8 +5,8 @@ import json
 from rdflib import Namespace, RDF
 import multiprocessing
 import itertools
-import pprint
 import argparse
+import requests
 
 
 def load_file(filepath):
@@ -14,8 +14,6 @@ def load_file(filepath):
         return _file.read().replace('\n', " ")
 
 
-get_publication_authors_query = load_file("queries/getPublicationAuthors.rq")
-get_publication_info_query = load_file("queries/getPublicationInfo.rq")
 get_publications_query = load_file("queries/listPublications.rq")
 describe_publication_query = load_file("queries/describePublication.rq")
 
@@ -179,20 +177,63 @@ def has_type(resource, type):
     return False
 
 
-def main(out, threads):
+def publish(bulk, endpoint, rebuild_index, mapping):
 
+    # if configured to rebuild_index
+    # Delete and then re-create to publication index (via PUT request)
+
+    if rebuild_index:
+        requests.delete(endpoint)
+        r = requests.put(endpoint)
+        if r.status_code != requests.codes.ok:
+            r.raise_for_status()
+
+    # push current publication document mapping
+
+    mapping_url = endpoint+"/dco/publication/_mapping"
+    with open(mapping) as mapping_file:
+        r = requests.put(mapping_url, data=mapping_file)
+        if r.status_code != requests.codes.ok:
+
+            # new mapping may be incompatible with previous
+            # delete current mapping and re-push
+
+            requests.delete(mapping_url)
+            r = requests.put(mapping_url, data=mapping_file)
+            if r.status_code != requests.codes.ok:
+                r.raise_for_status()
+
+    # bulk import new publication documents
+    bulk_import_url = endpoint+"/_bulk"
+    r = requests.post(bulk_import_url, data=bulk)
+    if r.status_code != requests.codes.ok:
+        r.raise_for_status()
+
+
+def generate(threads):
     pool = multiprocessing.Pool(threads)
-    records = list(itertools.chain.from_iterable(pool.map(process_publication, get_publications())))
-
-    with open(out, "w") as bulk_file:
-        bulk_file.write('\n'.join(records))
+    return list(itertools.chain.from_iterable(pool.map(process_publication, get_publications())))
 
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--threads', default=8, help='number of threads to use (default = 8)')
-    parser.add_argument('out', metavar='OUT', help='ElasticSearch bulk ingest file')
+    parser.add_argument('--es', default="http://data.deepcarbon.net/es", help="elasticsearch service URL")
+    parser.add_argument('--publish', default=False, help="publish to elasticsearch? (default = False)")
+    parser.add_argument('--rebuild-index', default=False, help="rebuild elasticsearch index? (default = False)")
+    parser.add_argument('--mapping', default="../mappings/publication.json", help="publication elasticsearch mapping document")
+    parser.add_argument('out', metavar='OUT', help='elasticsearch bulk ingest file')
 
     args = parser.parse_args()
-    main(out=args.out, threads=args.threads)
+
+    # generate bulk import document for publications
+    records = generate(threads=args.threads)
+
+    # save generated bulk import file so it can be backed up or reviewed if there are publish errors
+    with open(args.out, "w") as bulk_file:
+        bulk_file.write('\n'.join(records))
+
+    # publish the results to elasticsearch if "--publish" was specified on the command line
+    if args.publish:
+        publish(bulk=records, endpoint=args.es, rebuild_index=args.rebuild_index, mapping=args.mapping)
