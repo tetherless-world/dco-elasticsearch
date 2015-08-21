@@ -6,6 +6,7 @@ from rdflib import Namespace, RDF
 import multiprocessing
 import itertools
 import pprint
+import argparse
 
 
 def load_file(filepath):
@@ -177,10 +178,21 @@ def has_type(resource, type):
             return True
     return False
 
-### Main ###
 
-pool = multiprocessing.Pool(8)
-records = list(itertools.chain.from_iterable(pool.map(process_publication, get_publications())))
+def main(out, threads):
 
-with open("publications.bulk", "w") as bulk_file:
-    bulk_file.write('\n'.join(records))
+    pool = multiprocessing.Pool(threads)
+    records = list(itertools.chain.from_iterable(pool.map(process_publication, get_publications())))
+
+    with open(out, "w") as bulk_file:
+        bulk_file.write('\n'.join(records))
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--threads', default=8, help='number of threads to use (default = 8)')
+    parser.add_argument('out', metavar='OUT', help='ElasticSearch bulk ingest file')
+
+    args = parser.parse_args()
+    main(out=args.out, threads=args.threads)
