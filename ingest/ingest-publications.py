@@ -59,7 +59,7 @@ def process_publication(publication):
 
 
 def describe_publication(publication):
-    q = describe_publication_query.replace("?publication", "<"+publication+">")
+    q = describe_publication_query.replace("?publication", "<" + publication + ">")
     sparql.setQuery(q)
 
     try:
@@ -98,9 +98,11 @@ def create_publication_doc(publication):
         doc.update({"abstract": abstract})
 
     most_specific_type = list(pub.objects(VITRO.mostSpecificType))
-    most_specific_type = most_specific_type[0].label().toPython() if most_specific_type and most_specific_type[0].label() else None
+    most_specific_type = most_specific_type[0].label().toPython() \
+        if most_specific_type and most_specific_type[0].label() \
+        else None
     if most_specific_type:
-            doc.update({"mostSpecificType": most_specific_type})
+        doc.update({"mostSpecificType": most_specific_type})
 
     publication_year = list(pub.objects(DCO.yearOfPublication))
     publication_year = publication_year[0] if publication_year else None
@@ -178,11 +180,10 @@ def has_type(resource, type):
 
 
 def publish(bulk, endpoint, rebuild, mapping):
-
     # if configured to rebuild_index
     # Delete and then re-create to publication index (via PUT request)
 
-    index_url = endpoint+"/dco"
+    index_url = endpoint + "/dco"
 
     if rebuild:
         requests.delete(index_url)
@@ -193,7 +194,7 @@ def publish(bulk, endpoint, rebuild, mapping):
 
     # push current publication document mapping
 
-    mapping_url = endpoint+"/dco/publication/_mapping"
+    mapping_url = endpoint + "/dco/publication/_mapping"
     with open(mapping) as mapping_file:
         r = requests.put(mapping_url, data=mapping_file)
         if r.status_code != requests.codes.ok:
@@ -208,7 +209,7 @@ def publish(bulk, endpoint, rebuild, mapping):
                 r.raise_for_status()
 
     # bulk import new publication documents
-    bulk_import_url = endpoint+"/_bulk"
+    bulk_import_url = endpoint + "/_bulk"
     r = requests.post(bulk_import_url, data=bulk)
     if r.status_code != requests.codes.ok:
         print(r.url, r.status_code)
@@ -227,7 +228,7 @@ if __name__ == "__main__":
     parser.add_argument('--es', default="http://data.deepcarbon.net/es", help="elasticsearch service URL")
     parser.add_argument('--publish', default=False, action="store_true", help="publish to elasticsearch?")
     parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")
-    parser.add_argument('--mapping', default="../mappings/publication.json", help="publication elasticsearch mapping document")
+    parser.add_argument('--mapping', default="mappings/publication.json", help="publication elasticsearch mapping document")
     parser.add_argument('out', metavar='OUT', help='elasticsearch bulk ingest file')
 
     args = parser.parse_args()
@@ -241,4 +242,5 @@ if __name__ == "__main__":
 
     # publish the results to elasticsearch if "--publish" was specified on the command line
     if args.publish:
-        publish(bulk=records, endpoint=args.es, rebuild=args.rebuild, mapping=args.mapping)
+        bulk_str = '\n'.join(records)
+        publish(bulk=bulk_str, endpoint=args.es, rebuild=args.rebuild, mapping=args.mapping)
