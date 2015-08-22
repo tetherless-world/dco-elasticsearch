@@ -182,10 +182,13 @@ def publish(bulk, endpoint, rebuild, mapping):
     # if configured to rebuild_index
     # Delete and then re-create to publication index (via PUT request)
 
+    index_url = endpoint+"/dco"
+
     if rebuild:
-        requests.delete(endpoint)
-        r = requests.put(endpoint)
+        requests.delete(index_url)
+        r = requests.put(index_url)
         if r.status_code != requests.codes.ok:
+            print(r.url, r.status_code)
             r.raise_for_status()
 
     # push current publication document mapping
@@ -201,12 +204,14 @@ def publish(bulk, endpoint, rebuild, mapping):
             requests.delete(mapping_url)
             r = requests.put(mapping_url, data=mapping_file)
             if r.status_code != requests.codes.ok:
+                print(r.url, r.status_code)
                 r.raise_for_status()
 
     # bulk import new publication documents
     bulk_import_url = endpoint+"/_bulk"
     r = requests.post(bulk_import_url, data=bulk)
     if r.status_code != requests.codes.ok:
+        print(r.url, r.status_code)
         r.raise_for_status()
 
 
