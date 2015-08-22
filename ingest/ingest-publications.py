@@ -17,9 +17,6 @@ def load_file(filepath):
 get_publications_query = load_file("queries/listPublications.rq")
 describe_publication_query = load_file("queries/describePublication.rq")
 
-vivo_endpoint = "http://deepcarbon.tw.rpi.edu:3030/VIVO/query"
-sparql = SPARQLWrapper(vivo_endpoint)
-
 PROV = Namespace("http://www.w3.org/ns/prov#")
 BIBO = Namespace("http://purl.org/ontology/bibo/")
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
@@ -38,38 +35,43 @@ def get_id(dco_id):
     return dco_id[dco_id.rfind('/') + 1:]
 
 
-def select(query):
+def select(endpoint, query):
+    sparql = SPARQLWrapper(endpoint)
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
     return results["results"]["bindings"]
 
 
-def get_publications():
-    r = select(get_publications_query)
-    return [rs["publication"]["value"] for rs in r]
-
-
-def process_publication(publication):
-    pub = create_publication_doc(publication)
-    if "dcoId" in pub and pub["dcoId"] is not None:
-        return [json.dumps(get_metadata(get_id(pub["dcoId"]))), json.dumps(pub)]
-    else:
-        return []
-
-
-def describe_publication(publication):
-    q = describe_publication_query.replace("?publication", "<" + publication + ">")
-    sparql.setQuery(q)
-
+def describe(endpoint, query):
+    sparql = SPARQLWrapper(endpoint)
+    sparql.setQuery(query)
     try:
         return sparql.query().convert()
     except RuntimeWarning:
         pass
 
 
-def create_publication_doc(publication):
-    graph = describe_publication(publication)
+def get_publications(endpoint):
+    r = select(endpoint, get_publications_query)
+    return [rs["publication"]["value"] for rs in r]
+
+
+def process_publication(publication, endpoint):
+    pub = create_publication_doc(publication=publication, endpoint=endpoint)
+    if "dcoId" in pub and pub["dcoId"] is not None:
+        return [json.dumps(get_metadata(get_id(pub["dcoId"]))), json.dumps(pub)]
+    else:
+        return []
+
+
+def describe_publication(endpoint, publication):
+    q = describe_publication_query.replace("?publication", "<" + publication + ">")
+    return describe(endpoint, q)
+
+
+def create_publication_doc(publication, endpoint):
+    graph = describe_publication(endpoint=endpoint, publication=publication)
 
     pub = graph.resource(publication)
 
@@ -216,9 +218,10 @@ def publish(bulk, endpoint, rebuild, mapping):
         r.raise_for_status()
 
 
-def generate(threads):
+def generate(threads, sparql):
     pool = multiprocessing.Pool(threads)
-    return list(itertools.chain.from_iterable(pool.map(process_publication, get_publications())))
+    params = [(publication, sparql) for publication in get_publications(endpoint=sparql)]
+    return list(itertools.chain.from_iterable(pool.starmap(process_publication, params)))
 
 
 if __name__ == "__main__":
@@ -229,12 +232,13 @@ if __name__ == "__main__":
     parser.add_argument('--publish', default=False, action="store_true", help="publish to elasticsearch?")
     parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")
     parser.add_argument('--mapping', default="mappings/publication.json", help="publication elasticsearch mapping document")
+    parser.add_argument('--sparql', default='http://deepcarbon.tw.rpi.edu:3030/VIVO/query', help='sparql endpoint')
     parser.add_argument('out', metavar='OUT', help='elasticsearch bulk ingest file')
 
     args = parser.parse_args()
 
     # generate bulk import document for publications
-    records = generate(threads=args.threads)
+    records = generate(threads=args.threads, sparql=args.sparql)
 
     # save generated bulk import file so it can be backed up or reviewed if there are publish errors
     with open(args.out, "w") as bulk_file:
