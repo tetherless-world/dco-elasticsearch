@@ -7,6 +7,8 @@ import multiprocessing
 import itertools
 import argparse
 import requests
+import warnings
+import pprint
 
 
 def load_file(filepath):
@@ -134,7 +136,10 @@ def create_publication_doc(publication, endpoint):
 
     subject_areas = []
     for subject_area in pub.objects(VIVO.hasSubjectArea):
-        subject_areas.append({"uri": str(subject_area.identifier), "name": subject_area.label().toPython()})
+        sa = {"uri": str(subject_area.identifier)}
+        if subject_area.label():
+            sa.update({"name": subject_area.label().toPython()})
+        subject_areas.append(sa)
 
     if subject_areas:
         doc.update({"subjectArea": subject_areas})
@@ -153,7 +158,8 @@ def create_publication_doc(publication, endpoint):
         if rank:
             obj.update({"rank": rank})
 
-        research_areas = [research_area.label().toPython() for research_area in author.objects(VIVO.hasResearchArea)]
+        research_areas = [research_area.label().toPython() for research_area in author.objects(VIVO.hasResearchArea) if research_area.label()]
+
         if research_areas:
             obj.update({"researchArea": research_areas})
 
