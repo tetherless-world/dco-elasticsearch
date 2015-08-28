@@ -244,7 +244,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # generate bulk import document for publications
-    records = generate(threads=args.threads, sparql=args.sparql)
+    records = generate(threads=int(args.threads), sparql=args.sparql)
 
     # save generated bulk import file so it can be backed up or reviewed if there are publish errors
     with open(args.out, "w") as bulk_file:
