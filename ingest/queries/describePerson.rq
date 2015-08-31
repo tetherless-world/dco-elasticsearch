@@ -17,6 +17,6 @@ WHERE {
   OPTIONAL { ?person dco:inOrganization ?org }
   OPTIONAL { ?person dco:associatedDCOCommunity ?dco_community }
   OPTIONAL { ?person dco:associatedDCOPortalGroup ?portal_group }
-  OPTIONAL { ?person vitro-public:mainImage [vitro-public:thumbnailImage [vitro-public:downloadLocation ?thumbnail]] }
-  OPTIONAL { vivo:hasResearchArea ?researchArea }
+  OPTIONAL { ?person vitro:mainImage [vitro:thumbnailImage [vitro:downloadLocation ?thumbnail]] }
+  OPTIONAL { ?person vivo:hasResearchArea ?researchArea }
 }
