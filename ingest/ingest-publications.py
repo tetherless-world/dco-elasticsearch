@@ -163,12 +163,12 @@ def create_publication_doc(publication, endpoint):
         if research_areas:
             obj.update({"researchArea": research_areas})
 
-        authors.append(obj)
-
         org = list(author.objects(DCO.inOrganization))
         org = org[0] if org else None
         if org and org.label():
             obj.update({"organization": {"uri": str(org.identifier), "name": org.label().toPython()}})
+
+        authors.append(obj)
 
     try:
         authors = sorted(authors, key=lambda a: a["rank"]) if len(authors) > 1 else authors

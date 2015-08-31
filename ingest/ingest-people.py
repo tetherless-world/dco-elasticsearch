@@ -19,9 +19,11 @@ BIBO = Namespace("http://purl.org/ontology/bibo/")
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
 VIVO = Namespace('http://vivoweb.org/ontology/core#')
 VITRO = Namespace("http://vitro.mannlib.cornell.edu/ns/vitro/0.7#")
+VITRO_PUB = Namespace("http://vitro.mannlib.cornell.edu/ns/vitro/public#")
 OBO = Namespace("http://purl.obolibrary.org/obo/")
 DCO = Namespace("http://info.deepcarbon.net/schema#")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
+OBO = Namespace("http://purl.obolibrary.org/obo/")
 
 get_people_query = load_file("queries/listPeople.rq")
 describe_person_query = load_file("queries/describePerson.rq")
@@ -75,15 +77,36 @@ def create_person_doc(person, endpoint):
     per = graph.resource(person)
 
     try:
-        title = per.label().toPython()
+        name = per.label().toPython()
     except AttributeError:
-        print("missing title:", person)
+        print("missing name:", person)
         return {}
 
     dco_id = list(per.objects(DCO.hasDcoId))
     dco_id = str(dco_id[0].identifier) if dco_id else None
 
-    doc = {"uri": person, "title": title, "dcoId": dco_id}
+    doc = {"uri": person, "name": name, "dcoId": dco_id}
+
+    vcard = list(per.objects(OBO.ARG_2000028))
+    vcard = vcard[0] if vcard else None
+
+    vcard_name = list(vcard.objects(VCARD.hasName)) if vcard else None
+    vcard_name = vcard_name[0] if vcard_name else None
+
+    given_name = list(vcard_name.objects(VCARD.givenName)) if vcard_name else None
+    if given_name:
+        doc.update({"givenName": given_name[0].toPython()})
+
+    family_name = list(vcard_name.objects(VCARD.familyName)) if vcard_name else None
+    if family_name:
+        doc.update({"familyName": family_name[0].toPython()})
+
+    if vcard:
+        vcard_email = [x for x in vcard.objects(VCARD.hasEmail) if has_type(x, VCARD.Work)]
+        vcard_email = vcard_email[0] if vcard_email else None
+        email = list(vcard_email.objects(VCARD.email)) if vcard_email else None
+        if email:
+            doc.update({"email": email[0].toPython()})
 
     research_areas = [research_area.label().toPython() for research_area in per.objects(VIVO.hasResearchArea) if research_area.label()]
     if research_areas:
@@ -102,13 +125,13 @@ def create_person_doc(person, endpoint):
     if dco_communities:
         doc.update({"dcoCommunities": dco_communities})
 
-    main_image = list(per.objects(VITRO.mainImage))
+    main_image = list(per.objects(VITRO_PUB.mainImage))
     main_image = main_image[0] if main_image else None
 
-    thumb_image = list(main_image.objects(VITRO.thumbnailImage)) if main_image else None
+    thumb_image = list(main_image.objects(VITRO_PUB.thumbnailImage)) if main_image else None
     thumb_image = thumb_image[0] if thumb_image else None
 
-    thumb_image_download = list(thumb_image.objects(VITRO.downloadLocation)) if thumb_image else None
+    thumb_image_download = list(thumb_image.objects(VITRO_PUB.downloadLocation)) if thumb_image else None
     thumb_image_download = thumb_image_download[0] if thumb_image_download else None
 
     if thumb_image_download:
