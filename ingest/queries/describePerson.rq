@@ -1,0 +1,22 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX dco: <http://info.deepcarbon.net/schema#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX vivo: <http://vivoweb.org/ontology/core#>
+PREFIX vitro: <http://vitro.mannlib.cornell.edu/ns/vitro/0.7#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX bibo: <http://purl.org/ontology/bibo/>
+
+DESCRIBE ?person ?dcoid ?mostSpecificType ?org ?dco_community ?portal_group ?thumbnail ?researchArea
+WHERE {
+  ?person dco:hasDcoId ?dcoid .
+  ?person vitro:mostSpecificType ?mostSpecificType .
+  OPTIONAL { ?person dco:inOrganization ?org }
+  OPTIONAL { ?person dco:associatedDCOCommunity ?dco_community }
+  OPTIONAL { ?person dco:associatedDCOPortalGroup ?portal_group }
+  OPTIONAL { ?person vitro-public:mainImage [vitro-public:thumbnailImage [vitro-public:downloadLocation ?thumbnail]] }
+  OPTIONAL { vivo:hasResearchArea ?researchArea }
+}
