@@ -23,7 +23,7 @@ VITRO_PUB = Namespace("http://vitro.mannlib.cornell.edu/ns/vitro/public#")
 OBO = Namespace("http://purl.obolibrary.org/obo/")
 DCO = Namespace("http://info.deepcarbon.net/schema#")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
-OBO = Namespace("http://purl.obolibrary.org/obo/")
+NET_ID = Namespace("http://vivo.mydomain.edu/ns#")
 
 get_people_query = load_file("queries/listPeople.rq")
 describe_person_query = load_file("queries/describePerson.rq")
@@ -93,6 +93,14 @@ def create_person_doc(person, endpoint):
     if orcid:
         orcid = orcid[orcid.rfind('/') + 1:]
         doc.update({"orcid": orcid})
+
+    network_id = list(per.objects(NET_ID.networkId))
+    network_id = network_id[0].toPython() if network_id else None
+    if network_id:
+        doc.update({"network_id": network_id})
+
+    is_dco_member = True if network_id is not None else False
+    doc.update({"is_dco_member": is_dco_member})
 
     most_specific_type = list(per.objects(VITRO.mostSpecificType))
     most_specific_type = most_specific_type[0].label().toPython() \
