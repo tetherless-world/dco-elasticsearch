@@ -83,9 +83,23 @@ def create_person_doc(person, endpoint):
         return {}
 
     dco_id = list(per.objects(DCO.hasDcoId))
+    dco_id = list(graph.subjects(DCO.dcoIdFor, per)) if dco_id is None else dco_id
     dco_id = str(dco_id[0].identifier) if dco_id else None
 
     doc = {"uri": person, "name": name, "dcoId": dco_id}
+
+    orcid = list(per.objects(VIVO.orcidId))
+    orcid = str(orcid[0].identifier) if orcid else None
+    if orcid:
+        orcid = orcid[orcid.rfind('/') + 1:]
+        doc.update({"orcid": orcid})
+
+    most_specific_type = list(per.objects(VITRO.mostSpecificType))
+    most_specific_type = most_specific_type[0].label().toPython() \
+        if most_specific_type and most_specific_type[0].label() \
+        else None
+    if most_specific_type:
+        doc.update({"mostSpecificType": most_specific_type})
 
     vcard = list(per.objects(OBO.ARG_2000028))
     vcard = vcard[0] if vcard else None
@@ -141,11 +155,10 @@ def create_person_doc(person, endpoint):
 
 
 def process_person(person, endpoint):
-    pub = create_person_doc(person=person, endpoint=endpoint)
-    if "dcoId" in pub and pub["dcoId"] is not None:
-        return [json.dumps(get_metadata(get_id(pub["dcoId"]))), json.dumps(pub)]
-    else:
-        return []
+    per = create_person_doc(person=person, endpoint=endpoint)
+    es_id = per["dcoId"] if "dcoId" in per and per["dcoId"] is not None else per["uri"]
+    es_id = get_id(es_id)
+    return [json.dumps(get_metadata(es_id)), json.dumps(per)]
 
 
 def publish(bulk, endpoint, rebuild, mapping):

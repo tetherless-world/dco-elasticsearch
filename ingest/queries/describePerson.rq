@@ -16,8 +16,8 @@ PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
 DESCRIBE ?person ?dcoid ?mostSpecificType ?org ?dco_community ?portal_group ?main_image ?thumb_image ?thumbnail ?research_area ?vcard ?email ?name
 WHERE {
   ?person a foaf:Person .
-  ?person dco:hasDcoId ?dcoid .
   ?person vitro:mostSpecificType ?mostSpecificType .
+  OPTIONAL { { ?person dco:hasDcoId ?dcoid } UNION { ?dcoid dco:dcoIdFor ?person } }
   OPTIONAL { ?person obo:ARG_2000028 ?vcard
     OPTIONAL { ?vcard vcard:hasEmail ?email }
     OPTIONAL { ?vcard vcard:hasName ?name }
