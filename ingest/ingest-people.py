@@ -100,7 +100,7 @@ def create_person_doc(person, endpoint):
         doc.update({"network_id": network_id})
 
     is_dco_member = True if network_id is not None else False
-    doc.update({"is_dco_member": is_dco_member})
+    doc.update({"isDcoMember": is_dco_member})
 
     most_specific_type = list(per.objects(VITRO.mostSpecificType))
     most_specific_type = most_specific_type[0].label().toPython() \
@@ -130,14 +130,13 @@ def create_person_doc(person, endpoint):
         if email:
             doc.update({"email": email[0].toPython()})
 
-    research_areas = [research_area.label().toPython() for research_area in per.objects(VIVO.hasResearchArea) if research_area.label()]
+    research_areas = [{"uri": str(research_area.identifier), "name": research_area.label().toPython()} for research_area in per.objects(VIVO.hasResearchArea) if research_area.label()]
     if research_areas:
         doc.update({"researchArea": research_areas})
 
-    orgs = [org for org in per.objects(DCO.inOrganization) if org.label()]
-    for org in orgs:
-        doc.update({"organization": {"uri": str(org.identifier), "name": org.label().toPython()}})
-        break
+    orgs = [{"uri": str(org.identifier), "name": org.label().toPython()} for org in per.objects(DCO.inOrganization) if org.label()]
+    if orgs:
+        doc.update({"organization": orgs})
 
     portal_groups = [{"uri": str(pg.identifier), "name": pg.label().toPython()} for pg in per.objects(DCO.associatedDCOPortalGroup) if pg.label()]
     if portal_groups:
