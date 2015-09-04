@@ -158,6 +158,15 @@ def create_person_doc(person, endpoint):
     if thumb_image_download:
         doc.update({"thumbnail": thumb_image_download.identifier})
 
+    positions = [x for x in per.objects(VIVO.relatedBy) if has_type(x, VIVO.Position)]
+    affiliations = []
+    for position in positions:
+        org = [x for x in position.objects(VIVO.relates) if has_type(x, FOAF.Organization)][0]
+        affiliations.append({"position": position.label().toPython(), "org": {"uri": str(org.identifier), "name": org.label().toPython()}})
+
+    if affiliations:
+        doc.update({"affiliations": affiliations})
+
     return doc
 
 
