@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>People Browser</title>
 
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.1/handlebars.min.js"></script>
+
     <script type="text/javascript" src="facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
     <link rel="stylesheet" href="facetview2/vendor/bootstrap/css/bootstrap.min.css">
     <script type="text/javascript" src="facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
@@ -16,28 +18,106 @@
     <link rel="stylesheet" href="facetview2/css/facetview.css">
     <link rel="stylesheet" href="browsers.css">
 
+    <script id="person-template" type="text/x-handlebars-template">
+        <tr>
+            <td>
+                <div class="thumbnail">
+                    {{#if thumbnail}}<img src="{{thumbnail}}">{{/if}}
+                    <div class="caption">
+                        <h5><small>
+                            <a class="{{#if isDcoMember}}dco-logo{{/if}}" href="{{dcoId}}" target="_blank">{{name}}</a>
+                        </small></h5>
+                    </div>
+                </div>
+                <div class="person-info">
+                    {{#if (showMostSpecificType mostSpecificType)}}<div><em class="small">{{mostSpecificType}}</em></div>{{/if}}
+                    {{#if email}}<div><strong>email: </strong><a href="mailto:{{email}}">{{email}}</a></div>{{/if}}
+                    {{#if network_id}}<div><strong>network ID: </strong><small>{{network_id}}</small></div>{{/if}}
+
+                    {{#if organization}}
+                    <div><strong>Organizations:</strong> {{#expand organization}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
+                    {{/if}}
+
+                    {{#if dcoCommunities}}
+                    <div><strong>Communities:</strong> {{#expand dcoCommunities}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
+                    {{/if}}
+
+                    {{#if affiliations}}
+                    <div><strong>Affiliations:</strong></div>
+                    {{#list affiliations}}{{position}} - <a href="{{org.uri}}">{{org.name}}</a>{{/list}}
+                    {{/if}}
+
+                    {{#if researchArea}}
+                    <div><strong>Research Areas:</strong> {{#expand researchArea}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
+                    {{/if}}
+
+                    {{!-- BADGES --}}
+
+                    <div>
+                        {{#if orcid}}<a href="{{orcidURL orcid}}" target="_blank"><img class="badge" src="{{orcidBadgeURL orcid}}"/></a>{{/if}}
+                        <a href="{{dcoId}}" target="_blank"><img class="badge" src="{{dcoIdBadgeURL dcoId}}"/></a>
+                    </div>
+
+                </div>
+            </td>
+        </tr>
+    </script>
+
     <script type="text/javascript">
 
-        function foo(field, label) {
-            var html = "";
-            if (field) {
-                var j = field.length - 1;
-                html += "<br />" + label + ": ";
-                for(var i = 0; i < field.length; i++) {
-                    html += "<a href=\"" + field[i]["uri"] + "\" target=\"_blank\">" + field[i]["name"] + "</a>";
-                    if(i < j) {
-                        html += "; ";
-                    }
+        Handlebars.registerHelper('orcidURL', function(orcid) {
+            return "http://orcid.org/"+orcid;
+        });
+
+        Handlebars.registerHelper('orcidBadgeURL', function(orcid) {
+            var escapedORCID = encodeURIComponent(orcid);
+            return "//dcotest.tw.rpi.edu/badges/badge?title=ORCID&text="+escapedORCID+"&color=a6ce39";
+        });
+
+        Handlebars.registerHelper('dcoIdBadgeURL', function(dcoId) {
+            var escapedDCOID = encodeURIComponent(dcoId.substring(25));
+            return "//dcotest.tw.rpi.edu/badges/badge?title=metadata&text="+escapedDCOID+"&color=D14719";
+        });
+
+        Handlebars.registerHelper('showMostSpecificType', function(mostSpecificType) {
+            return (mostSpecificType && mostSpecificType != "Person");
+        });
+
+        Handlebars.registerHelper('expand', function(items, options) {
+            var out = "";
+            var j = items.length - 1;
+            for(var i = 0; i < items.length; i++) {
+                out += options.fn(items[i]);
+                if(i < j) {
+                    out += "; ";
                 }
             }
-            return html;
-        }
+            return out;
+        });
+
+        Handlebars.registerHelper('list', function(items, options) {
+            var out = "<ul>";
+            for(var i=0, l=items.length; i<l; i++) {
+                out = out + "<li>" + options.fn(items[i]) + "</li>";
+            }
+            return out + "</ul>";
+        });
+
+        var source = $("#person-template").html();
+        var template = Handlebars.compile(source);
+
+    </script>
+
+    <script type="text/javascript">
 
         jQuery(document).ready(function($) {
             $('.facet-view-simple').facetview({
                 search_url: '//data.deepcarbon.net/es/dco/person/_search',
                 page_size: 10,
-                sort: [{"_score" : {"order" : "desc"}}],
+                sort: [
+                    {"_score" : {"order" : "desc"}},
+                    {"name.exact" : {"order" : "asc"}}
+                ],
                 sharesave_link: true,
                 search_button: true,
                 default_freetext_fuzzify: "*",
@@ -47,57 +127,16 @@
                 facets: [
                     {'field': 'mostSpecificType.exact', 'display': 'Type'},
                     {'field': 'dcoCommunities.name.exact', 'display': 'Community'},
-                    /*{'field': 'portalGroups.name.exact', 'display': 'Portal Group'},*/
                     {'field': 'organization.name.exact', 'display': 'Organization'},
                     {'field': 'researchArea.name.exact', 'display': 'Research Area'},
                     {'field': 'isDcoMember', 'display': 'Show only DCO-members'}
                 ],
+                search_sortby: [
+                    {'display':'Name','field':'name.exact'}
+                ],
                 render_result_record: function(options, record)
                 {
-                    var html = "<tr class='row'><td class='col-md-6'>";
-
-                    if (record["thumbnail"]) {
-                        html += "<img class='thumbnail' src=\"" + record["thumbnail"] + "\">"
-                    }
-
-                    if (record["isDcoMember"]) {
-                        html += "<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>&nbsp;";
-                    }
-
-                    html += "<strong><a href=\""+record["dcoId"]+"\" target=\"_blank\">" + record["name"] + "</a></strong>";
-
-                    if (record["email"]) {
-                        html += "&nbsp;<small>(<a href=\"mailto:"+record["email"]+"\">"+record["email"]+"</a>)</small>";
-                    }
-
-
-                    if (record["mostSpecificType"]) {
-                        html += "<br /><em>" + record["mostSpecificType"] + "</em>";
-                    }
-
-                    html += foo(record["organization"], "Organizations");
-                    html += foo(record["dcoCommunities"], "Communities");
-                    //html += foo(record["portalGroups"], "Groups");
-                    html += foo(record["researchArea"], "Research Areas");
-
-
-                    // BADGES
-
-                    html += "<div>"
-
-                    if (record["orcid"]) {
-                        var orcidUrl = "http://orcid.org/"+record["orcid"]
-                        var escapedORCID = encodeURIComponent(record["orcid"]);
-                        html += "<a href=\"" + orcidUrl + "\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=ORCID&text="+escapedORCID+"&color=a6ce39'/></a>&emsp;";
-                    }
-
-                    var escapedDCOId= encodeURIComponent(record["dcoId"].substring(25));
-                    html += "<a href=\""+record["dcoId"]+"\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=metadata&text="+escapedDCOId+"&color=D14719'/></a>";
-
-                    html += "</div>"
-
-                    html += "</td></tr>";
-                    return html;
+                    return template(record).trim();
                 },
                 selected_filters_in_facet: true,
                 show_filter_field : true,
@@ -122,6 +161,10 @@
                             });
                 },
                 post_render_callback: function(options, context) {
+
+                    //  add DCO logo before any element with class 'dco-logo'
+                    $(".dco-logo").before("<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>&nbsp;");
+
                     if(options.active_filters["isDcoMember"] != null) {
                         // if the isDcoPublication filter is active set ensure the checkbox is checked
                         $("#is-dco-member-checkbox").attr("checked", true);
@@ -141,6 +184,7 @@
 
 
     <style type="text/css">
+
         .facet-view-simple{
             width:100%;
             height:100%;
@@ -149,7 +193,7 @@
 
         .facetview_freetext.span4 {
            width: 290px;
-           height: 12px;
+           height: 10px;
         }
 
         legend {
@@ -165,10 +209,18 @@
             box-shadow: none;
         }
 
+        .person-info {
+            display: inline-block;
+            vertical-align: top;
+            clear: left;
+            margin-left: 0 !important;
+        }
+
         .thumbnail {
-            float: left;
-            width: 80px;
-            margin-right: 8px;
+            display: inline-block;
+            width: 100px;
+            box-shadow: none;
+            border: none;
         }
 
         #facetview_filter_isDcoMember {
