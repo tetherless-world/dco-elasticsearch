@@ -5,8 +5,62 @@ from rdflib import Namespace, RDF
 import json
 import requests
 import multiprocessing
-import itertools
+from itertools import chain
+import functools
 import argparse
+
+
+class Maybe:
+    def __init__(self, v=None):
+        self.value = v
+
+    @staticmethod
+    def nothing():
+        return Maybe()
+
+    @staticmethod
+    def of(t):
+        return Maybe(t)
+
+    def reduce(self, action):
+        return Maybe.of(functools.reduce(action, self.value)) if self.value else Maybe.nothing()
+
+    def stream(self):
+        return Maybe.of([self.value]) if self.value is not None else Maybe.nothing()
+
+    def map(self, action):
+        return Maybe.of(chain(map(action, self.value))) if self.value is not None else Maybe.nothing()
+
+    def flatmap(self, action):
+        return Maybe.of(chain.from_iterable(map(action, self.value))) if self.value is not None else Maybe.nothing()
+
+    def andThen(self, action):
+        return Maybe.of(action(self.value)) if self.value is not None else Maybe.nothing()
+
+    def orElse(self, action):
+        return Maybe.of(action()) if self.value is None else Maybe.of(self.value)
+
+    def do(self, action):
+        if self.value:
+            action(self.value)
+        return self
+
+    def filter(self, action):
+        return Maybe.of(filter(action, self.value)) if self.value is not None else Maybe.nothing()
+
+    def followedBy(self, action):
+        return self.andThen(lambda _: action)
+
+    def one(self):
+        try:
+            return Maybe.of(next(self.value)) if self.value is not None else Maybe.nothing()
+        except StopIteration:
+            return Maybe.nothing()
+        except TypeError:
+            return self
+
+    def list(self):
+        return list(self.value) if self.value is not None else []
 
 
 def load_file(filepath):
@@ -27,6 +81,9 @@ NET_ID = Namespace("http://vivo.mydomain.edu/ns#")
 
 get_people_query = load_file("queries/listPeople.rq")
 describe_person_query = load_file("queries/describePerson.rq")
+
+# standard lambdas
+non_empty_str = lambda s: True if s else False
 
 
 def get_metadata(id):
@@ -71,99 +128,182 @@ def describe_person(endpoint, person):
     return describe(endpoint, q)
 
 
+def get_dcoid(person):
+    return Maybe.of(person).stream() \
+        .flatmap(lambda p: p.objects(DCO.hasDcoId)) \
+        .orElse(lambda: person.graph.subjects(DCO.dcoIdFor, person)) \
+        .map(lambda i: i.identifier).one().value
+
+
+def get_orcid(person):
+    return Maybe.of(person).stream() \
+        .flatmap(lambda p: p.objects(VIVO.orcidId)) \
+        .map(lambda o: o.identifier) \
+        .map(lambda o: o[o.rfind('/') + 1:]).one().value
+
+
+def get_most_specific_type(person):
+    return Maybe.of(person).stream() \
+        .flatmap(lambda p: p.objects(VITRO.mostSpecificType)) \
+        .map(lambda t: t.label()) \
+        .filter(non_empty_str) \
+        .one().value
+
+
+def get_network_id(person):
+    return Maybe.of(person).stream() \
+        .flatmap(lambda p: p.objects(NET_ID.networkId)) \
+        .filter(non_empty_str) \
+        .one().value
+
+
+def get_given_name(person):
+    return Maybe.of(person).stream() \
+        .flatmap(lambda p: p.objects(OBO.ARG_2000028)) \
+        .flatmap(lambda v: v.objects(VCARD.hasName)) \
+        .flatmap(lambda n: n.objects(VCARD.givenName)) \
+        .filter(non_empty_str) \
+        .one().value
+
+
+def get_family_name(person):
+    return Maybe.of(person).stream() \
+        .flatmap(lambda p: p.objects(OBO.ARG_2000028)) \
+        .flatmap(lambda v: v.objects(VCARD.hasName)) \
+        .flatmap(lambda n: n.objects(VCARD.familyName)) \
+        .filter(non_empty_str) \
+        .one().value
+
+
+def get_email(person):
+    return Maybe.of(person).stream() \
+        .flatmap(lambda p: p.objects(OBO.ARG_2000028)) \
+        .flatmap(lambda v: v.objects(VCARD.hasEmail)) \
+        .filter(lambda f: has_type(f, VCARD.Work)) \
+        .flatmap(lambda e: e.objects(VCARD.email)) \
+        .filter(non_empty_str) \
+        .one().value
+
+
+def get_research_areas(person):
+    return Maybe.of(person).stream() \
+        .flatmap(lambda p: p.objects(VIVO.hasResearchArea)) \
+        .filter(lambda r: True if r.label() else False) \
+        .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
+
+
+def get_organizations(person):
+    return Maybe.of(person).stream() \
+        .flatmap(lambda p: p.objects(DCO.inOrganization)) \
+        .filter(lambda r: True if r.label() else False) \
+        .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
+
+
+def get_portal_groups(person):
+    return Maybe.of(person).stream() \
+        .flatmap(lambda p: p.objects(DCO.associatedDCOPortalGroup)) \
+        .filter(lambda r: True if r.label() else False) \
+        .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
+
+
+def get_dco_communities(person):
+    return Maybe.of(person).stream() \
+        .flatmap(lambda p: p.objects(DCO.associatedDCOCommunity)) \
+        .filter(lambda r: True if r.label() else False) \
+        .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
+
+
+def get_affiliations(person):
+    affiliations = []
+
+    positions = Maybe.of(person).stream() \
+        .flatmap(lambda per: per.objects(VIVO.relatedBy)) \
+        .filter(lambda related: has_type(related, VIVO.Position)).list()
+
+    for position in positions:
+        organization = Maybe.of(position).stream() \
+            .flatmap(lambda r: r.objects(VIVO.relates)) \
+            .filter(lambda o: has_type(o, FOAF.Organization)) \
+            .filter(lambda o: True if o.label() else False) \
+            .map(lambda o: {"uri": str(o.identifier), "name": str(o.label())}) \
+            .one().value
+
+        if organization:
+            affiliations.append({"position": str(position.label()), "org": organization})
+
+    return affiliations
+
+
+def get_thumbnail(person):
+    return Maybe.of(person).stream() \
+        .flatmap(lambda p: p.objects(VITRO_PUB.mainImage)) \
+        .flatmap(lambda i: i.objects(VITRO_PUB.thumbnailImage)) \
+        .flatmap(lambda t: t.objects(VITRO_PUB.downloadLocation)) \
+        .map(lambda t: t.identifier) \
+        .one().value
+
+
 def create_person_doc(person, endpoint):
     graph = describe_person(endpoint=endpoint, person=person)
 
     per = graph.resource(person)
 
     try:
-        name = per.label().toPython()
+        name = per.label()
     except AttributeError:
         print("missing name:", person)
         return {}
 
-    dco_id = list(per.objects(DCO.hasDcoId))
-    dco_id = list(graph.subjects(DCO.dcoIdFor, per)) if dco_id is None else dco_id
-    dco_id = str(dco_id[0].identifier) if dco_id else None
+    dcoid = get_dcoid(per)
+    doc = {"uri": person, "name": name, "dcoId": dcoid}
 
-    doc = {"uri": person, "name": name, "dcoId": dco_id}
-
-    orcid = list(per.objects(VIVO.orcidId))
-    orcid = str(orcid[0].identifier) if orcid else None
+    orcid = get_orcid(per)
     if orcid:
-        orcid = orcid[orcid.rfind('/') + 1:]
         doc.update({"orcid": orcid})
 
-    network_id = list(per.objects(NET_ID.networkId))
-    network_id = network_id[0].toPython() if network_id else None
+    network_id = get_network_id(per)
     if network_id:
-        doc.update({"network_id": network_id})
+        doc.update({"network_id": network_id, "isDcoMember": True})
+    else:
+        doc.update({"isDcoMember": False})
 
-    is_dco_member = True if network_id is not None else False
-    doc.update({"isDcoMember": is_dco_member})
-
-    most_specific_type = list(per.objects(VITRO.mostSpecificType))
-    most_specific_type = most_specific_type[0].label().toPython() \
-        if most_specific_type and most_specific_type[0].label() \
-        else None
+    most_specific_type = get_most_specific_type(per)
     if most_specific_type:
         doc.update({"mostSpecificType": most_specific_type})
 
-    vcard = list(per.objects(OBO.ARG_2000028))
-    vcard = vcard[0] if vcard else None
-
-    vcard_name = list(vcard.objects(VCARD.hasName)) if vcard else None
-    vcard_name = vcard_name[0] if vcard_name else None
-
-    given_name = list(vcard_name.objects(VCARD.givenName)) if vcard_name else None
+    given_name = get_given_name(per)
     if given_name:
-        doc.update({"givenName": given_name[0].toPython()})
+        doc.update({"givenName": given_name})
 
-    family_name = list(vcard_name.objects(VCARD.familyName)) if vcard_name else None
+    family_name = get_family_name(per)
     if family_name:
-        doc.update({"familyName": family_name[0].toPython()})
+        doc.update({"familyName": family_name})
 
-    if vcard:
-        vcard_email = [x for x in vcard.objects(VCARD.hasEmail) if has_type(x, VCARD.Work)]
-        vcard_email = vcard_email[0] if vcard_email else None
-        email = list(vcard_email.objects(VCARD.email)) if vcard_email else None
-        if email:
-            doc.update({"email": email[0].toPython()})
+    email = get_email(per)
+    if email:
+        doc.update({"email": email})
 
-    research_areas = [{"uri": str(research_area.identifier), "name": research_area.label().toPython()} for research_area in per.objects(VIVO.hasResearchArea) if research_area.label()]
+    research_areas = get_research_areas(per)
     if research_areas:
         doc.update({"researchArea": research_areas})
 
-    orgs = [{"uri": str(org.identifier), "name": org.label().toPython()} for org in per.objects(DCO.inOrganization) if org.label()]
-    if orgs:
-        doc.update({"organization": orgs})
+    organizations = get_organizations(per)
+    if organizations:
+        doc.update({"organization": organizations})
 
-    portal_groups = [{"uri": str(pg.identifier), "name": pg.label().toPython()} for pg in per.objects(DCO.associatedDCOPortalGroup) if pg.label()]
+    portal_groups = get_portal_groups(per)
     if portal_groups:
         doc.update({"portalGroups": portal_groups})
 
-    dco_communities = [{"uri": str(comm.identifier), "name": comm.label().toPython()} for comm in per.objects(DCO.associatedDCOCommunity) if comm.label()]
+    dco_communities = get_dco_communities(per)
     if dco_communities:
         doc.update({"dcoCommunities": dco_communities})
 
-    main_image = list(per.objects(VITRO_PUB.mainImage))
-    main_image = main_image[0] if main_image else None
+    thumbnail = get_thumbnail(per)
+    if thumbnail:
+        doc.update({"thumbnail": thumbnail})
 
-    thumb_image = list(main_image.objects(VITRO_PUB.thumbnailImage)) if main_image else None
-    thumb_image = thumb_image[0] if thumb_image else None
-
-    thumb_image_download = list(thumb_image.objects(VITRO_PUB.downloadLocation)) if thumb_image else None
-    thumb_image_download = thumb_image_download[0] if thumb_image_download else None
-
-    if thumb_image_download:
-        doc.update({"thumbnail": thumb_image_download.identifier})
-
-    positions = [x for x in per.objects(VIVO.relatedBy) if has_type(x, VIVO.Position)]
-    affiliations = []
-    for position in positions:
-        org = [x for x in position.objects(VIVO.relates) if has_type(x, FOAF.Organization)][0]
-        affiliations.append({"position": position.label().toPython(), "org": {"uri": str(org.identifier), "name": org.label().toPython()}})
-
+    affiliations = get_affiliations(per)
     if affiliations:
         doc.update({"affiliations": affiliations})
 
@@ -217,7 +357,7 @@ def publish(bulk, endpoint, rebuild, mapping):
 def generate(threads, sparql):
     pool = multiprocessing.Pool(threads)
     params = [(person, sparql) for person in get_people(endpoint=sparql)]
-    return list(itertools.chain.from_iterable(pool.starmap(process_person, params)))
+    return list(chain.from_iterable(pool.starmap(process_person, params)))
 
 
 if __name__ == "__main__":
