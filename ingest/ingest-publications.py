@@ -10,6 +10,8 @@ import requests
 import warnings
 import pprint
 
+_index = "dco"
+_type = "publication"
 
 def load_file(filepath):
     with open(filepath) as _file:
@@ -30,7 +32,7 @@ FOAF = Namespace("http://xmlns.com/foaf/0.1/")
 
 
 def get_metadata(id):
-    return {"index": {"_index": "dco", "_type": "publication", "_id": id}}
+    return {"index": {"_index": _index, "_type": _type, "_id": id}}
 
 
 def get_id(dco_id):
@@ -191,7 +193,7 @@ def publish(bulk, endpoint, rebuild, mapping):
     # if configured to rebuild_index
     # Delete and then re-create to publication index (via PUT request)
 
-    index_url = endpoint + "/dco"
+    index_url = endpoint + "/" + _index
 
     if rebuild:
         requests.delete(index_url)
@@ -202,7 +204,7 @@ def publish(bulk, endpoint, rebuild, mapping):
 
     # push current publication document mapping
 
-    mapping_url = endpoint + "/dco/publication/_mapping"
+    mapping_url = index_url + "/" + _type + "/_mapping"
     with open(mapping) as mapping_file:
         r = requests.put(mapping_url, data=mapping_file)
         if r.status_code != requests.codes.ok:
