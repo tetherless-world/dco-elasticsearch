@@ -10,9 +10,6 @@ import requests
 import warnings
 import pprint
 
-_index = "dco"
-_type = "publication"
-
 def load_file(filepath):
     with open(filepath) as _file:
         return _file.read().replace('\n', " ")
@@ -29,6 +26,9 @@ VITRO = Namespace("http://vitro.mannlib.cornell.edu/ns/vitro/0.7#")
 OBO = Namespace("http://purl.obolibrary.org/obo/")
 DCO = Namespace("http://info.deepcarbon.net/schema#")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
+
+_index = "dco"
+_type = "publication"
 
 
 def get_metadata(id):
