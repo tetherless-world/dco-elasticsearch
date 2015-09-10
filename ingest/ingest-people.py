@@ -82,8 +82,9 @@ NET_ID = Namespace("http://vivo.mydomain.edu/ns#")
 get_people_query = load_file("queries/listPeople.rq")
 describe_person_query = load_file("queries/describePerson.rq")
 
-# standard lambdas
+# standard filters
 non_empty_str = lambda s: True if s else False
+has_label = lambda o: True if o.label() else False
 
 
 def get_metadata(id):
@@ -188,28 +189,28 @@ def get_email(person):
 def get_research_areas(person):
     return Maybe.of(person).stream() \
         .flatmap(lambda p: p.objects(VIVO.hasResearchArea)) \
-        .filter(lambda r: True if r.label() else False) \
+        .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
 
 def get_organizations(person):
     return Maybe.of(person).stream() \
         .flatmap(lambda p: p.objects(DCO.inOrganization)) \
-        .filter(lambda r: True if r.label() else False) \
+        .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
 
 def get_portal_groups(person):
     return Maybe.of(person).stream() \
         .flatmap(lambda p: p.objects(DCO.associatedDCOPortalGroup)) \
-        .filter(lambda r: True if r.label() else False) \
+        .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
 
 def get_dco_communities(person):
     return Maybe.of(person).stream() \
         .flatmap(lambda p: p.objects(DCO.associatedDCOCommunity)) \
-        .filter(lambda r: True if r.label() else False) \
+        .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
 
@@ -224,7 +225,7 @@ def get_affiliations(person):
         organization = Maybe.of(position).stream() \
             .flatmap(lambda r: r.objects(VIVO.relates)) \
             .filter(lambda o: has_type(o, FOAF.Organization)) \
-            .filter(lambda o: True if o.label() else False) \
+            .filter(has_label) \
             .map(lambda o: {"uri": str(o.identifier), "name": str(o.label())}) \
             .one().value
 
