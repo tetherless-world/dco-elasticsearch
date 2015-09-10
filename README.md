@@ -3,7 +3,7 @@ DCO Faceted Search using ElasticSearch
 
 ## Overview
 
-The DCO faceted search browsers are powered by [FacetView2](https://github.com/tetherless-world/facetview2) - a pure javascript frontend for ElasticSearch search indices that lets you easily embed a faceted browse front end into any web page.
+The DCO faceted search browsers are powered by [FacetView2](https://github.com/tetherless-world/facetview2) - a pure javascript frontend for ElasticSearch search indices that let you easily embed a faceted browse front end into any web page.
 
 To configure a working faceted browser you need:
 1. A running instance of ElasticSearch with a populated index
@@ -27,13 +27,13 @@ Finally, you can use the official docker image to start a containerized instance
 
 ### The Ingest Process
 
-Currently we use python scripts to build and import batch documents into our ElasticSearch (ES) service.  The scripts can be scheduled or run manually and currently generate a batch of all documents for a given search type (e.g. publication, person, dataset, etc).  Our scripts do not currently support generating batches of only recently changed documents.  That ingest scripts query a DCO SPARQL endpoint and generate a ES batch file containing JSON documents for all entities to be indexed.
+Currently we use python scripts to build and import batch documents into our ElasticSearch (ES) service.  The scripts can be scheduled or run manually and currently generate a batch of all documents for a given search type (e.g. publication, person, dataset, etc).  Our scripts do not currently support generating batches of only recently changed documents.  The ingest scripts query a DCO SPARQL endpoint and generate a ES batch file containing JSON documents for all entities to be indexed.
 
 Ingest scripts are located in the ingest directory and follow the convention ingest-x.py where x the plural form of the 'type' of search document generated.
 
-Currently a SELECT query is run to get a list of all URIs to build search documents for and a DESCRIBE query is run for each URI that we are building a search document for.  This means that for 1500 people, 1501 queries will be executed against the SPARQL endpoint.  This can cause performance problems with endpoints so please test against non-PRODUCTION endpoints and consider adding a LIMIT to the query used to generate the list of URIs to search.
+Currently a SELECT query is run to get a list of all URIs to build search documents for and a DESCRIBE query is run for each URI.  This means that for 1500 people, 1501 queries will be executed against the SPARQL endpoint.  This can cause performance problems with endpoints so please test against non-PRODUCTION endpoints and consider adding a LIMIT to the query used to generate the list of URIs to construct search documents for.
 
-The ingest scripts will perform the import when the --publish command line is specified.  You can change the elasticsearch URL the script imports to with the --es command line parameter.
+The ingest scripts will perform the import when the --publish command line parameter is specified.  You can change the elasticsearch URL the script imports to with the --es command line parameter.
 
 !IMPORTANT! - if you are writing a new ingest script make sure the correct values for the ``_index`` and ``_type`` variables are specified at the top of the script.
 
