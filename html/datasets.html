@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Dataset Browser</title>
+
+    <script type="text/javascript" src="facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
+    <link rel="stylesheet" href="facetview2/vendor/bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
+    <script type="text/javascript" src="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
+
+    <script type="text/javascript" src="facetview2/es.js"></script>
+    <script type="text/javascript" src="facetview2/bootstrap2.facetview.theme.js"></script>
+    <script type="text/javascript" src="facetview2/jquery.facetview2.js"></script>
+    <link rel="stylesheet" href="facetview2/css/facetview.css">
+    <link rel="stylesheet" href="browsers.css">
+
+    <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            $('.facet-view-simple').facetview({
+                search_url: '//localhost:9200/dco/publication/_search',
+                page_size: 20,
+                sort: [{"_score" : {"order" : "desc"}}],
+                sharesave_link: true,
+                search_button: true,
+                default_freetext_fuzzify: "*",
+                default_facet_operator: "AND",
+                default_facet_order: "count",
+                default_facet_size: 15,
+                facets: [
+                    {'field': 'mostSpecificType', 'display': 'Type'},
+                    {'field': 'community.name.exact', 'display': 'Community'},
+                    {'field': 'subjectArea.name.exact', 'display': 'Subject Area'},
+                    {'field': 'authors.name.exact', 'size': 20, 'display': 'Author'},
+                    {'field': 'publicationYear', 'display': 'Publication Year'},
+                    {'field': 'publishedIn.name.exact', 'display': 'Published In'},
+                    {'field': 'presentedAt.name.exact', 'display': 'Presented At Event'},
+                    {'field': 'authors.organization.name.exact', 'display': 'Author Organization'},
+                    {'field': 'authors.researchArea.exact', 'display': 'Author Research Area'},
+                    {'field': 'isDcoPublication', 'display': 'Show only DCO-member authored publications'}
+                ],
+                search_sortby: [
+                    {'display':'Title','field':'title.exact'},
+                    {'display':'Date','field':'publicationYear'}
+                ],
+                render_result_record: function(options, record)
+                {
+
+                    var doiUrl = "https://dx.doi.org/"+record["doi"];
+
+                    var html = "<tr><td>";
+                    
+                    if (record["isDcoPublication"]) {
+                        html += "<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>&nbsp;";
+                    }
+
+                    if (record["doi"]) {
+                        html += "<strong><a href=\""+doiUrl+"\" target=\"_blank\">" + record["title"] + "</a></strong>";
+                    } else {
+                        html += "<strong>" + record["title"] + "</strong>";
+                    }
+
+                    if (record["publicationYear"]) {
+                        html += "&emsp;<small>(" + record["publicationYear"] + ")</small>";
+                    }
+
+                    if (record["mostSpecificType"]) {
+                        html += "<br />Type: " + record["mostSpecificType"];
+                    }
+
+                    if (record["community"]) {
+                        html += "<br /><span>Community: <a href=\"" + record["community"]["uri"] + "\" target=\"_blank\">" + record["community"]["name"] + "</a></span>";
+                    }
+
+                    if (record["authors"]) {
+                        html += "<br /><span><small>Authors: ";
+                        for (var i = 0; i < record["authors"].length; i++) {
+                            html += "<a href=\"" + record["authors"][i]["uri"] + "\" target=\"_blank\">" + record["authors"][i]["name"] + "</a>";
+                            if (i < record["authors"].length - 1) {
+                                html += "; ";
+                            }
+                        }
+                        html += "</small></span>";
+                    }
+
+                    if (record["subjectArea"]) {
+                        html += "<br /><span>Subject Areas: ";
+
+                        for(var i = 0; i < record["subjectArea"].length; i++) {
+                            html += "<a href=\"" + record["subjectArea"][i]["uri"] + "\" target=\"_blank\">" + record["subjectArea"][i]["name"] + "</a>";
+                            if (i < record["subjectArea"].length - 1) {
+                                html += "; ";
+                            }
+                        }
+
+                        html += "</span>"
+                    }
+
+                    if(record["publishedIn"]) {
+                        html += "<br /><span>Published in: <a href=\""+record["publishedIn"]["uri"]+"\" target=\"_blank\">"+record["publishedIn"]["name"]+"</a></span>";
+                    }
+
+                    if (record["presentedAt"]) {
+                        html += "<br /><span>Presented at: <a href=\""+record["presentedAt"]["uri"]+"\" target=\"_blank\">"+record["presentedAt"]["name"]+"</a></span>";
+                    }
+
+                    // Badges
+
+                    html += "<br />";
+
+                    if (record["doi"]) {
+                        var escapedDOI = encodeURIComponent(record["doi"]);
+                        html += "<a href=\"" + doiUrl + "\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=DOI&text="+escapedDOI+"&color=66CCFF'/></a>&emsp;";
+                    }
+
+                    var escapedDCOId= encodeURIComponent(record["dcoId"].substring(25));
+                    html += "<a href=\""+record["dcoId"]+"\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=metadata&text="+escapedDCOId+"&color=D14719'/></a>";
+
+                    html += "</td></tr>";
+                    return html;
+                },
+                selected_filters_in_facet: true,
+                show_filter_field : true,
+                show_filter_logic: true,
+                post_init_callback: function(options, context) {
+                    // on initial load activate the isDcoPublication filter
+                    options.active_filters = {'isDcoPublication': ['T']};
+
+                    // add the 'dco publication' checkbox to the UI
+                    $(".facetview_search_options_container")
+                            .after("<input id='is-dco-publication-checkbox' type='checkbox'>&nbsp;Only show contributions to the DCO</input>&nbsp;<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>");
+
+                    // set checkbox to control isDcoPublication filter on selection/deselection
+                    $("#is-dco-publication-checkbox")
+                            .change(function() {
+                                if(this.checked) {
+                                    $("a.facetview_filterchoice[data-field='isDcoPublication'][data-value='T']").click();
+                                } else {
+
+                                    $("a.facetview_clear[data-field='isDcoPublication'][data-value='T']").click();
+                                }
+                            });
+                },
+                post_render_callback: function(options, context) {
+                    if(options.active_filters["isDcoPublication"] != null) {
+                        // if the isDcoPublication filter is active set ensure the checkbox is checked
+                        $("#is-dco-publication-checkbox").attr("checked", true);
+                    } else if (!$("a.facetview_filterchoice[data-field='isDcoPublication'][data-value='T']").length) {
+                        // if the isDcoPublication filter is not active and is not a valid option
+                        // (there are no remaining DCO publications in the result set) then disable the checkbox
+                        $("#is-dco-publication-checkbox").attr("disabled", true);
+                    } else {
+                        // if the isDcoPublication filter is not active is a valid option ensure it is enabled
+                        $("#is-dco-publication-checkbox").attr("disabled", false);
+                    }
+                }
+            });
+        });
+
+    </script>
+
+
+    <style type="text/css">
+        .facet-view-simple{
+            width:100%;
+            height:100%;
+            margin:20px auto 0 auto;
+        }
+
+        .facetview_freetext.span4 {
+           width: 290px;
+           height: 12px;
+        }
+
+        legend {
+            display: none;
+        }
+
+        #wrapper-content {
+          padding-top: 0px;
+        }
+
+        input {
+            -webkit-box-shadow: none;
+            box-shadow: none;
+        }
+
+    </style>
+
+</head>
+<body>
+<div class="facet-view-simple"></div>
+</body>
+</html>
