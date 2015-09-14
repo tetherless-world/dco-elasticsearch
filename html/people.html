@@ -34,12 +34,12 @@
                     {{#if email}}<div><strong>email: </strong><a href="mailto:{{email}}">{{email}}</a></div>{{/if}}
                     {{#if network_id}}<div><strong>network ID: </strong><small>{{network_id}}</small></div>{{/if}}
 
-                    {{#if organization}}
-                    <div><strong>Organizations:</strong> {{#expand organization}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
-                    {{/if}}
-
                     {{#if dcoCommunities}}
                     <div><strong>Communities:</strong> {{#expand dcoCommunities}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
+                    {{/if}}
+
+                    {{#if organization}}
+                    <div><strong>Organizations:</strong> {{#expand organization}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
                     {{/if}}
 
                     {{#if affiliations}}
@@ -76,7 +76,7 @@
 
         Handlebars.registerHelper('dcoIdBadgeURL', function(dcoId) {
             var escapedDCOID = encodeURIComponent(dcoId.substring(25));
-            return "//dcotest.tw.rpi.edu/badges/badge?title=metadata&text="+escapedDCOID+"&color=D14719";
+            return "//dcotest.tw.rpi.edu/badges/badge?title=profile&text="+escapedDCOID+"&color=D14719";
         });
 
         Handlebars.registerHelper('showMostSpecificType', function(mostSpecificType) {
@@ -142,14 +142,14 @@
                 show_filter_field : true,
                 show_filter_logic: true,
                 post_init_callback: function(options, context) {
-                    // on initial load activate the isDcoPublication filter
+                    // on initial load activate the isDcoMember filter
                     options.active_filters = {'isDcoMember': ['T']};
 
                     // add the 'dco publication' checkbox to the UI
                     $(".facetview_search_options_container")
-                            .after("<input id='is-dco-member-checkbox' type='checkbox'>&nbsp;Only show DCO members</input>&nbsp;<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>");
+                            .after("<input id='is-dco-member-checkbox' type='checkbox'>&nbsp;Show only DCO members</input>&nbsp;<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>");
 
-                    // set checkbox to control isDcoPublication filter on selection/deselection
+                    // set checkbox to control isDcoMember filter on selection/deselection
                     $("#is-dco-member-checkbox")
                             .change(function() {
                                 if(this.checked) {
