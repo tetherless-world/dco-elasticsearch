@@ -15,4 +15,3 @@ SELECT DISTINCT ?project
 WHERE {
     { ?project a vivo:Project . }
 }
-LIMIT 20
