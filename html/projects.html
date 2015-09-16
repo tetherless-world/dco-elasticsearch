@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Project Browser</title>
+
+    <script type="text/javascript" src="facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
+    <link rel="stylesheet" href="facetview2/vendor/bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
+    <script type="text/javascript" src="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
+
+    <script type="text/javascript" src="facetview2/es.js"></script>
+    <script type="text/javascript" src="facetview2/bootstrap2.facetview.theme.js"></script>
+    <script type="text/javascript" src="facetview2/jquery.facetview2.js"></script>
+    <link rel="stylesheet" href="facetview2/css/facetview.css">
+    <link rel="stylesheet" href="browsers.css">
+
+    <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            $('.facet-view-simple').facetview({
+                search_url: '//localhost:9200/dco/project/_search',
+                page_size: 20,
+                sort: [{"_score" : {"order" : "desc"}}],
+                sharesave_link: true,
+                search_button: true,
+                default_freetext_fuzzify: "*",
+                default_facet_operator: "AND",
+                default_facet_order: "count",
+                default_facet_size: 15,
+                facets: [
+                    {'field': 'mostSpecificType', 'display': 'Type'},
+                    {'field': 'community.name.exact', 'display': 'Community'},
+                    {'field': 'portalGroup.name.exact', 'display': 'Portal Group'},
+                    {'field': 'participants.name.exact', 'size': 20, 'display': 'Participants'},
+                    {'field': 'submittedBy.name.exact', 'size': 20, 'display': 'Submitted By'},
+                    {'field': 'leader.name.exact', 'size': 20, 'display': 'Leader'},
+                    {'field': 'grant.label.exact', 'size': 20, 'display': 'Grants'},
+                    {'field': 'dateTimeInterval.startYear', 'size': 20, 'display': 'Start Year'},
+                    {'field': 'dateTimeInterval.endYear', 'size': 20, 'display': 'End Year'}
+                ],
+                search_sortby: [
+                    {'display':'Title','field':'title.exact'}
+                ],
+                render_result_record: function(options, record)
+                {
+
+                    var html = "<tr><td>";
+
+                    if (record["thumbnail"]) {
+                        html += "<div class='thumbnail'>"
+                        html += "<img src='"+record["thumbnail"]+"'>&nbsp;";
+                        html += "</div>"
+                    }
+
+                    html += "<div class='project-info'>"
+
+                    if (record["uri"]) {
+                        html += "<strong><a href=\""+record["uri"]+"\" target=\"_blank\">" + record["title"] + "</a></strong>";
+                    } else {
+                        html += "<strong>" + record["title"] + "</strong>";
+                    }
+
+                    if (record["mostSpecificType"]) {
+                        html += "<br />Type: " + record["mostSpecificType"];
+                    }
+
+                    if (record["leader"]) {
+                        html += "<br /><span>Leader: <a href=\"" + record["leader"]["uri"] + "\" target=\"_blank\">" + record["leader"]["name"] + "</a></span>";
+                    }
+
+                    if (record["community"]) {
+                      if (record["community"].length > 1) {
+                        html += "<br /><span><small>Communities: ";
+
+                      } else {
+                        html += "<br /><span><small>Community: ";
+
+                      }
+                        for (var i = 0; i < record["community"].length; i++) {
+                            html += "<a href=\"" + record["community"][i]["uri"] + "\" target=\"_blank\">" + record["community"][i]["name"] + "</a>";
+                            if (i < record["community"].length - 1) {
+                                html += "; ";
+                            }
+                        }
+                        html += "</small></span>";
+                    }
+
+                    if (record["portalGroup"]) {
+                        html += "<br /><span>Portal Group: <a href=\"" + record["portalGroup"]["uri"] + "\" target=\"_blank\">" + record["portalGroup"]["name"] + "</a></span>";
+                    }
+
+                    if (record["submittedBy"]) {
+                        html += "<br /><span>Submitted By: <a href=\"" + record["submittedBy"]["uri"] + "\" target=\"_blank\">" + record["submittedBy"]["name"] + "</a></span>";
+                    }
+
+                    if (record["participants"]) {
+
+                        if (record["participants"].length > 1) {
+                          html += "<br /><span><small>Participants: ";
+                        } else {
+                          html += "<br /><span><small>Participant: ";
+                        }
+
+                        for (var i = 0; i < record["participants"].length; i++) {
+                            html += "<a href=\"" + record["participants"][i]["uri"] + "\" target=\"_blank\">" + record["participants"][i]["name"] + "</a>";
+                            if (i < record["participants"].length - 1) {
+                                html += "; ";
+                            }
+                        }
+                        html += "</small></span>";
+                    }
+
+                    if (record["grant"]) {
+                        html += "<br /><span>Grant: <a href=\"" + record["grant"]["uri"] + "\" target=\"_blank\">" + record["grant"]["label"] + "</a></span>";
+                    }
+
+                    if (record["dateTimeInterval"]) {
+                      if (record["dateTimeInterval"]["startDate"]) {
+                        html += "<br /><span>Started: " + record["dateTimeInterval"]["startDate"] + "</span>";
+                        if (record["dateTimeInterval"]["endDate"]) {
+                          html += "<br /><span>Ended:" + record["dateTimeInterval"]["endDate"] + "</span>";
+                        }
+                      }
+                    }
+
+                    html += "<br />";
+
+                    var escapedDCOId= encodeURIComponent(record["dcoId"].substring(25));
+                    html += "<a href=\""+record["dcoId"]+"\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=metadata&text="+escapedDCOId+"&color=D14719'/></a>";
+
+                    html += "</div>"
+
+                    html += "</td></tr>";
+                    return html;
+                },
+                selected_filters_in_facet: true,
+                show_filter_field : true,
+                show_filter_logic: true,
+                post_init_callback: function(options, context) {
+                    //None for now
+                },
+                post_render_callback: function(options, context) {
+                    //None for now
+                }
+            });
+        });
+
+    </script>
+
+
+    <style type="text/css">
+        .facet-view-simple{
+            width:100%;
+            height:100%;
+            margin:20px auto 0 auto;
+        }
+
+        .facetview_freetext.span4 {
+           width: 290px;
+           height: 12px;
+        }
+
+        legend {
+            display: none;
+        }
+
+        #wrapper-content {
+          padding-top: 0px;
+        }
+
+        input {
+            -webkit-box-shadow: none;
+            box-shadow: none;
+        }
+
+        .thumbnail {
+            display: inline-block;
+            width: 100px;
+            box-shadow: none;
+            border: none;
+        }
+
+        .project-info {
+            display: inline-block;
+            vertical-align: top;
+            clear: left;
+            margin-left: 0 !important;
+        }
+
+
+    </style>
+
+</head>
+<body>
+<div class="facet-view-simple"></div>
+</body>
+</html>
