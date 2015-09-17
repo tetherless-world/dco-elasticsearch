@@ -23,7 +23,9 @@
 //                search_url: 'http://dcotest.tw.rpi.edu/search/dco/publication/_search',
                 page_size: 20,
                 sort: [
-                    {"_score" : {"order" : "asc"}}
+                    {"_score" : {"order" : "asc"}},
+                    {"publicationYear" : {"order" : "desc"}},
+                    {"title" : {"order" : "asc"}}
                 ],
                 sharesave_link: true,
                 search_button: true,
@@ -35,16 +37,16 @@
                     {'field': 'mostSpecificType', 'display': 'Type'},
                     {'field': 'publicationYear', 'display': 'Publication Year'},
                     {'field': 'authors.name.exact', 'size': 20, 'display': 'Author'},
-                    {'field': 'authors.organization.name.exact', 'display': 'Author Organization'}, // maybe not?
-                    {'field': 'isDcoPublication', 'display': 'Show only DCO-member authored publications'},
+                    {'field': 'authors.organization.name.exact', 'display': 'Author Organization'},
                     {'field': 'dcoCommunities.name.exact', 'display': 'DCO Communities'},
                     {'field': 'portalGroups.name.exact', 'display': 'Portal Group'},
-                    {'field': 'projects.name.exact', 'display': 'Project'}, // NOT WORKING
-                    {'field': 'dataTypes.name.exact', 'display': 'Data Type'}
+                    {'field': 'projects.name.exact', 'display': 'Project'},
+                    {'field': 'dataTypes.name.exact', 'display': 'Data Type'},
+                    {'field': 'isDcoPublication', 'display': 'Show only DCO-member authored publications'}
                 ],
                 search_sortby: [
                     {'display':'Date','field':'publicationYear'},
-                    {'display':'Title','field':'title.exact'}
+                    {'display':'Title','field':'title'}
                 ],
                 render_result_record: function(options, record)
                 {
@@ -75,11 +77,7 @@
                         var dcoIdString = decodeURIComponent(encodeURIComponent(record["dcoId"].substring(25)));
                         html += '<br /><span>DCO-ID: <a href=\"' + record["dcoId"] + '\" target="_black\">' + dcoIdString + "</a></span>";
                     }
-                    /*
-                    if (record["community"]) {
-                        html += "<br /><span>Community: <a href=\"" + record["community"]["uri"] + "\" target=\"_blank\">" + record["community"]["name"] + "</a></span>";
-                    }
-                    */
+
                     if (record["dcoCommunities"]) {
                         html += "<br /><span><small>DCO Communites: ";
                         if (record["dcoCommunities"].length == 0) {
@@ -95,7 +93,6 @@
                         html += "</small></span>";
                     }
 
-                    // implement Groups! (like community)
                     if (record["portalGroups"]) {
                         html += "<br /><span><small>DCO Portal Groups: ";
                         if (record["portalGroups"].length == 0) {
@@ -110,7 +107,6 @@
                         }
                         html += "</small></span>";
                     }
-
 
                     if (record["authors"]) {
                         html += "<br /><span><small>Authors: ";
@@ -127,7 +123,6 @@
                         html += "</small></span>";
                     }
 
-                    // project  (like community)
                     if (record["projects"]) {
                         html += "<br /><span><small>Projects: ";
                         if (record["projects"].length == 0) {
@@ -143,7 +138,6 @@
                         html += "</small></span>";
                     }
 
-                    // data types  (like community)
                     if (record["dataTypes"]) {
                         html += "<br /><span><small>Has Data Types: ";
                         if (record["dataTypes"].length == 0) {
@@ -159,7 +153,6 @@
                         html += "</small></span>";
                     }
 
-                    // citations
                     if (record["citations"]) {
                         html += "<br /><span><small>Citations (Source Papers): ";
                         if (record["citations"].length == 0) {
@@ -175,7 +168,6 @@
                         html += "</small></span>";
                     }
 
-                    // Distributions and direct access
                     if (record["distributions"]) {
                         html += "<br /><span><small>Distributions: ";
                         if (record["distributions"].length == 0) {
@@ -186,7 +178,6 @@
                                 html += ("<a href=\"" + record["distributions"][i]["accessURL"] + "\" target=\"_blank\">"
                                         + record["distributions"][i]["name"] + "</a>");
                                 html += " (Direct access: ";
-                                var filesTmp = record["distributions"][i]["files"];
                                 for (var j = 0; j < record["distributions"][i]["files"].length; j++){
                                     html += ("<a href=\"" + record["distributions"][i]["files"][j]["downloadURL"]
                                             + "\" target=\"_blank\">"
@@ -195,7 +186,6 @@
                                         html += "; ";
                                     }
                                 }
-
                                 html += ")";
                                 if (i < record["distributions"].length - 1) {
                                     html += "; <br /> &emsp;&emsp;&emsp;&emsp;";
