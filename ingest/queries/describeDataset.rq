@@ -10,7 +10,7 @@ PREFIX vitro: <http://vitro.mannlib.cornell.edu/ns/vitro/0.7#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX bibo: <http://purl.org/ontology/bibo/>
 
-DESCRIBE ?dataset ?dcoid ?mostSpecificType ?community ?group ?project ?authorship ?author ?authorOrganization ?dataType
+DESCRIBE ?dataset ?dcoid ?mostSpecificType ?community ?group ?project ?authorship ?author ?researchArea ?authorOrganization ?dataType ?citation ?distribution ?file ?fileURL
 WHERE {
   ?dataset dco:hasDcoId ?dcoid .
   ?dataset vitro:mostSpecificType ?mostSpecificType .
@@ -24,5 +24,14 @@ WHERE {
     OPTIONAL { ?author vivo:hasResearchArea ?researchArea }
     OPTIONAL { ?author dco:inOrganization ?authorOrganization }
   }
+  OPTIONAL {
+        ?dataset dco:hasDistribution ?distribution .
+        ?distribution dco:hasFile ?file .
+        ?distribution rdfs:label ?distributionLabel .
+        ?distribution dco:accessURL ?distributionURL .
+        ?file rdfs:label ?fileLabel .
+        ?file dco:downloadURL ?fileURL .
+  }
   OPTIONAL { ?dataset dco:hasDataType ?dataType }
+  OPTIONAL { ?dataset bibo:cites ?citation }
 }

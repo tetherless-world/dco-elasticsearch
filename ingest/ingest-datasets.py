@@ -83,6 +83,7 @@ VITRO = Namespace("http://vitro.mannlib.cornell.edu/ns/vitro/0.7#")
 OBO = Namespace("http://purl.obolibrary.org/obo/")
 DCO = Namespace("http://info.deepcarbon.net/schema#")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
+DCAT = Namespace("http://www.w3.org/ns/dcat#")
 
 # standard filters
 non_empty_str = lambda s: True if s else False
@@ -239,6 +240,7 @@ def create_dataset_doc(dataset, endpoint):
     if cites:
         doc.update({"citations": cites})
 
+    # authors
     authors = []
     authorships = [faux for faux in ds.objects(VIVO.relatedBy) if has_type(faux, VIVO.Authorship)]
     for authorship in authorships:
@@ -271,6 +273,41 @@ def create_dataset_doc(dataset, endpoint):
         print("missing rank for one or more authors of:", dataset)
 
     doc.update({"authors": authors})
+
+    # ============================================================
+    # distributions
+    distributions = []
+    distributionList = [faux for faux in ds.objects(DCO.hasDistribution) if has_type(faux, DCAT.Distribution)]
+    for distribution in distributionList:
+        accessURL = str(list(distribution.objects(DCO.accessURL))[0])
+        name = distribution.label().toPython() if distribution else None
+        obj = {"uri": str(distribution.identifier), "accessURL": accessURL, "name": name}
+
+        fileList = list(distribution.objects(DCO.hasFile))
+        # fileList = [f for f in distribution.objects(DCO.hasFile) if has_type(f, DCO.File)]
+        fileList = fileList if fileList else None
+        files = []
+        for file in fileList:
+            downloadURL = list(file.objects(DCO.downloadURL))
+            downloadURL = str(downloadURL[0]) if downloadURL else None
+            fileObj = {"uri": str(file.identifier),
+                       "name": file.label().toPython()}
+            fileObj.update({"downloadURL": downloadURL})
+            files.append(fileObj)
+
+        if files:
+            obj.update({"files": files})
+
+        distributions.append(obj)
+
+    # try:
+    #     authors = sorted(authors, key=lambda a: a["rank"]) if len(authors) > 1 else authors
+    # except KeyError:
+    #     print("missing rank for one or more authors of:", dataset)
+
+    doc.update({"distributions": distributions})
+
+    # ===========================================
 
     return doc
 
@@ -326,7 +363,6 @@ def generate(threads, sparql):
 
 
 if __name__ == "__main__":
-    print("helloworld\n")
     parser = argparse.ArgumentParser()
     parser.add_argument('--threads', default=1, help='number of threads to use (default = 8)')
     parser.add_argument('--es', default="http://localhost:9200", help="elasticsearch service URL")
@@ -334,8 +370,7 @@ if __name__ == "__main__":
     parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")
     parser.add_argument('--mapping', default="mappings/dataset.json", help="dataset elasticsearch mapping document")
     parser.add_argument('--sparql', default='http://deepcarbon.tw.rpi.edu:3030/VIVO/query', help='sparql endpoint')
-#    parser.add_argument('--sparql', default='http://udco.tw.rpi.edu/fuseki/vivo/query', help='sparql endpoint')
-    # parser.add_argument('--sparql', default='https://info.deepcarbon.net/vivo/admin/sparqlquery?query=', help='sparql endpoint')
+    # parser.add_argument('--sparql', default='http://udco.tw.rpi.edu/fuseki/vivo/query', help='sparql endpoint')
     parser.add_argument('out', metavar='OUT', help='elasticsearch bulk ingest file')
 
     args = parser.parse_args()
@@ -357,4 +392,4 @@ if __name__ == "__main__":
     # GET dco/dataset/_mapping
     # DELETE /dco/dataset/_mapping
     # curl -XPUT 'localhost:9200/dco/dataset/_mapping?pretty' --data-binary @mappings/dataset.json
-    # curl -XPOST localhost:9200/_bulk --data-binary @output
+    # curl -XPOST 'localhost:9200/_bulk' --data-binary @output

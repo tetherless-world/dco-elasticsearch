@@ -143,6 +143,32 @@
           }
         }
       },
+      "distributions": {
+        "properties": {
+          "accessURL": {
+            "type": "string"
+          },
+          "files": {
+            "properties": {
+              "downloadURL": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "uri": {
+                "type": "string"
+              }
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "uri": {
+            "type": "string"
+          }
+        }
+      },
       "dcoId": {
         "type": "string"
       },

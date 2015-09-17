@@ -22,7 +22,9 @@
                 search_url: '//localhost:9200/dco/dataset/_search',
 //                search_url: 'http://dcotest.tw.rpi.edu/search/dco/publication/_search',
                 page_size: 20,
-                sort: [{"_score" : {"order" : "desc"}}],
+                sort: [
+                    {"_score" : {"order" : "asc"}}
+                ],
                 sharesave_link: true,
                 search_button: true,
                 default_freetext_fuzzify: "*",
@@ -174,6 +176,34 @@
                     }
 
                     // Distributions and direct access
+                    if (record["distributions"]) {
+                        html += "<br /><span><small>Distributions: ";
+                        if (record["distributions"].length == 0) {
+                            html += 'N/A'
+                        } else {
+                            html += "<br /> &emsp;&emsp;&emsp;&emsp;";
+                            for (var i = 0; i < record["distributions"].length; i++) {
+                                html += ("<a href=\"" + record["distributions"][i]["accessURL"] + "\" target=\"_blank\">"
+                                        + record["distributions"][i]["name"] + "</a>");
+                                html += " (Direct access: ";
+                                var filesTmp = record["distributions"][i]["files"];
+                                for (var j = 0; j < record["distributions"][i]["files"].length; j++){
+                                    html += ("<a href=\"" + record["distributions"][i]["files"][j]["downloadURL"]
+                                            + "\" target=\"_blank\">"
+                                            + record["distributions"][i]["files"][j]["name"] + "</a>");
+                                    if (j < record["distributions"][i]["files"].length - 1) {
+                                        html += "; ";
+                                    }
+                                }
+
+                                html += ")";
+                                if (i < record["distributions"].length - 1) {
+                                    html += "; <br /> &emsp;&emsp;&emsp;&emsp;";
+                                }
+                            }
+                        }
+                        html += "</small></span>";
+                    }
 
                     // abstract??
 
