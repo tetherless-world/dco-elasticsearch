@@ -16,11 +16,24 @@
     <link rel="stylesheet" href="facetview2/css/facetview.css">
     <link rel="stylesheet" href="browsers.css">
 
+    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>-->
+    <!--<link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/bootstrap/css/bootstrap.min.css">-->
+    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>-->
+    <!--<link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">-->
+    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>-->
+
+    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/es.js"></script>-->
+    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/bootstrap2.facetview.theme.js"></script>-->
+    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/jquery.facetview2.js"></script>-->
+    <!--<link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/css/facetview.css">-->
+    <!--<link rel="stylesheet" href="/vivo/themes/dco/css/browsers.css">-->
+
+
     <script type="text/javascript">
         jQuery(document).ready(function($) {
             $('.facet-view-simple').facetview({
-                search_url: '//localhost:9200/dco/dataset/_search',
-//                search_url: 'http://dcotest.tw.rpi.edu/search/dco/publication/_search',
+//                search_url: '//localhost:9200/dco/dataset/_search',
+                search_url: '//dcotest.tw.rpi.edu/search/dco/dataset/_search',
                 page_size: 20,
                 sort: [
                     {"_score" : {"order" : "asc"}},
@@ -41,8 +54,8 @@
                     {'field': 'dcoCommunities.name.exact', 'display': 'DCO Communities'},
                     {'field': 'portalGroups.name.exact', 'display': 'Portal Group'},
                     {'field': 'projects.name.exact', 'display': 'Project'},
-                    {'field': 'dataTypes.name.exact', 'display': 'Data Type'},
-                    {'field': 'isDcoPublication', 'display': 'Show only DCO-member authored publications'}
+                    {'field': 'dataTypes.name.exact', 'display': 'Data Type'}
+//                    {'field': 'isDcoPublication', 'display': 'Show only DCO-member authored publications'}
                 ],
                 search_sortby: [
                     {'display':'Date','field':'publicationYear'},
@@ -214,7 +227,7 @@
                 },
                 selected_filters_in_facet: true,
                 show_filter_field : true,
-                show_filter_logic: true,
+                show_filter_logic: true/*,
                 post_init_callback: function(options, context) {
                     // on initial load activate the isDcoPublication filter
                     options.active_filters = {'isDcoPublication': ['T']};
@@ -247,6 +260,7 @@
                         $("#is-dco-publication-checkbox").attr("disabled", false);
                     }
                 }
+                */
             });
         });
 
