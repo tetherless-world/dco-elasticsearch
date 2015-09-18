@@ -32,11 +32,11 @@
     <script type="text/javascript">
         jQuery(document).ready(function($) {
             $('.facet-view-simple').facetview({
-//                search_url: '//localhost:9200/dco/dataset/_search',
-                search_url: '//dcotest.tw.rpi.edu/search/dco/dataset/_search',
+                search_url: '//localhost:9200/dco/dataset/_search',
+//                search_url: '//dcotest.tw.rpi.edu/search/dco/dataset/_search',
                 page_size: 20,
                 sort: [
-                    {"_score" : {"order" : "asc"}},
+//                    {"_score" : {"order" : "desc"}},
                     {"publicationYear" : {"order" : "desc"}},
                     {"title" : {"order" : "asc"}}
                 ],
@@ -68,29 +68,35 @@
 
                     var html = "<tr><td>";
 
+                    // show DCO logo for DCO publication
                     if (record["isDcoPublication"]) {
                         html += "<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>&nbsp;";
                     }
 
+                    // display title; if the dataset has doi, display title with link
                     if (record["doi"]) {
                         html += "<strong><a href=\""+doiUrl+"\" target=\"_blank\">" + record["title"] + "</a></strong>";
                     } else {
                         html += "<strong>" + record["title"] + "</strong>";
                     }
 
+                    // display publicationYear
                     if (record["publicationYear"]) {
                         html += "&emsp;<small>(" + record["publicationYear"] + ")</small>";
                     }
 
+                    // display mostSpecificType
                     if (record["mostSpecificType"]) {
                         html += "<br />Type: " + record["mostSpecificType"];
                     }
 
+                    // display dcoId with link to metadeta
                     if (record["dcoId"]){
                         var dcoIdString = decodeURIComponent(encodeURIComponent(record["dcoId"].substring(25)));
                         html += '<br /><span>DCO-ID: <a href=\"' + record["dcoId"] + '\" target="_black\">' + dcoIdString + "</a></span>";
                     }
 
+                    // display dcoCommunities
                     if (record["dcoCommunities"]) {
                         html += "<br /><span><small>DCO Communites: ";
                         if (record["dcoCommunities"].length == 0) {
@@ -106,6 +112,7 @@
                         html += "</small></span>";
                     }
 
+                    // display portalGroups
                     if (record["portalGroups"]) {
                         html += "<br /><span><small>DCO Portal Groups: ";
                         if (record["portalGroups"].length == 0) {
@@ -121,6 +128,7 @@
                         html += "</small></span>";
                     }
 
+                    // display authors
                     if (record["authors"]) {
                         html += "<br /><span><small>Authors: ";
                         if (record["authors"].length == 0) {
@@ -136,6 +144,7 @@
                         html += "</small></span>";
                     }
 
+                    // display associated projects
                     if (record["projects"]) {
                         html += "<br /><span><small>Projects: ";
                         if (record["projects"].length == 0) {
@@ -151,6 +160,7 @@
                         html += "</small></span>";
                     }
 
+                    // display dataTypes
                     if (record["dataTypes"]) {
                         html += "<br /><span><small>Has Data Types: ";
                         if (record["dataTypes"].length == 0) {
@@ -166,6 +176,7 @@
                         html += "</small></span>";
                     }
 
+                    // display citations
                     if (record["citations"]) {
                         html += "<br /><span><small>Citations (Source Papers): ";
                         if (record["citations"].length == 0) {
@@ -181,6 +192,7 @@
                         html += "</small></span>";
                     }
 
+                    // display distributions
                     if (record["distributions"]) {
                         html += "<br /><span><small>Distributions: ";
                         if (record["distributions"].length == 0) {
@@ -208,7 +220,7 @@
                         html += "</small></span>";
                     }
 
-                    // abstract??
+                    // diaplay abstract or not ??
 
                     // Badges
 
@@ -227,7 +239,7 @@
                 },
                 selected_filters_in_facet: true,
                 show_filter_field : true,
-                show_filter_logic: true/*,
+                show_filter_logic: true,/*,
                 post_init_callback: function(options, context) {
                     // on initial load activate the isDcoPublication filter
                     options.active_filters = {'isDcoPublication': ['T']};

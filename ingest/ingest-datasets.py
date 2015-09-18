@@ -136,32 +136,32 @@ def describe_dataset(endpoint, dataset):
     return describe(endpoint, q)
 
 
-def get_dco_communities(person):
-    return Maybe.of(person).stream() \
+def get_dco_communities(dataset):
+    return Maybe.of(dataset).stream() \
         .flatmap(lambda p: p.objects(DCO.associatedDCOCommunity)) \
         .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
-def get_portal_groups(person):
-    return Maybe.of(person).stream() \
+def get_portal_groups(dataset):
+    return Maybe.of(dataset).stream() \
         .flatmap(lambda p: p.objects(DCO.associatedDCOPortalGroup)) \
         .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
-def get_data_types(person):
-    return Maybe.of(person).stream() \
+def get_data_types(dataset):
+    return Maybe.of(dataset).stream() \
         .flatmap(lambda p: p.objects(DCO.hasDataType)) \
         .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
-def get_cites(person):
-    return Maybe.of(person).stream() \
+def get_cites(dataset):
+    return Maybe.of(dataset).stream() \
         .flatmap(lambda p: p.objects(BIBO.cites)) \
         .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
-def get_projects(person):
-    return Maybe.of(person).stream() \
+def get_projects(dataset):
+    return Maybe.of(dataset).stream() \
         .flatmap(lambda p: p.objects(DCO.isDatasetOf)) \
         .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
@@ -208,12 +208,12 @@ def create_dataset_doc(dataset, endpoint):
     if publication_year:
         doc.update({"publicationYear": str(publication_year)})
 
-    dco_community = list(ds.objects(DCO.associatedDCOCommunity))
-    dco_community = dco_community[0] if dco_community else None
-    if dco_community and dco_community.label():
-        doc.update({"community": {"uri": str(dco_community.identifier), "name": dco_community.label().toPython()}})
-    elif dco_community:
-        print("community label missing:", str(dco_community.identifier))
+    # dco_community = list(ds.objects(DCO.associatedDCOCommunity))
+    # dco_community = dco_community[0] if dco_community else None
+    # if dco_community and dco_community.label():
+    #     doc.update({"community": {"uri": str(dco_community.identifier), "name": dco_community.label().toPython()}})
+    # elif dco_community:
+    #     print("community label missing:", str(dco_community.identifier))
 
     # dco_communities
     dco_communities = get_dco_communities(ds)
@@ -251,7 +251,7 @@ def create_dataset_doc(dataset, endpoint):
         obj = {"uri": str(author.identifier), "name": name}
 
         rank = list(authorship.objects(VIVO.rank))
-        rank = rank[0].toPython() if rank else None
+        rank = str(rank[0].toPython()) if rank else None # added the str()
         if rank:
             obj.update({"rank": rank})
 
@@ -274,7 +274,6 @@ def create_dataset_doc(dataset, endpoint):
 
     doc.update({"authors": authors})
 
-    # ============================================================
     # distributions
     distributions = []
     distributionList = [faux for faux in ds.objects(DCO.hasDistribution) if has_type(faux, DCAT.Distribution)]
@@ -306,8 +305,6 @@ def create_dataset_doc(dataset, endpoint):
     #     print("missing rank for one or more authors of:", dataset)
 
     doc.update({"distributions": distributions})
-
-    # ===========================================
 
     return doc
 
@@ -365,8 +362,8 @@ def generate(threads, sparql):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--threads', default=1, help='number of threads to use (default = 8)')
-    # parser.add_argument('--es', default="http://localhost:9200", help="elasticsearch service URL")
-    parser.add_argument('--es', default="https://dcotest.tw.rpi.edu/search", help="elasticsearch service URL")
+    parser.add_argument('--es', default="http://localhost:9200", help="elasticsearch service URL")
+    # parser.add_argument('--es', default="https://dcotest.tw.rpi.edu/search", help="elasticsearch service URL")
     parser.add_argument('--publish', default=False, action="store_true", help="publish to elasticsearch?")
     parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")
     parser.add_argument('--mapping', default="mappings/dataset.json", help="dataset elasticsearch mapping document")
