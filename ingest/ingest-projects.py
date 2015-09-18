@@ -217,9 +217,9 @@ def create_project_doc(project, endpoint):
     elif grant:
         print("grant label missing:", str(grant.identifier))
 
+    associatedCommunities = []
     communities = [faux for faux in prj.objects(DCO.associatedDCOCommunity) if has_type(faux, DCO.ResearchCommunity)]
 
-    associatedCommunities = []
     if communities:
         for community in communities:
             #print(community)
@@ -283,6 +283,23 @@ def create_project_doc(project, endpoint):
 
     doc.update({"participants": participants})
 
+    reporting_years = []
+    project_updates = [faux for faux in prj.objects(DCO.hasProjectUpdate) if has_type(faux, DCO.ProjectUpdate)]
+
+    if project_updates:
+        for project_update in project_updates:
+            #print(project-update)
+
+            reporting_year = list(project_update.objects(DCO.forReportingYear))
+            reporting_year = reporting_year[0] if reporting_year else None
+
+
+            obj = {"uri": str(reporting_year.identifier), "year": reporting_year.label().toPython()}
+
+            reporting_years.append(obj)
+
+    doc.update({"reportingYear": reporting_years})
+
     thumbnail = get_thumbnail(prj)
     if thumbnail:
         doc.update({"thumbnail": thumbnail})
@@ -343,7 +360,7 @@ def generate(threads, sparql):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--threads', default=2, help='number of threads to use (default = 8)')
+    parser.add_argument('--threads', default=8, help='number of threads to use (default = 8)')
     parser.add_argument('--es', default="http://data.deepcarbon.net/es", help="elasticsearch service URL")
     parser.add_argument('--publish', default=False, action="store_true", help="publish to elasticsearch?")
     parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")
