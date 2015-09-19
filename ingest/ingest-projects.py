@@ -147,9 +147,6 @@ def create_project_doc(project, endpoint):
     dco_id = list(prj.objects(DCO.hasDcoId))
     dco_id = str(dco_id[0].identifier) if dco_id else None
 
-    #is_dco_publication = list(pub.objects(DCO.isDCOPublication))
-    #is_dco_publication = True if is_dco_publication and is_dco_publication[0].toPython() == "YES" else False
-
     doc = {"uri": project, "title": title, "dcoId": dco_id}
 
     most_specific_type = list(prj.objects(VITRO.mostSpecificType))
@@ -236,16 +233,11 @@ def create_project_doc(project, endpoint):
 
     if roles:
         for role in roles:
-            #print(role)
+
             participant = [person for person in role.objects(OBO.RO_0000052) if has_type(person, FOAF.Person)][0]
             name = participant.label().toPython() if participant else None
 
             obj = {"uri": str(participant.identifier), "name": name}
-
-            #rank = list(authorship.objects(VIVO.rank))
-            #rank = rank[0].toPython() if rank else None
-            #if rank:
-            #    obj.update({"rank": rank})
 
             research_areas = [research_area.label().toPython() for research_area in participant.objects(VIVO.hasResearchArea) if research_area.label()]
 
@@ -263,7 +255,7 @@ def create_project_doc(project, endpoint):
 
     if roles:
         for role in roles:
-            #print(role)
+
             participant = [person for person in role.objects(OBO.RO_0000052) if has_type(person, FOAF.Person)][0]
             name = participant.label().toPython() if participant else None
 
@@ -288,7 +280,6 @@ def create_project_doc(project, endpoint):
 
     if project_updates:
         for project_update in project_updates:
-            #print(project-update)
 
             reporting_year = list(project_update.objects(DCO.forReportingYear))
             reporting_year = reporting_year[0] if reporting_year else None
