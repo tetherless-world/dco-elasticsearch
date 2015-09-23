@@ -4,41 +4,39 @@
     <meta charset="UTF-8">
     <title>Dataset Browser</title>
 
-    <script type="text/javascript" src="facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
-    <link rel="stylesheet" href="facetview2/vendor/bootstrap/css/bootstrap.min.css">
-    <script type="text/javascript" src="facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
-    <script type="text/javascript" src="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
+    <!--<script type="text/javascript" src="facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>-->
+    <!--<link rel="stylesheet" href="facetview2/vendor/bootstrap/css/bootstrap.min.css">-->
+    <!--<script type="text/javascript" src="facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>-->
+    <!--<link rel="stylesheet" href="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">-->
+    <!--<script type="text/javascript" src="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>-->
 
-    <script type="text/javascript" src="facetview2/es.js"></script>
-    <script type="text/javascript" src="facetview2/bootstrap2.facetview.theme.js"></script>
-    <script type="text/javascript" src="facetview2/jquery.facetview2.js"></script>
-    <link rel="stylesheet" href="facetview2/css/facetview.css">
-    <link rel="stylesheet" href="browsers.css">
+    <!--<script type="text/javascript" src="facetview2/es.js"></script>-->
+    <!--<script type="text/javascript" src="facetview2/bootstrap2.facetview.theme.js"></script>-->
+    <!--<script type="text/javascript" src="facetview2/jquery.facetview2.js"></script>-->
+    <!--<link rel="stylesheet" href="facetview2/css/facetview.css">-->
+    <!--<link rel="stylesheet" href="browsers.css">-->
 
-    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>-->
-    <!--<link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/bootstrap/css/bootstrap.min.css">-->
-    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>-->
-    <!--<link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">-->
-    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>-->
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
 
-    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/es.js"></script>-->
-    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/bootstrap2.facetview.theme.js"></script>-->
-    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/jquery.facetview2.js"></script>-->
-    <!--<link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/css/facetview.css">-->
-    <!--<link rel="stylesheet" href="/vivo/themes/dco/css/browsers.css">-->
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/es.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/bootstrap2.facetview.theme.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/jquery.facetview2.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/css/facetview.css">
+    <link rel="stylesheet" href="/vivo/themes/dco/css/browsers.css">
 
 
     <script type="text/javascript">
         jQuery(document).ready(function($) {
             $('.facet-view-simple').facetview({
-                search_url: '//localhost:9200/dco/dataset/_search',
-//                search_url: '//dcotest.tw.rpi.edu/search/dco/dataset/_search',
-                page_size: 20,
+//                search_url: '//localhost:9200/dco/dataset/_search',
+                search_url: '//dcotest.tw.rpi.edu/search/dco/dataset/_search',
+                page_size: 50,
                 sort: [
-//                    {"_score" : {"order" : "desc"}},
-                    {"publicationYear" : {"order" : "desc"}},
-                    {"title" : {"order" : "asc"}}
+                    {"_score" : {"order" : "desc"}}
                 ],
                 sharesave_link: true,
                 search_button: true,
@@ -46,32 +44,67 @@
                 default_facet_operator: "AND",
                 default_facet_order: "count",
                 default_facet_size: 15,
-                facets: [
+                facets: [/*
+                    Facets to be used are listed below (in real order):
+                        Facet Name      |       Variable Name
+                    =======================================================
+                    Type                |   mostSpecificType
+                    Publication Year    |   publicationYear
+                    ---------------------------------------------
+                    Author              |   authors.name.exact
+                    Author Organization |   authors.organization.name.exact
+                    ---------------------------------------------
+                    DCO Community       |   dcoCommunities.name.exact
+                    Portal Group        |   portalGroups.name.exact
+                    Project             |   projects.name.exact
+                    ---------------------------------------------
+                    Data Type           |   dataTypes.name.exact
+                    =======================================================
+                    */
                     {'field': 'mostSpecificType', 'display': 'Type'},
                     {'field': 'publicationYear', 'display': 'Publication Year'},
                     {'field': 'authors.name.exact', 'size': 20, 'display': 'Author'},
                     {'field': 'authors.organization.name.exact', 'display': 'Author Organization'},
-                    {'field': 'dcoCommunities.name.exact', 'display': 'DCO Communities'},
+                    {'field': 'dcoCommunities.name.exact', 'display': 'DCO Community'},
                     {'field': 'portalGroups.name.exact', 'display': 'Portal Group'},
                     {'field': 'projects.name.exact', 'display': 'Project'},
                     {'field': 'dataTypes.name.exact', 'display': 'Data Type'}
-//                    {'field': 'isDcoPublication', 'display': 'Show only DCO-member authored publications'}
                 ],
                 search_sortby: [
-                    {'display':'Date','field':'publicationYear'},
+                    {'display':'Year','field':'publicationYear'},
                     {'display':'Title','field':'title'}
                 ],
                 render_result_record: function(options, record)
-                {
-
+                {/*
+                 Contents to be displayed in individual records.
+                 Here is a template below. (Not real)
+                 ****************************************************************************
+                 * (The title; with link if dataset has DOI) (Publication Year)
+                 * Type: Dataset
+                 * DCO-ID: (e.g.) 11121/8158-6700-3912-5989-CC (linked to metadata in vivo)
+                 * DCO Communites: Data Science Team; Extreme Physics and Chemistry Community; ...
+                 * DCO Portal Groups: Data Science Community; ...
+                 * Authors: Ma, Xiaogang (Marshall); Ghiorso, Mark S.; Zhong, Hao; ...
+                 * Projects: DECADE - CO2 Soil Degassing at Piton de la Fournaise; ...
+                 * Has Data Types: Thermodynamics of chemicals and minerals; ...
+                 * Citations (Source Papers): Inverted High-Temperature Quartz, Unit Cell Parameters ...
+                 * Distributions: (Note: Some datasets have multiple distributions; some distributions have multiple files.)
+                 *     20150827-0138 (Direct access: GhiorsoEtAl1979)
+                 *     Han's Queries (Oct 2013) (Direct access: EPC Queries; DS Queries; DL Queries; DE Queries; README; RF Queries)
+                 *     ...
+                 * [Badges of doi and metadata with link][]..
+                 ****************************************************************************
+                 Below are implementations of each item.
+                */
                     var doiUrl = "https://dx.doi.org/"+record["doi"];
 
                     var html = "<tr><td>";
 
-                    // show DCO logo for DCO publication
-                    if (record["isDcoPublication"]) {
-                        html += "<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>&nbsp;";
-                    }
+                    // Show DCO logo as datasets are all DCO publications!
+                    // We can also uncommented the if-condition if we want to find out which datasets are not registered as
+                    // DCO publications, as they should be.
+//                    if (record["isDcoPublication"])
+                    html += "<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>&nbsp;";
 
                     // display title; if the dataset has doi, display title with link
                     if (record["doi"]) {
@@ -220,8 +253,6 @@
                         html += "</small></span>";
                     }
 
-                    // diaplay abstract or not ??
-
                     // Badges
 
                     html += "<br />";
@@ -239,40 +270,7 @@
                 },
                 selected_filters_in_facet: true,
                 show_filter_field : true,
-                show_filter_logic: true,/*,
-                post_init_callback: function(options, context) {
-                    // on initial load activate the isDcoPublication filter
-                    options.active_filters = {'isDcoPublication': ['T']};
-
-                    // add the 'dco publication' checkbox to the UI
-                    $(".facetview_search_options_container")
-                            .after("<input id='is-dco-publication-checkbox' type='checkbox'>&nbsp;Only show contributions to the DCO</input>&nbsp;<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>");
-
-                    // set checkbox to control isDcoPublication filter on selection/deselection
-                    $("#is-dco-publication-checkbox")
-                            .change(function() {
-                                if(this.checked) {
-                                    $("a.facetview_filterchoice[data-field='isDcoPublication'][data-value='T']").click();
-                                } else {
-
-                                    $("a.facetview_clear[data-field='isDcoPublication'][data-value='T']").click();
-                                }
-                            });
-                },
-                post_render_callback: function(options, context) {
-                    if(options.active_filters["isDcoPublication"] != null) {
-                        // if the isDcoPublication filter is active set ensure the checkbox is checked
-                        $("#is-dco-publication-checkbox").attr("checked", true);
-                    } else if (!$("a.facetview_filterchoice[data-field='isDcoPublication'][data-value='T']").length) {
-                        // if the isDcoPublication filter is not active and is not a valid option
-                        // (there are no remaining DCO publications in the result set) then disable the checkbox
-                        $("#is-dco-publication-checkbox").attr("disabled", true);
-                    } else {
-                        // if the isDcoPublication filter is not active is a valid option ensure it is enabled
-                        $("#is-dco-publication-checkbox").attr("disabled", false);
-                    }
-                }
-                */
+                show_filter_logic: true
             });
         });
 
