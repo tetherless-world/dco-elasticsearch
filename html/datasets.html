@@ -44,7 +44,8 @@
                 default_facet_operator: "AND",
                 default_facet_order: "count",
                 default_facet_size: 15,
-                facets: [/*
+                facets: [
+                    /*
                     Facets to be used are listed below (in real order):
                         Facet Name      |       Variable Name
                     =======================================================
@@ -75,7 +76,8 @@
                     {'display':'Title','field':'title'}
                 ],
                 render_result_record: function(options, record)
-                {/*
+                {
+                /*
                  Contents to be displayed in individual records.
                  Here is a template below. (Not real)
                  ****************************************************************************
@@ -100,10 +102,7 @@
 
                     var html = "<tr><td>";
 
-                    // Show DCO logo as datasets are all DCO publications!
-                    // We can also uncommented the if-condition if we want to find out which datasets are not registered as
-                    // DCO publications, as they should be.
-//                    if (record["isDcoPublication"])
+                    // Show DCO logo as datasets are all DCO publications
                     html += "<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>&nbsp;";
 
                     // display title; if the dataset has doi, display title with link

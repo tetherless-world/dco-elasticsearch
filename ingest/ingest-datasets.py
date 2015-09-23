@@ -181,10 +181,7 @@ def create_dataset_doc(dataset, endpoint):
     dco_id = list(ds.objects(DCO.hasDcoId))
     dco_id = str(dco_id[0].identifier) if dco_id else None
 
-    is_dco_publication = list(ds.objects(DCO.isDCOPublication))
-    is_dco_publication = True if is_dco_publication and is_dco_publication[0].toPython() == "YES" else False
-
-    doc = {"uri": dataset, "title": title, "dcoId": dco_id, "isDcoPublication": is_dco_publication}
+    doc = {"uri": dataset, "title": title, "dcoId": dco_id}
 
     doi = list(ds.objects(BIBO.doi))
     doi = doi[0].toPython() if doi else None
