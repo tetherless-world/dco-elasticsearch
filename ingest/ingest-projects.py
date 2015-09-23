@@ -351,7 +351,7 @@ def generate(threads, sparql):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--threads', default=8, help='number of threads to use (default = 8)')
+    parser.add_argument('--threads', default=2, help='number of threads to use (default = 8)')
     parser.add_argument('--es', default="http://data.deepcarbon.net/es", help="elasticsearch service URL")
     parser.add_argument('--publish', default=False, action="store_true", help="publish to elasticsearch?")
     parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")

@@ -19,8 +19,7 @@
     <script type="text/javascript">
         jQuery(document).ready(function($) {
             $('.facet-view-simple').facetview({
-                //search_url: '//dcotest.tw.rpi.edu/search/dco/project/_search',
-                search_url: '//localhost:9200/dco/project/_search',
+                search_url: '//dcotest.tw.rpi.edu/search/dco/project/_search',
                 page_size: 20,
                 sort: [{"_score" : {"order" : "desc"}}],
                 sharesave_link: true,
@@ -30,6 +29,7 @@
                 default_facet_order: "count",
                 default_facet_size: 15,
                 facets: [
+
                     {'field': 'mostSpecificType', 'display': 'Type'},
                     {'field': 'community.name.exact', 'display': 'Community'},
                     {'field': 'portalGroup.name.exact', 'display': 'Portal Group'},
@@ -42,7 +42,8 @@
                     {'field': 'reportingYear.year', 'size': 20, 'display': 'Reporting Year'}
                 ],
                 search_sortby: [
-                    {'display':'Title','field':'title.exact'}
+                    {'display':'Title','field':'title.exact'},
+                    {'display':'Reporting Year','field':'reportingYear.year'}
                 ],
                 render_result_record: function(options, record)
                 {
@@ -63,14 +64,17 @@
                         html += "<strong>" + record["title"] + "</strong>";
                     }
 
+                    //Type of project
                     if (record["mostSpecificType"]) {
                         html += "<br />Type: " + record["mostSpecificType"];
                     }
 
+                    //Displays the leader of this project.
                     if (record["leader"]) {
                         html += "<br /><span>Leader: <a href=\"" + record["leader"]["uri"] + "\" target=\"_blank\">" + record["leader"]["name"] + "</a></span>";
                     }
 
+                    //List the science communities this project is related to, if any
                     if (record["community"]) {
                       if (record["community"].length > 1) {
                         html += "<br /><span><small>Communities: ";
@@ -88,14 +92,18 @@
                         html += "</small></span>";
                     }
 
+                    //List what portal teams/groups this project is related to, if any.
                     if (record["portalGroup"]) {
                         html += "<br /><span>Portal Group: <a href=\"" + record["portalGroup"]["uri"] + "\" target=\"_blank\">" + record["portalGroup"]["name"] + "</a></span>";
                     }
 
+                    /* Property is being investigated
                     if (record["submittedBy"]) {
                         html += "<br /><span>Submitted By: <a href=\"" + record["submittedBy"]["uri"] + "\" target=\"_blank\">" + record["submittedBy"]["name"] + "</a></span>";
                     }
+                    */
 
+                    //The list of DCO Members and non-DCO Members who participated in this project.
                     if (record["participants"]) {
 
                         if (record["participants"].length > 1) {
@@ -113,23 +121,14 @@
                         html += "</small></span>";
                     }
 
+                    //Lists grants that fund this project.
                     if (record["grant"]) {
                         html += "<br /><span>Grant: <a href=\"" + record["grant"]["uri"] + "\" target=\"_blank\">" + record["grant"]["label"] + "</a></span>";
                     }
 
-/*
-                    if (record["dateTimeInterval"]) {
-                      if (record["dateTimeInterval"]["startDate"]) {
-                        html += "<br /><span>Started: " + record["dateTimeInterval"]["startDate"] + "</span>";
-                        if (record["dateTimeInterval"]["endDate"]) {
-                          html += "<br /><span>Ended:" + record["dateTimeInterval"]["endDate"] + "</span>";
-                        }
-                      }
-                    }
-*/
-
                     html += "<br />";
 
+                    //Displays the DCO Id of this project
                     var escapedDCOId= encodeURIComponent(record["dcoId"].substring(25));
                     html += "<a href=\""+record["dcoId"]+"\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=profile&text="+escapedDCOId+"&color=D14719'/></a>";
 

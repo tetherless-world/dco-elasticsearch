@@ -23,7 +23,7 @@ WHERE {
   OPTIONAL { ?project dco:associatedDCOPortalGroup ?portalGroup }
   OPTIONAL { ?project dco:submittedBy ?submittedBy }
   OPTIONAL { ?project dco:hasProjectUpdate ?pu .
-    OPTIONAL{ ?pu dco:forReportingYear ?reportingYear }
+    ?pu dco:forReportingYear ?reportingYear
   }
   OPTIONAL { ?project vivo:dateTimeInterval ?dateTimeInterval .
     OPTIONAL { ?dateTimeInterval vivo:start ?start .
