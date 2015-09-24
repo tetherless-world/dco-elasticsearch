@@ -170,14 +170,6 @@ def create_project_doc(project, endpoint):
     elif leader:
         print("leader label missing:", str(leader.identifier))
 
-    dco_portal_group = list(prj.objects(DCO.associatedDCOPortalGroup))
-    dco_portal_group = dco_portal_group[0] if dco_portal_group else None
-    if dco_portal_group and dco_portal_group.label():
-        doc.update({"portalGroup": {"uri": str(dco_portal_group.identifier), "name": dco_portal_group.label().toPython()}})
-    elif dco_portal_group:
-        print("portal group label missing:", str(dco_portal_group.identifier))
-
-
     date_time_interval = list(prj.objects(VIVO.dateTimeInterval))
     date_time_interval = date_time_interval[0] if date_time_interval else None
 
@@ -207,12 +199,6 @@ def create_project_doc(project, endpoint):
         if end is not None and start is None:
             doc.update({"dateTimeInterval": {"uri": str(date_time_interval.identifier), "endDate": str(end_date_time)[:10], "endYear": str(end_date_time)[:4]}})
 
-    grant = list(prj.objects(VIVO.hasFundingVehicle))
-    grant = grant[0] if grant else None
-    if grant and grant.label():
-        doc.update({"grant": {"uri": str(grant.identifier), "label": grant.label().toPython()}})
-    elif grant:
-        print("grant label missing:", str(grant.identifier))
 
     associatedCommunities = []
     communities = [faux for faux in prj.objects(DCO.associatedDCOCommunity) if has_type(faux, DCO.ResearchCommunity)]
@@ -226,7 +212,22 @@ def create_project_doc(project, endpoint):
 
             associatedCommunities.append(obj)
 
-    doc.update({"community": associatedCommunities})
+    doc.update({"dcoCommunities": associatedCommunities})
+
+    associatedPortalGroups = []
+    portalGroups = [faux for faux in prj.objects(DCO.associatedDCOPortalGroup) if has_type(faux, DCO.PortalGroup)]
+
+    if portalGroups:
+        for portalGroup in portalGroups:
+
+            name = portalGroup.label().toPython() if portalGroup else None
+
+            obj = {"uri": str(portalGroup.identifier), "name": name}
+
+            associatedPortalGroups.append(obj)
+
+    doc.update({"dcoPortalGroups": associatedPortalGroups})
+
 
     participants = []
     roles = [faux for faux in prj.objects(OBO.BFO_0000055) if has_type(faux, VIVO.Role)]
@@ -290,6 +291,21 @@ def create_project_doc(project, endpoint):
             reporting_years.append(obj)
 
     doc.update({"reportingYear": reporting_years})
+
+    grants = []
+    fundingVehicles = [faux for faux in prj.objects(VIVO.hasFundingVehicle) if has_type(faux, VIVO.Grant)]
+
+    if fundingVehicles:
+        for fundingVehicle in fundingVehicles:
+
+            name = fundingVehicle.label().toPython() if fundingVehicle else None
+
+            obj = {"uri": str(fundingVehicle.identifier), "name": name}
+
+            grants.append(obj)
+
+    doc.update({"grants": grants})
+
 
     thumbnail = get_thumbnail(prj)
     if thumbnail:

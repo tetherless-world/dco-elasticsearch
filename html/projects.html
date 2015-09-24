@@ -2,7 +2,9 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>Project Browser</title>
+    <title>Projects Browser</title>
+
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.1/handlebars.min.js"></script>
 
     <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
     <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/bootstrap/css/bootstrap.min.css">
@@ -15,6 +17,85 @@
     <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/jquery.facetview2.js"></script>
     <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/css/facetview.css">
     <link rel="stylesheet" href="/vivo/themes/dco/css/browsers.css">
+
+    <script id="project-template" type="text/x-handlebars-template">
+        <tr>
+            <td>
+                {{#if thumbnail}}
+                <div class="thumbnail">
+                    <img src="{{thumbnail}}">
+                </div>
+                {{/if}}
+                <div class="project-info span7">
+                    {{!-- Display title of this project and link to the project's instance URI --}}
+                    <div><a href="{{dcoId}}">{{title}}</a></div>
+
+                    {{!-- Display this project's type --}}
+                    {{#if (showMostSpecificType mostSpecificType)}}<div><strong>Type: </strong><small>{{mostSpecificType}}</small></div>{{/if}}
+
+                    {{!-- List the science communities this project is related to, if any --}}
+                    {{#if dcoCommunities}}
+                    <div><strong>Communities:</strong> {{#expand dcoCommunities}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
+                    {{/if}}
+
+                    {{!-- List what portal teams/groups this project is related to, if any --}}
+                    {{#if dcoPortalGroups}}
+                    <div><strong>Portal Groups:</strong> {{#expand dcoPortalGroups}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
+                    {{/if}}
+
+                    {{!-- The list of DCO Members and non-DCO Members who participated in this project --}}
+                    {{#if participants}}
+                    <div><strong>Participants:</strong> {{#expand participants}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
+                    {{/if}}
+
+                    {{!-- The grants that have funded this project --}}
+                    {{#if grants}}
+                    <div><strong>Grants:</strong> {{#expand grants}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
+                    {{/if}}
+
+                    {{!-- BADGES --}}
+
+                    <div>
+                        <a href="{{dcoId}}" target="_blank"><img class="badge" src="{{dcoIdBadgeURL dcoId}}"/></a>
+                    </div>
+
+                </div>
+            </td>
+        </tr>
+    </script>
+
+    <script type="text/javascript">
+        Handlebars.registerHelper('orcidURL', function(orcid) {
+            return "http://orcid.org/"+orcid;
+        });
+        Handlebars.registerHelper('dcoIdBadgeURL', function(dcoId) {
+            var escapedDCOID = encodeURIComponent(dcoId.substring(25));
+            return "//dcotest.tw.rpi.edu/badges/badge?title=metadata&text="+escapedDCOID+"&color=D14719";
+        });
+        Handlebars.registerHelper('showMostSpecificType', function(mostSpecificType) {
+            return (mostSpecificType);
+        });
+        Handlebars.registerHelper('expand', function(items, options) {
+            var out = "";
+            var j = items.length - 1;
+            for(var i = 0; i < items.length; i++) {
+                out += options.fn(items[i]);
+                if(i < j) {
+                    out += "; ";
+                }
+            }
+            return out;
+        });
+        Handlebars.registerHelper('list', function(items, options) {
+            var out = "<ul>";
+            for(var i=0, l=items.length; i<l; i++) {
+                out = out + "<li>" + options.fn(items[i]) + "</li>";
+            }
+            return out + "</ul>";
+        });
+        var source = $("#project-template").html();
+        var template = Handlebars.compile(source);
+    </script>
 
     <script type="text/javascript">
         jQuery(document).ready(function($) {
@@ -29,17 +110,15 @@
                 default_facet_order: "count",
                 default_facet_size: 15,
                 facets: [
-
-                    {'field': 'mostSpecificType', 'display': 'Type'},
-                    {'field': 'community.name.exact', 'display': 'Community'},
-                    {'field': 'portalGroup.name.exact', 'display': 'Portal Group'},
-                    {'field': 'leader.name.exact', 'size': 20, 'display': 'Leader'},
-                    {'field': 'participants.name.exact', 'size': 20, 'display': 'Participants'},
-                    {'field': 'submittedBy.name.exact', 'size': 20, 'display': 'Submitted By'},
-                    {'field': 'grant.label.exact', 'size': 20, 'display': 'Grants'},
-                    {'field': 'dateTimeInterval.startYear', 'size': 20, 'display': 'Start Year'},
-                    {'field': 'dateTimeInterval.endYear', 'size': 20, 'display': 'End Year'},
-                    {'field': 'reportingYear.year', 'size': 20, 'display': 'Reporting Year'}
+                  {'field': 'mostSpecificType', 'display': 'Type'},
+                  {'field': 'dcoCommunities.name.exact', 'display': 'Community'},
+                  {'field': 'dcoPortalGroups.name.exact', 'display': 'Portal Group'},
+                  {'field': 'leader.name.exact', 'size': 20, 'display': 'Leader'},
+                  {'field': 'participants.name.exact', 'size': 20, 'display': 'Participants'},
+                  {'field': 'grants.name.exact', 'size': 20, 'display': 'Grants'},
+                  {'field': 'dateTimeInterval.startYear', 'size': 20, 'display': 'Start Year'},
+                  {'field': 'dateTimeInterval.endYear', 'size': 20, 'display': 'End Year'},
+                  {'field': 'reportingYear.year', 'size': 20, 'display': 'Reporting Year'}
                 ],
                 search_sortby: [
                     {'display':'Title','field':'title.exact'},
@@ -47,108 +126,19 @@
                 ],
                 render_result_record: function(options, record)
                 {
-
-                    var html = "<tr><td>";
-
-                    if (record["thumbnail"]) {
-                        html += "<div class='thumbnail'>"
-                        html += "<img src='"+record["thumbnail"]+"'>&nbsp;";
-                        html += "</div>"
-                    }
-
-                    html += "<div class='project-info'>"
-
-                    if (record["uri"]) {
-                        html += "<strong><a href=\""+record["uri"]+"\" target=\"_blank\">" + record["title"] + "</a></strong>";
-                    } else {
-                        html += "<strong>" + record["title"] + "</strong>";
-                    }
-
-                    //Type of project
-                    if (record["mostSpecificType"]) {
-                        html += "<br />Type: " + record["mostSpecificType"];
-                    }
-
-                    //Displays the leader of this project.
-                    if (record["leader"]) {
-                        html += "<br /><span>Leader: <a href=\"" + record["leader"]["uri"] + "\" target=\"_blank\">" + record["leader"]["name"] + "</a></span>";
-                    }
-
-                    //List the science communities this project is related to, if any
-                    if (record["community"]) {
-                      if (record["community"].length > 1) {
-                        html += "<br /><span><small>Communities: ";
-
-                      } else {
-                        html += "<br /><span><small>Community: ";
-
-                      }
-                        for (var i = 0; i < record["community"].length; i++) {
-                            html += "<a href=\"" + record["community"][i]["uri"] + "\" target=\"_blank\">" + record["community"][i]["name"] + "</a>";
-                            if (i < record["community"].length - 1) {
-                                html += "; ";
-                            }
-                        }
-                        html += "</small></span>";
-                    }
-
-                    //List what portal teams/groups this project is related to, if any.
-                    if (record["portalGroup"]) {
-                        html += "<br /><span>Portal Group: <a href=\"" + record["portalGroup"]["uri"] + "\" target=\"_blank\">" + record["portalGroup"]["name"] + "</a></span>";
-                    }
-
-                    /* Property is being investigated
-                    if (record["submittedBy"]) {
-                        html += "<br /><span>Submitted By: <a href=\"" + record["submittedBy"]["uri"] + "\" target=\"_blank\">" + record["submittedBy"]["name"] + "</a></span>";
-                    }
-                    */
-
-                    //The list of DCO Members and non-DCO Members who participated in this project.
-                    if (record["participants"]) {
-
-                        if (record["participants"].length > 1) {
-                          html += "<br /><span><small>Participants: ";
-                        } else {
-                          html += "<br /><span><small>Participant: ";
-                        }
-
-                        for (var i = 0; i < record["participants"].length; i++) {
-                            html += "<a href=\"" + record["participants"][i]["uri"] + "\" target=\"_blank\">" + record["participants"][i]["name"] + "</a>";
-                            if (i < record["participants"].length - 1) {
-                                html += "; ";
-                            }
-                        }
-                        html += "</small></span>";
-                    }
-
-                    //Lists grants that fund this project.
-                    if (record["grant"]) {
-                        html += "<br /><span>Grant: <a href=\"" + record["grant"]["uri"] + "\" target=\"_blank\">" + record["grant"]["label"] + "</a></span>";
-                    }
-
-                    html += "<br />";
-
-                    //Displays the DCO Id of this project
-                    var escapedDCOId= encodeURIComponent(record["dcoId"].substring(25));
-                    html += "<a href=\""+record["dcoId"]+"\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=profile&text="+escapedDCOId+"&color=D14719'/></a>";
-
-                    html += "</div>"
-
-                    html += "</td></tr>";
-                    return html;
+                    return template(record).trim();
                 },
                 selected_filters_in_facet: true,
                 show_filter_field : true,
                 show_filter_logic: true,
                 post_init_callback: function(options, context) {
-                    //None for now
+                  //None for now
                 },
                 post_render_callback: function(options, context) {
-                    //None for now
+                  //None for now
                 }
             });
         });
-
     </script>
 
 
@@ -190,8 +180,6 @@
             clear: left;
             margin-left: 0 !important;
         }
-
-
     </style>
 
 </head>

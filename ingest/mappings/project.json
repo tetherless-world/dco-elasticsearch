@@ -1,7 +1,7 @@
 {
   "project": {
     "properties": {
-      "community":{
+      "dcoCommunities":{
         "properties":{
           "name":{
             "type":"multi_field",
@@ -46,9 +46,9 @@
        "dcoId": {
           "type": "string"
        },
-       "grant": {
+       "grants": {
           "properties": {
-             "label": {
+             "name": {
                "type":"multi_field",
                "fields":{
                  "name":{
@@ -110,7 +110,7 @@
              }
           }
        },
-       "portalGroup": {
+       "dcoPortalGroups": {
           "properties": {
              "name": {
                "type":"multi_field",
