@@ -16,7 +16,7 @@ DESCRIBE ?project ?dcoid ?mostSpecificType ?mainImage ?thumbImage ?thumbnail ?de
 WHERE {
   ?project dco:hasDcoId ?dcoid .
   ?project vitro:mostSpecificType ?mostSpecificType .
-  ?project vivo:description ?description .
+  OPTIONAL { ?project vivo:description ?description }
   OPTIONAL { ?project vivo:hasFundingVehicle ?grant }
   OPTIONAL { ?project dco:fieldworkLeader ?leader }
   OPTIONAL { ?project dco:associatedDCOCommunity ?community }
