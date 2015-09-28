@@ -1,5 +1,11 @@
 __author__ = 'am-e'
 
+"""
+This script makes a connection to a SPARQL endpoint, then runs a query to list all projects and another query
+to describe all the listed peojects. The script then writes the output to a file and optionally publishes the
+data to an Elasticsearch node.
+"""
+
 from SPARQLWrapper import SPARQLWrapper, JSON
 import json
 from rdflib import Namespace, RDF
