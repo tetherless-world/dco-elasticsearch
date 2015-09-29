@@ -1,8 +1,10 @@
 $num_args = $#ARGV + 1;
 if ($num_args != 2) {
-    print "\nUsage: switch_dev_prod.pl dev/prod filename\n";
+    print "\nUsage: switch_dev_prod.pl dev|prod filename\n";
     exit;
 }
+
+print "\nThis script switches paths in a facetview2 browser HTML between Dev and Prod.\n"
 
 $environment=$ARGV[0];
 $filename=$ARGV[1];
