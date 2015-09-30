@@ -1,6 +1,6 @@
 $num_args = $#ARGV + 1;
 if ($num_args != 2) {
-    print "\nUsage: update_paths.pl dev|prod filename\n";
+    print "\nUsage: perl update_paths.pl dev|prod filename\n";
     exit;
 }
 
