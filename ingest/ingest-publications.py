@@ -88,10 +88,10 @@ def create_publication_doc(publication, endpoint):
     dco_id = list(pub.objects(DCO.hasDcoId))
     dco_id = str(dco_id[0].identifier) if dco_id else None
 
-    is_dco_publication = list(pub.objects(DCO.isDCOPublication))
-    is_dco_publication = True if is_dco_publication and is_dco_publication[0].toPython() == "YES" else False
+    is_contribution_to_dco = list(pub.objects(DCO.isContributionToDCO))
+    is_contribution_to_dco = True if is_contribution_to_dco and is_contribution_to_dco[0].toPython() == "YES" else False
 
-    doc = {"uri": publication, "title": title, "dcoId": dco_id, "isDcoPublication": is_dco_publication}
+    doc = {"uri": publication, "title": title, "dcoId": dco_id, "isContributionToDCO": is_contribution_to_dco}
 
     doi = list(pub.objects(BIBO.doi))
     doi = doi[0].toPython() if doi else None

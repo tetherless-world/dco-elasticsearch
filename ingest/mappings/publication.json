@@ -102,7 +102,7 @@
         "type":"string",
         "index": "not_analyzed"
       },
-      "isDcoPublication":{
+      "isContributionToDCO":{
         "type":"boolean"
       },
       "keywords":{

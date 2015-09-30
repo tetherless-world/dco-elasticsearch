@@ -166,14 +166,14 @@
                     $(".dco-logo").before("<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>&nbsp;");
 
                     if(options.active_filters["isDcoMember"] != null) {
-                        // if the isDcoPublication filter is active set ensure the checkbox is checked
+                        // if the isDcoMember filter is active set ensure the checkbox is checked
                         $("#is-dco-member-checkbox").attr("checked", true);
                     } else if (!$("a.facetview_filterchoice[data-field='isDcoMember'][data-value='T']").length) {
-                        // if the isDcoPublication filter is not active and is not a valid option
+                        // if the isDcoMember filter is not active and is not a valid option
                         // (there are no remaining DCO publications in the result set) then disable the checkbox
                         $("#is-dco-member-checkbox").attr("disabled", true);
                     } else {
-                        // if the isDcoPublication filter is not active is a valid option ensure it is enabled
+                        // if the isDcoMember filter is not active is a valid option ensure it is enabled
                         $("#is-dco-member-checkbox").attr("disabled", false);
                     }
                 }
