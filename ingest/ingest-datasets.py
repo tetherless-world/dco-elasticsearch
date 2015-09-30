@@ -2,17 +2,17 @@
 
 
 #########################################################
-from SPARQLWrapper import SPARQLWrapper, JSON
-from rdflib import Namespace, RDF
-import json
-import requests
-import multiprocessing
-import itertools
-# from itertools import chain
-import functools
-import argparse
-import warnings
-import pprint
+# from SPARQLWrapper import SPARQLWrapper, JSON
+# from rdflib import Namespace, RDF
+# import json
+# import requests
+# import multiprocessing
+# import itertools
+# # from itertools import chain
+# import functools
+# import argparse
+# import warnings
+# import pprint
 #########################################################
 from ingestHelpers import *
 #########################################################
@@ -25,28 +25,17 @@ _type = "dataset"
 
 
 
-def process_dataset(dataset, endpoint):
-    ds = create_dataset_doc(dataset=dataset, endpoint=endpoint)
-    if "dcoId" in ds and ds["dcoId"] is not None:
-        return [json.dumps(get_metadata(_index, _type, (ds["dcoId"]))), json.dumps(ds)]
-    else:
-        return []
-
-
+# describe_dataset: used by create_dataset_doc
 def describe_dataset(endpoint, dataset):
     q = describe_dataset_query.replace("?dataset", "<" + dataset + ">")
     return describe(endpoint, q)
 
 
-def generate(threads, sparql, get_objects_query):
-    pool = multiprocessing.Pool(threads)
-    # params = [(dataset, sparql) for dataset in get_datasets(endpoint=sparql)] ==>
-    params = [(object, sparql) for object in get_objects(endpoint=sparql, get_objects_query=get_objects_query)]
-    return list(itertools.chain.from_iterable(pool.starmap(process_dataset, params)))
 
-
+# create_dataset_doc: used by process_dataset
 def create_dataset_doc(dataset, endpoint):
     graph = describe_dataset(endpoint=endpoint, dataset=dataset)
+    # graph = describe_object_function(endpoint=endpoint, dataset=dataset)
 
     ds = graph.resource(dataset)
 
@@ -93,7 +82,7 @@ def create_dataset_doc(dataset, endpoint):
         doc.update({"portalGroups": portal_groups})
 
     # projects NOT WORKING YET
-    projects = get_projects(ds)
+    projects = get_projects_of_dataset(ds)
     if projects:
         doc.update({"projects": projects})
 
@@ -119,6 +108,8 @@ def create_dataset_doc(dataset, endpoint):
 
 
 
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--threads', default=1, help='number of threads to use (default = 8)')
@@ -134,7 +125,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # generate bulk import document for datasets
-    records = generate(threads=int(args.threads), sparql=args.sparql, get_objects_query=get_datasets_query)
+    # records = generate(threads=int(args.threads), sparql=args.sparql, get_objects_query=get_datasets_query, process_object_function=process_dataset) ==>
+    records = generate(threads=int(args.threads), sparql=args.sparql, get_objects_query=get_datasets_query,
+                       process_object_function=process_dataset, create_object_doc_function=create_dataset_doc,
+                       object_index=_index, object_type=_type)
 
     # save generated bulk import file so it can be backed up or reviewed if there are publish errors
     with open(args.out, "w") as bulk_file:
@@ -147,9 +141,14 @@ if __name__ == "__main__":
 
 
 
+
     # SOME RUNNING SCRIPTS:
+
+    # ./bin/elasticsearch
+
     # python3 ingest-datasets.py output
     # GET dco/dataset/_mapping
+    # DELETE /dco/dataset/
     # DELETE /dco/dataset/_mapping
     # curl -XPUT 'localhost:9200/dco/dataset/_mapping?pretty' --data-binary @mappings/dataset.json
     # curl -XPOST 'localhost:9200/_bulk' --data-binary @output

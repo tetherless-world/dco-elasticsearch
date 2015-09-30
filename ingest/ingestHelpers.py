@@ -73,7 +73,7 @@ def get_cites(dataset):
         .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
-def get_projects(dataset):
+def get_projects_of_dataset(dataset):
     return Maybe.of(dataset).stream() \
         .flatmap(lambda p: p.objects(DCO.isDatasetOf)) \
         .filter(has_label) \
@@ -205,9 +205,10 @@ def select(endpoint, query):
 
 
 # get_datasets -> get_objects
-def get_objects(endpoint, get_objects_query):
+def get_objects(endpoint, get_objects_query, object_type):
     r = select(endpoint, get_objects_query)
-    return [rs["dataset"]["value"] for rs in r]
+    # return [rs["dataset"]["value"] for rs in r]
+    return [rs[object_type]["value"] for rs in r]
 
 
 def describe(endpoint, query):
@@ -219,3 +220,18 @@ def describe(endpoint, query):
         pass
 
 
+# process_dataset: used by generate
+def process_dataset(dataset, endpoint, create_object_doc_function, object_index, object_type):
+    # ds = create_dataset_doc(dataset=dataset, endpoint=endpoint) ==>
+    ds = create_object_doc_function(dataset=dataset, endpoint=endpoint)
+    if "dcoId" in ds and ds["dcoId"] is not None:
+        return [json.dumps(get_metadata(object_index, object_type, (ds["dcoId"]))), json.dumps(ds)]
+    else:
+        return []
+
+
+def generate(threads, sparql, get_objects_query, process_object_function, create_object_doc_function, object_index, object_type):
+    pool = multiprocessing.Pool(threads)
+    # params = [(dataset, sparql) for dataset in get_datasets(endpoint=sparql)] ==>
+    params = [(object, sparql, create_object_doc_function, object_index, object_type) for object in get_objects(endpoint=sparql, get_objects_query=get_objects_query, object_type=object_type)]
+    return list(itertools.chain.from_iterable(pool.starmap(process_object_function, params)))
