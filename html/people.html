@@ -25,7 +25,11 @@
                     {{#if thumbnail}}<img src="{{thumbnail}}">{{/if}}
                     <div class="caption">
                         <h5><small>
+                            {{#if dcoId}}
                             <a class="{{#if isDcoMember}}dco-logo{{/if}}" href="{{dcoId}}" target="_blank">{{name}}</a>
+                            {{else}}
+                            <a class="{{#if isDcoMember}}dco-logo{{/if}}" href="{{uri}}" target="_blank">{{name}}</a>
+                            {{/if}}
                         </small></h5>
                     </div>
                 </div>
@@ -55,7 +59,7 @@
 
                     <div>
                         {{#if orcid}}<a href="{{orcidURL orcid}}" target="_blank"><img class="badge" src="{{orcidBadgeURL orcid}}"/></a>{{/if}}
-                        <a href="{{dcoId}}" target="_blank"><img class="badge" src="{{dcoIdBadgeURL dcoId}}"/></a>
+                        {{#if dcoId}}<a href="{{dcoId}}" target="_blank"><img class="badge" src="{{dcoIdBadgeURL dcoId}}"/></a>{{/if}}
                     </div>
 
                 </div>
