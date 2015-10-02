@@ -34,7 +34,7 @@
             $('.facet-view-simple').facetview({
 //                search_url: '//localhost:9200/dco/dataset/_search',
                 search_url: '//dcotest.tw.rpi.edu/search/dco/dataset/_search',
-                page_size: 50,
+                page_size: 150,
                 sort: [
                     {"_score" : {"order" : "desc"}}
                 ],
@@ -83,7 +83,7 @@
                  ****************************************************************************
                  * (The title; with link if dataset has DOI) (Publication Year)
                  * Type: Dataset
-                 * DCO-ID: (e.g.) 11121/8158-6700-3912-5989-CC (linked to metadata in vivo)
+                 * DCO-ID: (e.g.) 11121/8158-6700-3912-5989-CC (linked to metadata in vivo) (disabled)
                  * DCO Communites: Data Science Team; Extreme Physics and Chemistry Community; ...
                  * DCO Portal Groups: Data Science Community; ...
                  * Authors: Ma, Xiaogang (Marshall); Ghiorso, Mark S.; Zhong, Hao; ...
@@ -122,11 +122,11 @@
                         html += "<br />Type: " + record["mostSpecificType"];
                     }
 
-                    // display dcoId with link to metadeta
-                    if (record["dcoId"]){
-                        var dcoIdString = decodeURIComponent(encodeURIComponent(record["dcoId"].substring(25)));
-                        html += '<br /><span>DCO-ID: <a href=\"' + record["dcoId"] + '\" target="_black\">' + dcoIdString + "</a></span>";
-                    }
+                    // display dcoId with link to metadeta; disabled
+//                    if (record["dcoId"]){
+//                        var dcoIdString = decodeURIComponent(encodeURIComponent(record["dcoId"].substring(25)));
+//                        html += '<br /><span>DCO-ID: <a href=\"' + record["dcoId"] + '\" target="_black\">' + dcoIdString + "</a></span>";
+//                    }
 
                     // display dcoCommunities
                     if (record["dcoCommunities"]) {
@@ -162,18 +162,16 @@
 
                     // display authors
                     if (record["authors"]) {
-                        html += "<br /><span><small>Authors: ";
-                        if (record["authors"].length == 0) {
-                            html += 'N/A'
-                        } else {
+                        if (record["authors"].length != 0) {
+                            html += "<br /><span><small>Authors: ";
                             for (var i = 0; i < record["authors"].length; i++) {
                                 html += "<a href=\"" + record["authors"][i]["uri"] + "\" target=\"_blank\">" + record["authors"][i]["name"] + "</a>";
                                 if (i < record["authors"].length - 1) {
                                     html += "; ";
                                 }
                             }
+                            html += "</small></span>";
                         }
-                        html += "</small></span>";
                     }
 
                     // display associated projects
@@ -226,10 +224,8 @@
 
                     // display distributions
                     if (record["distributions"]) {
-                        html += "<br /><span><small>Distributions: ";
-                        if (record["distributions"].length == 0) {
-                            html += 'N/A'
-                        } else {
+                        if (record["distributions"].length != 0) {
+                            html += "<br /><span><small>Distributions: ";
                             html += "<br /> &emsp;&emsp;&emsp;&emsp;";
                             for (var i = 0; i < record["distributions"].length; i++) {
                                 html += ("<a href=\"" + record["distributions"][i]["accessURL"] + "\" target=\"_blank\">"
@@ -248,8 +244,8 @@
                                     html += "; <br /> &emsp;&emsp;&emsp;&emsp;";
                                 }
                             }
+                            html += "</small></span>";
                         }
-                        html += "</small></span>";
                     }
 
                     // Badges
@@ -261,8 +257,10 @@
                         html += "<a href=\"" + doiUrl + "\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=DOI&text="+escapedDOI+"&color=66CCFF'/></a>&emsp;";
                     }
 
-                    var escapedDCOId= encodeURIComponent(record["dcoId"].substring(25));
-                    html += "<a href=\""+record["dcoId"]+"\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=metadata&text="+escapedDCOId+"&color=D14719'/></a>";
+                    if (record["dcoId"]) {
+                        var escapedDCOId = encodeURIComponent(record["dcoId"].substring(25));
+                        html += "<a href=\"" + record["dcoId"] + "\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=metadata&text=" + escapedDCOId + "&color=D14719'/></a>";
+                    }
 
                     html += "</td></tr>";
                     return html;
