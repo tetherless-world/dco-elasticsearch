@@ -1,18 +1,9 @@
 # In development of utilizing sepatate .py files for common functions
-
-
 #########################################################
-# from SPARQLWrapper import SPARQLWrapper, JSON
-# from rdflib import Namespace, RDF
-# import json
-# import requests
-# import multiprocessing
-# import itertools
-# # from itertools import chain
-# import functools
-# import argparse
-# import warnings
-# import pprint
+import functools
+import argparse
+import warnings
+import pprint
 #########################################################
 from ingestHelpers import *
 #########################################################
@@ -24,12 +15,11 @@ _index = "dco"
 _type = "dataset"
 
 
-
 # describe_dataset: used by create_dataset_doc
+# change the "?dataset" variable to whatever variable name you use in the listXXX.eq file
 def describe_dataset(endpoint, dataset):
     q = describe_dataset_query.replace("?dataset", "<" + dataset + ">")
     return describe(endpoint, q)
-
 
 
 # create_dataset_doc: used by process_dataset
@@ -81,7 +71,7 @@ def create_dataset_doc(dataset, endpoint):
     if portal_groups:
         doc.update({"portalGroups": portal_groups})
 
-    # projects NOT WORKING YET
+    # projects
     projects = get_projects_of_dataset(ds)
     if projects:
         doc.update({"projects": projects})
@@ -91,16 +81,16 @@ def create_dataset_doc(dataset, endpoint):
     if data_types:
         doc.update({"dataTypes": data_types})
 
-    # cites NOT WORKING YET
+    # cites
     cites = get_cites(ds)
     if cites:
         doc.update({"citations": cites})
 
-    # authors
+    # authors: if none, will return an empty list []
     authors = get_authors(ds)
     doc.update({"authors": authors})
 
-    # distributions
+    # distributions: if none, will return an empty list []
     distributions = get_distributions(ds)
     doc.update({"distributions": distributions})
 
@@ -108,9 +98,19 @@ def create_dataset_doc(dataset, endpoint):
 
 
 
-
-
 if __name__ == "__main__":
+    # Usage:
+    #   Arguments:
+    #   --threads: number of threads to use (default = 8)
+    #   --es', elasticsearch service URL (default="http://localhost:9200")
+    #   --publish', publish to elasticsearch? (default=False)
+    #   --rebuild', rebuild elasticsearch index? (default=False)
+    #   --mapping', dataset elasticsearch mapping document (default="mappings/dataset.json")
+    #   --sparql', sparql endpoint (default='http://deepcarbon.tw.rpi.edu:3030/VIVO/query')
+    #   [out]: file name of the elasticsearch bulk ingest file
+    # Example:
+    #   python3 ingest-datasets.py output4 --threads 2 --mapping mappings/XXXXX.json ...
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--threads', default=1, help='number of threads to use (default = 8)')
     parser.add_argument('--es', default="http://localhost:9200", help="elasticsearch service URL")
@@ -125,7 +125,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # generate bulk import document for datasets
-    # records = generate(threads=int(args.threads), sparql=args.sparql, get_objects_query=get_datasets_query, process_object_function=process_dataset) ==>
     records = generate(threads=int(args.threads), sparql=args.sparql, get_objects_query=get_datasets_query,
                        process_object_function=process_dataset, create_object_doc_function=create_dataset_doc,
                        object_index=_index, object_type=_type)
@@ -141,14 +140,17 @@ if __name__ == "__main__":
 
 
 
-
+    ########################################
+    #
     # SOME RUNNING SCRIPTS:
-
+    #
     # ./bin/elasticsearch
-
+    #
     # python3 ingest-datasets.py output
     # GET dco/dataset/_mapping
     # DELETE /dco/dataset/
     # DELETE /dco/dataset/_mapping
     # curl -XPUT 'localhost:9200/dco/dataset/_mapping?pretty' --data-binary @mappings/dataset.json
     # curl -XPOST 'localhost:9200/_bulk' --data-binary @output
+    #
+    #########################################

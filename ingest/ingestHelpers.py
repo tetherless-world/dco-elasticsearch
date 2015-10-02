@@ -3,19 +3,17 @@ __author__ = 'Hao'
 from rdflib import Namespace, RDF
 import requests
 
-
 from Maybe import *
 
 from SPARQLWrapper import SPARQLWrapper, JSON
 import json
 import multiprocessing
 import itertools
-# from itertools import chain
+from itertools import chain
 import functools
 import argparse
 import warnings
 import pprint
-
 
 
 PROV = Namespace("http://www.w3.org/ns/prov#")
@@ -42,11 +40,8 @@ def has_type(resource, type):
 def get_metadata(index, type, id):
     return {"index": {"_index": index, "_type": type, "_id": id}}
 
-
 def get_id(dco_id):
     return dco_id[dco_id.rfind('/') + 1:]
-
-
 
 
 def get_dco_communities(dataset):
@@ -78,8 +73,6 @@ def get_projects_of_dataset(dataset):
         .flatmap(lambda p: p.objects(DCO.isDatasetOf)) \
         .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
-
-
 
 
 # get_authors: object -> [authors] for objects such as: datasets, publications, ...
@@ -146,7 +139,6 @@ def get_distributions(ds):
 
     return distributions
 # end
-
 
 
 
@@ -235,3 +227,5 @@ def generate(threads, sparql, get_objects_query, process_object_function, create
     # params = [(dataset, sparql) for dataset in get_datasets(endpoint=sparql)] ==>
     params = [(object, sparql, create_object_doc_function, object_index, object_type) for object in get_objects(endpoint=sparql, get_objects_query=get_objects_query, object_type=object_type)]
     return list(itertools.chain.from_iterable(pool.starmap(process_object_function, params)))
+
+
