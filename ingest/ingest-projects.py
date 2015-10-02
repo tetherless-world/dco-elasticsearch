@@ -142,6 +142,7 @@ def get_thumbnail(project):
         .one().value
 
 # create_project_doc: used by process_project
+# creates a document to insert into elasticsearch based on the mapping in mappings/project.json
 def create_project_doc(project, endpoint):
     graph = describe_project(endpoint=endpoint, project=project)
 
