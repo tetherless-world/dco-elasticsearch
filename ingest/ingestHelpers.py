@@ -10,10 +10,11 @@ import json
 import multiprocessing
 import itertools
 from itertools import chain
-import functools
+# import functools
 import argparse
-import warnings
-import pprint
+# import warnings
+# import pprint
+
 
 
 PROV = Namespace("http://www.w3.org/ns/prov#")
@@ -228,4 +229,31 @@ def generate(threads, sparql, get_objects_query, process_object_function, create
     params = [(object, sparql, create_object_doc_function, object_index, object_type) for object in get_objects(endpoint=sparql, get_objects_query=get_objects_query, object_type=object_type)]
     return list(itertools.chain.from_iterable(pool.starmap(process_object_function, params)))
 
+def Main(get_objects_query, create_object_doc_function, object_index, object_type):
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--threads', default=1, help='number of threads to use (default = 8)')
+    parser.add_argument('--es', default="http://localhost:9200", help="elasticsearch service URL")
+    # parser.add_argument('--es', default="https://dcotest.tw.rpi.edu/search", help="elasticsearch service URL")
+    parser.add_argument('--publish', default=False, action="store_true", help="publish to elasticsearch?")
+    parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")
+    parser.add_argument('--mapping', default="mappings/dataset.json", help="dataset elasticsearch mapping document")
+    parser.add_argument('--sparql', default='http://deepcarbon.tw.rpi.edu:3030/VIVO/query', help='sparql endpoint')
+    # parser.add_argument('--sparql', default='http://udco.tw.rpi.edu/fuseki/vivo/query', help='sparql endpoint')
+    parser.add_argument('out', metavar='OUT', help='elasticsearch bulk ingest file')
 
+    args = parser.parse_args()
+
+    # generate bulk import document for datasets
+    records = generate(threads=int(args.threads), sparql=args.sparql, get_objects_query=get_objects_query,
+                       process_object_function=process_dataset, create_object_doc_function=create_object_doc_function,
+                       object_index=object_index, object_type=object_type)
+
+    # save generated bulk import file so it can be backed up or reviewed if there are publish errors
+    with open(args.out, "w") as bulk_file:
+        bulk_file.write('\n'.join(records))
+
+    # publish the results to elasticsearch if "--publish" was specified on the command line
+    if args.publish:
+        bulk_str = '\n'.join(records)
+        publish(bulk=bulk_str, endpoint=args.es, rebuild=args.rebuild, mapping=args.mapping, index=object_index, tYPE=object_type)
+    print(get_objects_query)
