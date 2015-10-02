@@ -1,10 +1,5 @@
-__author__ = 'am-e'
-
-"""
-This script makes a connection to a SPARQL endpoint, then runs a query to list all projects and another query
-to describe all the listed peojects. The script then writes the output to a file and optionally publishes the
-data to an Elasticsearch node.
-"""
+__author__ = 'szednik'
+#Edited by Ahmed (am-e) to ingest projects
 
 from SPARQLWrapper import SPARQLWrapper, JSON
 import json
@@ -16,6 +11,7 @@ import argparse
 import requests
 import warnings
 import pprint
+
 
 class Maybe:
     def __init__(self, v=None):
@@ -75,6 +71,7 @@ def load_file(filepath):
         return _file.read().replace('\n', " ")
 
 
+# Global variables for the ingest process for: ***project***
 get_projects_query = load_file("queries/listProjects.rq")
 describe_project_query = load_file("queries/describeProject.rq")
 
@@ -89,14 +86,17 @@ DCO = Namespace("http://info.deepcarbon.net/schema#")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
 
 
+# get_metadata: returns the index and type of the specified id
 def get_metadata(id):
     return {"index": {"_index": "dco", "_type": "project", "_id": id}}
 
 
+# get_id: returns dcoId of entity being ingested
 def get_id(dco_id):
     return dco_id[dco_id.rfind('/') + 1:]
 
 
+# select: run the supplied SPARQL SELECT query
 def select(endpoint, query):
     sparql = SPARQLWrapper(endpoint)
     sparql.setQuery(query)
@@ -104,7 +104,7 @@ def select(endpoint, query):
     results = sparql.query().convert()
     return results["results"]["bindings"]
 
-
+# describe: run the supplied SPARQL DESCRIBE query
 def describe(endpoint, query):
     sparql = SPARQLWrapper(endpoint)
     sparql.setQuery(query)
@@ -113,12 +113,13 @@ def describe(endpoint, query):
     except RuntimeWarning:
         pass
 
-
+# get_projects: run the projects SELECT query and return the result set
 def get_projects(endpoint):
     r = select(endpoint, get_projects_query)
     return [rs["project"]["value"] for rs in r]
 
 
+# process_project: used by generate
 def process_project(project, endpoint):
     prj = create_project_doc(project=project, endpoint=endpoint)
     if "dcoId" in prj and prj["dcoId"] is not None:
@@ -126,7 +127,8 @@ def process_project(project, endpoint):
     else:
         return []
 
-
+# describe_project: used by create_projcet_doc
+# change the "?project" variable to whatever variable name you use in the listXXX.rq file
 def describe_project(endpoint, project):
     q = describe_project_query.replace("?project", "<" + project + ">")
     return describe(endpoint, q)
@@ -139,6 +141,7 @@ def get_thumbnail(project):
         .map(lambda t: t.identifier) \
         .one().value
 
+# create_project_doc: used by process_project
 def create_project_doc(project, endpoint):
     graph = describe_project(endpoint=endpoint, project=project)
 
@@ -150,11 +153,13 @@ def create_project_doc(project, endpoint):
         print("missing title:", project)
         return {}
 
+    #dcoId of this project
     dco_id = list(prj.objects(DCO.hasDcoId))
     dco_id = str(dco_id[0].identifier) if dco_id else None
 
     doc = {"uri": project, "title": title, "dcoId": dco_id}
 
+    #type of this project: Project/Field Study
     most_specific_type = list(prj.objects(VITRO.mostSpecificType))
     most_specific_type = most_specific_type[0].label().toPython() \
         if most_specific_type and most_specific_type[0].label() \
@@ -162,6 +167,7 @@ def create_project_doc(project, endpoint):
     if most_specific_type:
         doc.update({"mostSpecificType": most_specific_type})
 
+    #project submitted by - under investigation
     submitted_by = list(prj.objects(DCO.submittedBy))
     submitted_by = submitted_by[0] if submitted_by else None
     if submitted_by and submitted_by.label():
@@ -169,6 +175,7 @@ def create_project_doc(project, endpoint):
     elif submitted_by:
         print("submitted-by label missing:", str(submitted_by.identifier))
 
+    #leader of this project
     leader = list(prj.objects(DCO.fieldworkLeader))
     leader = leader[0] if leader else None
     if leader and leader.label():
@@ -176,6 +183,7 @@ def create_project_doc(project, endpoint):
     elif leader:
         print("leader label missing:", str(leader.identifier))
 
+    #date/time interval when this project took place
     date_time_interval = list(prj.objects(VIVO.dateTimeInterval))
     date_time_interval = date_time_interval[0] if date_time_interval else None
 
@@ -205,7 +213,7 @@ def create_project_doc(project, endpoint):
         if end is not None and start is None:
             doc.update({"dateTimeInterval": {"uri": str(date_time_interval.identifier), "endDate": str(end_date_time)[:10], "endYear": str(end_date_time)[:4]}})
 
-
+    #dcoCommunities associated with this project
     associatedCommunities = []
     communities = [faux for faux in prj.objects(DCO.associatedDCOCommunity) if has_type(faux, DCO.ResearchCommunity)]
 
@@ -220,6 +228,7 @@ def create_project_doc(project, endpoint):
 
     doc.update({"dcoCommunities": associatedCommunities})
 
+    #dcoPortalGroups associated with this project
     associatedPortalGroups = []
     portalGroups = [faux for faux in prj.objects(DCO.associatedDCOPortalGroup) if has_type(faux, DCO.PortalGroup)]
 
@@ -234,13 +243,16 @@ def create_project_doc(project, endpoint):
 
     doc.update({"dcoPortalGroups": associatedPortalGroups})
 
-
+    #people who have participated in this project
     participants = []
+
+    #get roles linked to project by "BFO_0000055" property
     roles = [faux for faux in prj.objects(OBO.BFO_0000055) if has_type(faux, VIVO.Role)]
 
     if roles:
         for role in roles:
 
+            #get participants for each role
             participant = [person for person in role.objects(OBO.RO_0000052) if has_type(person, FOAF.Person)][0]
             name = participant.label().toPython() if participant else None
 
@@ -258,11 +270,13 @@ def create_project_doc(project, endpoint):
 
             participants.append(obj)
 
+    #get roles linked to this project by "contributingRole" property
     roles = [faux for faux in prj.objects(VIVO.contributingRole) if has_type(faux, VIVO.Role)]
 
     if roles:
         for role in roles:
 
+            #get participants for each role
             participant = [person for person in role.objects(OBO.RO_0000052) if has_type(person, FOAF.Person)][0]
             name = participant.label().toPython() if participant else None
 
@@ -282,6 +296,7 @@ def create_project_doc(project, endpoint):
 
     doc.update({"participants": participants})
 
+    #reporting years for this project updates related to project
     reporting_years = []
     project_updates = [faux for faux in prj.objects(DCO.hasProjectUpdate) if has_type(faux, DCO.ProjectUpdate)]
 
@@ -298,6 +313,7 @@ def create_project_doc(project, endpoint):
 
     doc.update({"reportingYear": reporting_years})
 
+    #grants that fund this project
     grants = []
     fundingVehicles = [faux for faux in prj.objects(VIVO.hasFundingVehicle) if has_type(faux, VIVO.Grant)]
 
@@ -312,21 +328,21 @@ def create_project_doc(project, endpoint):
 
     doc.update({"grants": grants})
 
-
+    #thumbnail for this project if found
     thumbnail = get_thumbnail(prj)
     if thumbnail:
         doc.update({"thumbnail": thumbnail})
 
     return doc
 
-
+# has_type: asserts whether a resource if of a certain type
 def has_type(resource, type):
     for rtype in resource.objects(RDF.type):
         if str(rtype.identifier) == str(type):
             return True
     return False
 
-
+# publish: publishes extracted data to elasticsearch node
 def publish(bulk, endpoint, rebuild, mapping):
     # if configured to rebuild_index
     # Delete and then re-create to project index (via PUT request)
@@ -363,7 +379,7 @@ def publish(bulk, endpoint, rebuild, mapping):
         print(r.url, r.status_code)
         r.raise_for_status()
 
-
+# generate: startes the ingest process
 def generate(threads, sparql):
     pool = multiprocessing.Pool(threads)
     params = [(project, sparql) for project in get_projects(endpoint=sparql)]
@@ -394,3 +410,19 @@ if __name__ == "__main__":
     if args.publish:
         bulk_str = '\n'.join(records)
         publish(bulk=bulk_str, endpoint=args.es, rebuild=args.rebuild, mapping=args.mapping)
+
+
+########################################
+#
+# SOME RUNNING SCRIPTS:
+#
+# ./bin/elasticsearch
+#
+# python3 ingest-projects.py output
+# GET dco/project/_mapping
+# DELETE /dco/project/
+# DELETE /dco/project/_mapping
+# curl -XPUT 'localhost:9200/dco/project/_mapping?pretty' --data-binary @mappings/dataset.json
+# curl -XPOST 'localhost:9200/_bulk' --data-binary @output
+#
+#########################################
