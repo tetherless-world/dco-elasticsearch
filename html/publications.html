@@ -38,7 +38,7 @@
                     {'field': 'presentedAt.name.exact', 'display': 'Presented At Event'},
                     {'field': 'authors.organization.name.exact', 'display': 'Author Organization'},
                     {'field': 'authors.researchArea.exact', 'display': 'Author Research Area'},
-                    {'field': 'isContributionToDCO', 'display': 'Only show contributions to the DCO'}
+                    {'field': 'isDcoPublication', 'display': 'Only show contributions to the DCO'}
                 ],
                 search_sortby: [
                     {'display':'Title','field':'title.exact'},
@@ -51,7 +51,7 @@
 
                     var html = "<tr><td>";
                     
-                    if (record["isContributionToDCO"]) {
+                    if (record["isDcoPublication"]) {
                         html += "<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>&nbsp;";
                     }
 
@@ -124,34 +124,34 @@
                 show_filter_field : true,
                 show_filter_logic: true,
                 post_init_callback: function(options, context) {
-                    // on initial load activate the isContributionToDCO filter
-                    options.active_filters = {'isContributionToDCO': ['T']};
+                    // on initial load activate the isDcoPublication filter
+                    options.active_filters = {'isDcoPublication': ['T']};
 
                     // add the 'dco publication' checkbox to the UI
                     $(".facetview_search_options_container")
                             .after("<input id='is-dco-publication-checkbox' type='checkbox'>&nbsp;Only show contributions to the DCO</input>&nbsp;<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>");
 
-                    // set checkbox to control isContributionToDCO filter on selection/deselection
+                    // set checkbox to control isDcoPublication filter on selection/deselection
                     $("#is-dco-publication-checkbox")
                             .change(function() {
                                 if(this.checked) {
-                                    $("a.facetview_filterchoice[data-field='isContributionToDCO'][data-value='T']").click();
+                                    $("a.facetview_filterchoice[data-field='isDcoPublication'][data-value='T']").click();
                                 } else {
 
-                                    $("a.facetview_clear[data-field='isContributionToDCO'][data-value='T']").click();
+                                    $("a.facetview_clear[data-field='isDcoPublication'][data-value='T']").click();
                                 }
                             });
                 },
                 post_render_callback: function(options, context) {
-                    if(options.active_filters["isContributionToDCO"] != null) {
-                        // if the isContributionToDCO filter is active set ensure the checkbox is checked
+                    if(options.active_filters["isDcoPublication"] != null) {
+                        // if the isDcoPublication filter is active set ensure the checkbox is checked
                         $("#is-dco-publication-checkbox").attr("checked", true);
-                    } else if (!$("a.facetview_filterchoice[data-field='isContributionToDCO'][data-value='T']").length) {
-                        // if the isContributionToDCO filter is not active and is not a valid option
+                    } else if (!$("a.facetview_filterchoice[data-field='isDcoPublication'][data-value='T']").length) {
+                        // if the isDcoPublication filter is not active and is not a valid option
                         // (there are no remaining DCO publications in the result set) then disable the checkbox
                         $("#is-dco-publication-checkbox").attr("disabled", true);
                     } else {
-                        // if the isContributionToDCO filter is not active is a valid option ensure it is enabled
+                        // if the isDcoPublication filter is not active is a valid option ensure it is enabled
                         $("#is-dco-publication-checkbox").attr("disabled", false);
                     }
                 }

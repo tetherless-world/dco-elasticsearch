@@ -7,11 +7,11 @@
     display: none; !important;
 }
 
-#facetview_filter_isContributionToDCO {
+#facetview_filter_isDcoPublication {
     display: none; !important;
     visibility: hidden;
 }
 
-#facetview_filter_group_isContributionToDCO {
+#facetview_filter_group_isDcoPublication {
     display: none; !important;
 }
