@@ -91,7 +91,7 @@ def create_publication_doc(publication, endpoint):
     is_dco_publication = list(pub.objects(DCO.isContributionToDCO))
     is_dco_publication = True if is_dco_publication and isDcoPublication[0].toPython() == "YES" else False
 
-    doc = {"uri": publication, "title": title, "dcoId": dco_id, "isContributionToDCO": isDcoPublication}
+    doc = {"uri": publication, "title": title, "dcoId": dco_id, "isDcoPublication": is_dco_publication}
 
     doi = list(pub.objects(BIBO.doi))
     doi = doi[0].toPython() if doi else None
