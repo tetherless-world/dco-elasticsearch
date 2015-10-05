@@ -15,7 +15,7 @@ SELECT DISTINCT ?title ?dcoId ?mostSpecificType ?isDcoPublication ?doi ?publicat
 WHERE {
   {publication} rdfs:label ?label .
   BIND(str(?label) AS ?title) .
-  OPTIONAL { {publication} dco:isDCOPublication ?isDcoPublication . }
+  OPTIONAL { {publication} dco:isContributionToDCO ?isDcoPublication . }
   OPTIONAL { {publication} vitro:mostSpecificType [ rdfs:label ?mst ] . BIND(str(?mst) AS ?mostSpecificType) . }
   OPTIONAL { {publication} dco:hasDcoId ?dcoId . }
   OPTIONAL { {publication} dco:yearOfPublication ?publicationYear . }
