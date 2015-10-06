@@ -172,13 +172,15 @@
                                 }
                             });
 
-                    // Render the map view
+                    // Render the map view using Leaflet
                     $("#map").css("height", "300px");
                     var map = L.map('map').setView([0, 0], 2);
                     var OpenStreetMap_Mapnik = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         maxZoom: 18,
                         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                     }).addTo(map);
+                    options.mapObj = map;
+                    options.mapMarkers = new Array();
                 },
                 post_render_callback: function(options, context) {
 
@@ -196,6 +198,32 @@
                         // if the isDcoMember filter is not active is a valid option ensure it is enabled
                         $("#is-dco-member-checkbox").attr("disabled", false);
                     }
+
+                    // Show people on the map
+                    var records = options.data.records;
+                    var map = options.mapObj;
+                    var markers = options.mapMarkers;
+                    // Empty previous markers
+                    if (markers.length > 0) {
+                        for (i=0; i < markers.length; i++) {
+                            map.removeLayer(markers[i]);
+                        }
+                    }
+                    $.each(records, function(index, obj){
+                        if ("homeCountry" in obj) {
+                            var country = obj.homeCountry.name;
+                            $.ajax({
+                                url: "http://localhost/www/dco/browsers/country_coordinates.php?country=" +
+                                    encodeURIComponent(country)
+                            }).done(function(data) {
+                                if (data) {
+                                    var coordinates = data.split(",");
+                                    var marker = L.marker(coordinates).addTo(map);
+                                    options.mapMarkers.push(marker);
+                                }
+                            });
+                        }
+                    });
                 }
             });
         });
