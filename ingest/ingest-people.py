@@ -214,6 +214,13 @@ def get_dco_communities(person):
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
 
+def get_home_country(person):
+    return Maybe.of(person).stream() \
+        .flatmap(lambda p: p.objects(DCO.homeCountry)) \
+        .filter(has_label) \
+        .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).one().value
+
+
 def get_affiliations(person):
     affiliations = []
 
@@ -287,6 +294,10 @@ def create_person_doc(person, endpoint):
     research_areas = get_research_areas(per)
     if research_areas:
         doc.update({"researchArea": research_areas})
+
+    home_country = get_home_country(per)
+    if home_country:
+        doc.update({"homeCountry": home_country})
 
     organizations = get_organizations(per)
     if organizations:
