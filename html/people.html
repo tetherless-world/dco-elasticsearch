@@ -59,6 +59,10 @@
                     <div><strong>Research Areas:</strong> {{#expand researchArea}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
                     {{/if}}
 
+                    {{#if homeCountry}}
+                    <div><strong>Country:</strong> {{homeCountry.name}}</div>
+                    {{/if}}
+
                     {{!-- BADGES --}}
 
                     <div>
@@ -138,6 +142,7 @@
                     {'field': 'portalGroups.name.exact', 'display': 'Portal Group'},
                     {'field': 'organization.name.exact', 'display': 'Organization'},
                     {'field': 'researchArea.name.exact', 'display': 'Research Area'},
+                    {'field': 'homeCountry.name.exact', 'display': 'Country'},
                     {'field': 'isDcoMember', 'display': 'Show only DCO-members'}
                 ],
                 search_sortby: [

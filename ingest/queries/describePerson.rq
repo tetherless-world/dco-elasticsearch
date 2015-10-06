@@ -13,7 +13,7 @@ PREFIX bibo: <http://purl.org/ontology/bibo/>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
 
-DESCRIBE ?person ?dcoid ?mostSpecificType ?org ?dco_community ?portal_group ?main_image ?thumb_image ?thumbnail ?research_area ?vcard ?email ?name ?position ?affiliation
+DESCRIBE ?person ?dcoid ?mostSpecificType ?org ?dco_community ?portal_group ?main_image ?thumb_image ?thumbnail ?research_area ?vcard ?email ?name ?position ?affiliation ?homeCountry
 WHERE {
   ?person a foaf:Person .
   ?person vitro:mostSpecificType ?mostSpecificType .
@@ -33,4 +33,5 @@ WHERE {
              ?main_image vitro-pub:thumbnailImage ?thumb_image .
              ?thumb_image vitro-pub:downloadLocation ?thumbnail }
   OPTIONAL { ?person vivo:hasResearchArea ?research_area }
+  OPTIONAL { ?person dco:homeCountry ?homeCountry }
 }
