@@ -178,7 +178,8 @@
                             });
 
                     // Render the map view using Leaflet
-                    $("#map").css("height", "300px");
+                    $(".facetview_searching")
+                        .after("<div class='facetview_map'><div id='map' style='width: 100%; height: 300px'></div></div>")
                     var map = L.map('map').setView([0, 0], 2);
                     var OpenStreetMap_Mapnik = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         maxZoom: 18,
@@ -204,7 +205,7 @@
                         $("#is-dco-member-checkbox").attr("disabled", false);
                     }
 
-                    // Show people on the map
+                    // Show person markers on the map
                     var records = options.data.records;
                     var map = options.mapObj;
                     var markers = options.mapMarkers;
