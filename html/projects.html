@@ -28,7 +28,7 @@
                 {{/if}}
                 <div class="project-info span7">
                     {{!-- Display title of this project and link to the project's instance URI --}}
-                    <div><a href="{{dcoId}}">{{title}}</a></div>
+                    <div><a href="https://deepcarbon.net/dco_project_summary?uri={{uri}}">{{title}}</a></div>
 
                     {{!-- Display this project's type --}}
                     {{#if (showMostSpecificType mostSpecificType)}}<div><strong>Type: </strong><small>{{mostSpecificType}}</small></div>{{/if}}
@@ -100,7 +100,7 @@
     <script type="text/javascript">
         jQuery(document).ready(function($) {
             $('.facet-view-simple').facetview({
-                search_url: '//dcotest.tw.rpi.edu/search/dco/project/_search',
+                search_url: '//data.deepcarbon.net/es/dco/project/_search',
                 page_size: 20,
                 sort: [{"_score" : {"order" : "desc"}}],
                 sharesave_link: true,
