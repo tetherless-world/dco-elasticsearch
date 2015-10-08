@@ -114,17 +114,35 @@ if __name__ == "__main__":
     Main(get_objects_query=get_datasets_query, create_object_doc_function=create_dataset_doc,
          object_index=_index, object_type=_type)
 
-    ########################################
+    ################################################################################################################
     #
     # SOME RUNNING SCRIPTS:
     #
-    # ./bin/elasticsearch
+    # To start elastic search: [elastic search folder]/bin/elasticsearch
     #
-    # python3 ingest-datasets.py output
-    # GET dco/dataset/_mapping
-    # DELETE /dco/dataset/
-    # DELETE /dco/dataset/_mapping
-    # curl -XPUT 'localhost:9200/dco/dataset/_mapping?pretty' --data-binary @mappings/dataset.json
-    # curl -XPOST 'localhost:9200/_bulk' --data-binary @output
+    # 0) (HAVE CAUTION.) Delete existing data to avoid uploading error due to mismatching:
+    #       (For localhost) curl -XDELETE 'localhost:9200/dco/dataset'
+    #       (For dcotest)   curl -XDELETE 'dcotest.tw.rpi.edu:49200/dco/dataset'
     #
-    #########################################
+    #
+    # 1) Manually upload mapping:
+    #       (For localhost) curl -XPUT 'localhost:9200/dco/dataset/_mapping?pretty' --data-binary @mappings/dataset.json
+    #       (For dcotest)   curl -XPUT 'dcotest.tw.rpi.edu:49200/dco/dataset/_mapping?pretty' --data-binary @mappings/dataset.json
+    #
+    # 2) Generate bulk data:
+    #       python3 ingest-datasets.py output#
+    #   and then upload bulk data manually
+    #       (For localhost) curl -XPOST 'localhost:9200/_bulk' --data-binary @output#
+    #       (For dcotest)   curl -XPOST 'dcotest.tw.rpi.edu:49200/_bulk' --data-binary @output#
+    #
+    # 2') Generate bulk data and upload bulk data automatically:
+    #       (For localhost) python3 ingest-datasets.py --es 'localhost:9200' --publish output#
+    #       (For dcotest)   python3 ingest-datasets.py --es 'dcotest.tw.rpi.edu/search/' --publish output#
+    #
+    # 3) To view and operate in Sense:
+    #       GET dco/dataset/_mapping
+    #       GET dco/dataset/_search
+    #       DELETE /dco/dataset/
+    #       DELETE /dco/dataset/_mapping
+    #       and etc...
+    #################################################################################################################

@@ -34,9 +34,9 @@
             $('.facet-view-simple').facetview({
 //                search_url: '//localhost:9200/dco/dataset/_search',
                 search_url: '//dcotest.tw.rpi.edu/search/dco/dataset/_search',
-                page_size: 150,
+                page_size: 20,
                 sort: [
-                    {"_score" : {"order" : "desc"}}
+                    {"_score" : {'order' : 'asc'}}
                 ],
                 sharesave_link: true,
                 search_button: true,
@@ -95,8 +95,8 @@
                     {'field': 'dataTypes.name.exact', 'display': 'Data Type'}
                 ],
                 search_sortby: [
-                    {'display':'Year','field':'publicationYear'},
-                    {'display':'Title','field':'title'}
+                    {'display':'Year','field':'publicationYear', 'order':'asc'},
+                    {'display':'Title','field':'title.exact', 'order':'desc'}
                 ],
                 render_result_record: function(options, record)
                 {
