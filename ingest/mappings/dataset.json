@@ -192,9 +192,6 @@
         "type": "string",
         "index":"not_analyzed"
       },
-      "isDcoPublication": {
-        "type": "boolean"
-      },
       "mostSpecificType": {
         "type": "string",
         "index":"not_analyzed"
@@ -205,7 +202,7 @@
       "title": {
         "type": "multi_field",
           "fields": {
-            "name": {
+            "title": {
               "type": "string",
               "index": "analyzed"
             },
