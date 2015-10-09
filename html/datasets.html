@@ -123,22 +123,15 @@
                 */
                     var doiUrl = "https://dx.doi.org/"+record["doi"];
 
+                    var datasetSummaryUrl = 'https://deepcarbon.net/dco_dataset_summary?uri=' + record["uri"];
+
                     var html = "<tr><td>";
 
                     // Show DCO logo as datasets are all DCO publications
                     html += "<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>&nbsp;";
 
-                    // display title with link; first check record["uri"] for link, if none, then check if the dataset
-                    // has doi...
-                    if (record["uri"]) {
-                        var uriUrl = 'https://deepcarbon.net/dco_dataset_summary?uri=' + record["uri"];
-                        html += "<strong><a href=\""+uriUrl+"\" target=\"_blank\">" + record["title"] + "</a></strong>";
-                    }
-                    else if (record["doi"]) {
-                        html += "<strong><a href=\""+doiUrl+"\" target=\"_blank\">" + record["title"] + "</a></strong>";
-                    } else {
-                        html += "<strong>" + record["title"] + "</strong>";
-                    }
+                    // display title with link to dataset summary page
+                    html += "<strong><a href=\""+ datasetSummaryUrl + "\" target=\"_blank\">" + record["title"] + "</a></strong>";
 
                     // display publicationYear
                     if (record["publicationYear"]) {
