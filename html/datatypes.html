@@ -2,30 +2,30 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>DataTypes Browser</title>
+    <title>DataType Browser</title>
 
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.1/handlebars.min.js"></script>
 
-    <script type="text/javascript" src="facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
-    <link rel="stylesheet" href="facetview2/vendor/bootstrap/css/bootstrap.min.css">
-    <script type="text/javascript" src="facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
-    <script type="text/javascript" src="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
 
-    <script type="text/javascript" src="facetview2/es.js"></script>
-    <script type="text/javascript" src="facetview2/bootstrap2.facetview.theme.js"></script>
-    <script type="text/javascript" src="facetview2/jquery.facetview2.js"></script>
-    <link rel="stylesheet" href="facetview2/css/facetview.css">
-    <link rel="stylesheet" href="browsers.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/es.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/bootstrap2.facetview.theme.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/jquery.facetview2.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/css/facetview.css">
+    <link rel="stylesheet" href="/vivo/themes/dco/css/browsers.css">
 
     <script id="dataType-template" type="text/x-handlebars-template">
         <tr>
             <td>
                 <div class="dataType-info span7">
                     {{!-- Display title of this dataType and link to the dataType's instance URI --}}
-                    <div><a href="https://deepcarbon.net/dco_datatype_summary?uri={{uri}}">{{title}}</a></div>
+                    <div><a href="https://deepcarbon.net/dco_datatype_summary?uri={{uri}}" target="_blank">{{title}}</a></div>
 
-                    {{!-- The list of authors to whom this dataType was attributed--}}
+                    {{!-- list author(s) to whom this dataType was attributed--}}
                     {{#if authors}}
                     <div><strong>Author(s):</strong> {{#expand authors}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
                     {{/if}}
@@ -38,6 +38,11 @@
                     {{!-- Display this dataType's source datatype --}}
                     {{#if sourceDataType}}
                     <div><strong>Source Datatype: </strong><a href="{{sourceDataType.uri}}" target="_blank">{{sourceDataType.title}}</a></div>
+                    {{/if}}
+
+                    {{!-- list subject area(s) of this dataType --}}
+                    {{#if subjectAreas}}
+                    <div><strong>Subject Areas(s):</strong> {{#expand subjectAreas}}<a href="{{uri}}" target="_blank">{{title}}</a>{{/expand}}</div>
                     {{/if}}
 
                     {{!-- BADGES --}}
@@ -85,7 +90,8 @@
         jQuery(document).ready(function($) {
             $('.facet-view-simple').facetview({
                 //search_url: '//data.deepcarbon.net/es/dco/datatype/_search',
-                search_url: '//localhost:9200/dco/datatype/_search',
+                search_url: 'https://dcotest.tw.rpi.edu/search/dco/datatype/_search',
+                //search_url: '//localhost:9200/dco/datatype/_search',
                 page_size: 20,
                 sort: [{"_score" : {"order" : "desc"}}],
                 sharesave_link: true,
@@ -95,12 +101,15 @@
                 default_facet_order: "count",
                 default_facet_size: 15,
                 facets: [
+                  {'field': 'creationYear', 'display': ' Creation Year'},
+                  {'field': 'authors.name.exact', 'display': ' Creator'},
                   {'field': 'sourceStandard.title.exact', 'display': 'Source Standard'},
-                  {'field': 'sourceDataType.title.exact', 'display': 'Source Datatype'}
+                  {'field': 'sourceDataType.title.exact', 'display': 'Source Datatype'},
+                  {'field': 'subjectAreas.title.exact', 'display': ' Subject Area'}
                 ],
                 search_sortby: [
                     {'display':'Title','field':'title.exact'},
-                    {'display':'Reporting Year','field':'reportingYear.year'}
+                    {'display':'Creation Year','field':'creationYear'}
                 ],
                 render_result_record: function(options, record)
                 {

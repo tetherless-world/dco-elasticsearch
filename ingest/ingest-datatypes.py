@@ -153,6 +153,14 @@ def create_dataType_doc(dataType, endpoint):
 
     doc = {"uri": dataType, "title": title, "dcoId": dco_id}
 
+    # creation year of this dataType
+    creation_year = list(dt.objects(DCO.createdAtTime))
+    creation_year = creation_year[0].toPython() \
+        if creation_year and creation_year[0] \
+        else None
+    if creation_year:
+        doc.update({"creationYear": creation_year})
+
     # source datatype of this dataType
     source_datatype = list(dt.objects(DCO.sourceDataType))
     source_datatype_label = source_datatype[0].label().toPython() \
@@ -187,7 +195,7 @@ def create_dataType_doc(dataType, endpoint):
     doc.update({"authors": authorsArr})
 
     subjectAreasArr = []
-    subjectAreas = [faux for faux in dt.objects(VIVO.hasSubjectArea)]
+    subjectAreas = [faux for faux in dt.objects(DCO.dataTypeSubjectArea)]
     #print(subjectAreas)
     if subjectAreas:
         for subjectArea in subjectAreas:
@@ -262,8 +270,8 @@ if __name__ == "__main__":
     parser.add_argument('--publish', default=False, action="store_true", help="publish to elasticsearch?")
     parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")
     parser.add_argument('--mapping', default="mappings/datatype.json", help="dataType elasticsearch mapping document")
-    #parser.add_argument('--sparql', default='http://deepcarbon.tw.rpi.edu:3030/VIVO/query', help='sparql endpoint')
-    parser.add_argument('--sparql', default='http://udco.tw.rpi.edu/fuseki/vivo/query', help='sparql endpoint')
+    parser.add_argument('--sparql', default='http://deepcarbon.tw.rpi.edu:3030/VIVO/query', help='sparql endpoint')
+    #parser.add_argument('--sparql', default='http://udco.tw.rpi.edu/fuseki/vivo/query', help='sparql endpoint')
     parser.add_argument('out', metavar='OUT', help='elasticsearch bulk ingest file')
 
     args = parser.parse_args()

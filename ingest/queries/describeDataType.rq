@@ -13,12 +13,13 @@ PREFIX bibo: <http://purl.org/ontology/bibo/>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX prov: <http://www.w3.org/ns/prov#>
 
-DESCRIBE ?dataType ?dcoId ?sourceDataType ?sourceStandard ?hasSubjectArea ?attributedTo
+DESCRIBE ?dataType ?dcoId ?sourceDataType ?sourceStandard ?subjectArea ?attributedTo ?createdAt
 WHERE {
+  ?dataType a dco:DataType .
   ?dataType dco:hasDcoId ?dcoId .
   OPTIONAL { ?dataType dco:sourceDataType ?sourceDataType }
   OPTIONAL { ?dataType dco:sourceStandard ?sourceStandard }
-  OPTIONAL { ?dataType vivo:hasSubjectArea ?hasSubjectArea }
-  OPTIONAL { ?dataType prov:wasAttributedTo ?attributedTo .
-  }
+  OPTIONAL { ?dataType dco:dataTypeSubjectArea ?subjectArea }
+  OPTIONAL { ?dataType prov:wasAttributedTo ?attributedTo }
+  OPTIONAL { ?dataType dco:createdAtTime ?creationYear }
 }

@@ -1,86 +1,115 @@
 {
   "datatype": {
     "properties": {
-       "authors": {
-         "properties":{
-           "name":{
-             "type":"multi_field",
-             "fields":{
-               "name":{
-                 "type":"string",
-                 "index":"analyzed"
-               },
-               "exact":{
-                 "type":"string",
-                 "index":"not_analyzed"
-               }
-             }
-           },
-           "uri":{
-             "type":"string",
-             "index": "not_analyzed"
-           }
-         }
-       },
-       "dcoId": {
-          "type": "string"
-       },
-       "sourceDataType": {
-         "properties":{
-           "title":{
-             "type":"multi_field",
-             "fields":{
-               "title":{
-                 "type":"string",
-                 "index":"analyzed"
-               },
-               "exact":{
-                 "type":"string",
-                 "index":"not_analyzed"
-               }
-             }
-           },
-           "uri": {
-              "type": "string"
-           }
-         }
-       },
-       "sourceStandard": {
-         "properties":{
-           "title":{
-             "type":"multi_field",
-             "fields":{
-               "title":{
-                 "type":"string",
-                 "index":"analyzed"
-               },
-               "exact":{
-                 "type":"string",
-                 "index":"not_analyzed"
-               }
-             }
-           },
-           "uri": {
-              "type": "string"
-           }
-         }
-       },
-       "title": {
-         "type":"multi_field",
-         "fields":{
-           "name":{
-             "type":"string",
-             "index":"analyzed"
-           },
-           "exact":{
-             "type":"string",
-             "index":"not_analyzed"
-           }
-         }
-       },
-       "uri": {
-          "type": "string"
-       }
+      "authors": {
+        "properties": {
+          "name": {
+            "type": "multi_field",
+            "fields": {
+              "name": {
+                "type": "string",
+                "index": "analyzed"
+              },
+              "exact": {
+                "type": "string",
+                "index": "not_analyzed"
+              }
+            }
+          },
+          "uri": {
+            "type": "string",
+            "index": "not_analyzed"
+          }
+        }
+      },
+      "dcoId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "creationYear": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "sourceDataType": {
+        "properties": {
+          "title": {
+            "type": "multi_field",
+            "fields": {
+              "title": {
+                "type": "string",
+                "index": "analyzed"
+              },
+              "exact": {
+                "type": "string",
+                "index": "not_analyzed"
+              }
+            }
+          },
+          "uri": {
+            "type": "string",
+            "index": "not_analyzed"
+          }
+        }
+      },
+      "sourceStandard": {
+        "properties": {
+          "title": {
+            "type": "multi_field",
+            "fields": {
+              "title": {
+                "type": "string",
+                "index": "analyzed"
+              },
+              "exact": {
+                "type": "string",
+                "index": "not_analyzed"
+              }
+            }
+          },
+          "uri": {
+            "type": "string",
+            "index": "not_analyzed"
+          }
+        }
+      },
+      "title": {
+        "type": "multi_field",
+        "fields": {
+          "name": {
+            "type": "string",
+            "index": "analyzed"
+          },
+          "exact": {
+            "type": "string",
+            "index": "not_analyzed"
+          }
+        }
+      },
+      "subjectAreas": {
+        "properties": {
+          "title": {
+            "type": "multi_field",
+            "fields": {
+              "name": {
+                "type": "string",
+                "index": "analyzed"
+              },
+              "exact": {
+                "type": "string",
+                "index": "not_analyzed"
+              }
+            }
+          },
+          "uri": {
+            "type": "string",
+          "index": "not_analyzed"
+          }
+        }
+      },
+      "uri": {
+        "type": "string",
+        "index": "not_analyzed"
+      }
     }
   }
 }
