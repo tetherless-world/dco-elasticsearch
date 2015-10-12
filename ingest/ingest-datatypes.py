@@ -199,7 +199,7 @@ def create_dataType_doc(dataType, endpoint):
     #print(subjectAreas)
     if subjectAreas:
         for subjectArea in subjectAreas:
-            print(subjectArea)
+            #print(subjectArea)
             title = subjectArea.label().toPython() if subjectAreas else None
 
             obj = {"uri": str(subjectArea.identifier), "title": title}
@@ -207,6 +207,20 @@ def create_dataType_doc(dataType, endpoint):
             subjectAreasArr.append(obj)
 
     doc.update({"subjectAreas": subjectAreasArr})
+
+    parametersArr = []
+    parameters = [faux for faux in dt.objects(DCO.hasParameter)]
+    #print(subjectAreas)
+    if parameters:
+        for parameter in parameters:
+            #print(parameter)
+            title = parameter.label().toPython() if parameter else None
+
+            obj = {"uri": str(parameter.identifier), "title": title}
+
+            parametersArr.append(obj)
+
+    doc.update({"parameters": parametersArr})
 
 
     return doc
