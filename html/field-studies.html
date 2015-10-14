@@ -137,11 +137,11 @@
                 post_init_callback: function(options, context) {
                     // Render the map view using Leaflet
                     $(".facetview_searching")
-                        .after("<div class='facetview_map'><div id='map' style='width: 100%; height: 300px'></div></div>")
+                        .after("<div class='facetview_map'><div id='map' style='width: 100%; height: 640px'></div></div>")
                     var map = L.map('map').setView([0, 0], 2);
-                    var OpenStreetMap_Mapnik = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 18,
-                        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    var Esri_OceanBasemap = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Ocean_Basemap/MapServer/tile/{z}/{y}/{x}', {
+                        attribution: 'Tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri',
+                        maxZoom: 13
                     }).addTo(map);
                     options.mapObj = map;
                     options.mapMarkers = new Array();
@@ -149,7 +149,30 @@
                     console.log(options);
                 },
                 post_render_callback: function(options, context) {
-                  //None for now
+                    // Show field studies on the map as markers
+                    var records = options.data.records;
+                    var map = options.mapObj;
+                    var markers = options.mapMarkers;
+                    // Empty previous markers
+                    if (markers.length > 0) {
+                        for (i=0; i < markers.length; i++) {
+                            map.removeLayer(markers[i]);
+                        }
+                    }
+                    $.each(records, function(index, obj) {
+                        if ("fieldSites" in obj) {
+                            var fieldSites = obj.fieldSites;
+                            $.each(fieldSites, function(i, fs) {
+                                if ("latitude" in fs && "longitude" in fs) {
+                                    var coordinates = [fs.latitude, fs.longitude];
+                                    var marker = L.marker(coordinates).addTo(map);
+                                    var popup = "<p>" + fs.name + "</p>"
+                                    marker.bindPopup(popup).openPopup();
+                                    options.mapMarkers.push(marker);
+                                }
+                            });
+                        }
+                    });
                 }
             });
         });
