@@ -27,8 +27,10 @@
                 </div>
                 {{/if}}
                 <div class="project-info span7">
-                    {{!-- Display title of this project and link to the project's instance URI --}}
-                    <div><a href="https://deepcarbon.net/dco_project_summary?uri={{uri}}">{{title}}</a></div>
+                    {{!-- Display title of this project and link to the project/field study summary page --}}
+                    {{#if (isMostSpecificTypeProject mostSpecificType)}}<div><a href="https://deepcarbon.net/dco_project_summary?uri={{uri}}" target="_blank">{{title}}</a></div>{{/if}}
+
+                    {{#if (isMostSpecificTypeFieldStudy mostSpecificType)}}<div><a href="https://deepcarbon.net/dco_field_study_summary?uri={{uri}}" target="_blank">{{title}}</a></div>{{/if}}
 
                     {{!-- Display this project's type --}}
                     {{#if (showMostSpecificType mostSpecificType)}}<div><strong>Type: </strong><small>{{mostSpecificType}}</small></div>{{/if}}
@@ -74,6 +76,12 @@
         });
         Handlebars.registerHelper('showMostSpecificType', function(mostSpecificType) {
             return (mostSpecificType);
+        });
+        Handlebars.registerHelper('isMostSpecificTypeProject', function(mostSpecificType) {
+            return (mostSpecificType == 'Project');
+        });
+        Handlebars.registerHelper('isMostSpecificTypeFieldStudy', function(mostSpecificType) {
+            return (mostSpecificType == 'Field Study');
         });
         Handlebars.registerHelper('expand', function(items, options) {
             var out = "";
