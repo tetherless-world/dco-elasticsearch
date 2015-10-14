@@ -2,6 +2,7 @@ __author__ = 'szednik'
 # Edited by Han Wang to ingest field studies
 
 from SPARQLWrapper import SPARQLWrapper, JSON
+import re
 import json
 from rdflib import Namespace, RDF
 import multiprocessing
@@ -333,6 +334,35 @@ def create_project_doc(project, endpoint):
     thumbnail = get_thumbnail(prj)
     if thumbnail:
         doc.update({"thumbnail": thumbnail})
+
+    #field sites of this project (field study)
+    field_sites = []
+    sites = [faux for faux in prj.objects(DCO.hasPhysicalLocation) if has_type(faux, DCO.PhysicalLocation)]
+    if sites:
+        for site in sites:
+            name = site.label() if site else None
+            obj = {"uri": str(site.identifier), "name": name}
+
+            re_float = re.compile(r'([+-]?\d*\.?\d*)')
+            latitude = list(site.objects(DCO.hasLatitude))
+            latitude = latitude[0].toPython() if latitude else None
+            if latitude:
+                m = re_float.search(latitude)
+                if m:
+                    latitude = m.group(0)
+            longitude = list(site.objects(DCO.hasLongitude))
+            longitude = longitude[0].toPython() if longitude else None
+            if longitude:
+                m = re_float.search(longitude)
+                if m:
+                    longitude = m.group(0)
+
+            if latitude and longitude:
+                obj.update({"latitude": str(latitude), "longitude": str(longitude)})
+
+            field_sites.append(obj)
+
+    doc.update({"fieldSites": field_sites})
 
     return doc
 
