@@ -6,6 +6,10 @@
 
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.1/handlebars.min.js"></script>
     <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
+    <script type='text/javascript' src='http://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/leaflet.markercluster.js'></script>
+
+    <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/MarkerCluster.css" />
+    <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css" />
 
     <script type="text/javascript" src="facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
@@ -137,24 +141,25 @@
                 post_init_callback: function(options, context) {
                     // Render the map view using Leaflet
                     $(".facetview_searching")
-                        .after("<div class='facetview_map'><div id='map' style='width: 70%; height: 640px'></div></div>")
+                        .after("<div class='facetview_map'><div id='map' style='width: 70%; height: 600px'></div></div>")
                     var map = L.map('map').setView([0, 0], 2);
                     var Esri_OceanBasemap = L.tileLayer("http://server.arcgisonline.com/ArcGIS/rest/services/Ocean_Basemap/MapServer/tile/{z}/{y}/{x}", {
                         attribution: "Tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri",
                         maxZoom: 13
                     }).addTo(map);
                     options.mapObj = map;
-                    options.mapMarkers = new Array();
+                    options.mapLayers = new Array();
                 },
                 post_render_callback: function(options, context) {
-                    console.log(options);
+                    // console.log(options);
                     // Show field studies on the map as markers
                     var records = options.data.records;
                     var map = options.mapObj;
-                    // Empty previous markers
-                    if (options.mapMarkers.length > 0) {
-                        for (i=0; i < options.mapMarkers.length; i++) {
-                            map.removeLayer(options.mapMarkers[i]);
+                    var markerClusters = L.markerClusterGroup();
+                    // Empty previous marker layers
+                    if (options.mapLayers.length > 0) {
+                        for (i=0; i < options.mapLayers.length; i++) {
+                            map.removeLayer(options.mapLayers[i]);
                         }
                     }
                     var fieldStudyInfo = new Object();
@@ -216,12 +221,13 @@
                                     var coordinates = [fs.latitude, fs.longitude];
                                     var marker = L.marker(coordinates);
                                     marker.bindPopup(popup.html()).openPopup();
-                                    marker.addTo(map);
-                                    options.mapMarkers.push(marker);
+                                    markerClusters.addLayer(marker);
                                 }
                             });
                         }
                     });
+                    options.mapLayers.push(markerClusters);
+                    map.addLayer(markerClusters);
                 }
             });
         });
@@ -229,10 +235,14 @@
 
 
     <style type="text/css">
-        .facet-view-simple{
-            width:100%;
-            height:100%;
-            margin:20px auto 0 auto;
+        .facet-view-simple {
+            width: 100%;
+            height: 100%;
+            margin: 20px auto 0 auto;
+        }
+
+        #facetview_results {
+            display: none;
         }
 
         .facetview_freetext.span4 {
