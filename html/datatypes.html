@@ -101,12 +101,12 @@
                 default_facet_order: "count",
                 default_facet_size: 15,
                 facets: [
-                  {'field': 'creationYear', 'display': 'Creation Year', "order": "reverse_term"},
-                  {'field': 'authors.name.exact', 'display': 'Creator'},
+                  {'field': 'subjectAreas.title.exact', 'display': ' Subject Area'},
                   {'field': 'parameters.title.exact', 'display': 'Parameter'},
+                  {'field': 'authors.name.exact', 'display': 'Creator'},
+                  {'field': 'creationYear', 'display': 'Creation Year', "order": "reverse_term"},
                   {'field': 'sourceStandard.title.exact', 'display': 'Source Standard'},
-                  {'field': 'sourceDataType.title.exact', 'display': 'Source Datatype'},
-                  {'field': 'subjectAreas.title.exact', 'display': ' Subject Area'}
+                  {'field': 'sourceDataType.title.exact', 'display': 'Source Datatype'}
                 ],
                 search_sortby: [
                     {'display':'Title','field':'title.exact'},
