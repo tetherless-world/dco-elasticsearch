@@ -6,10 +6,6 @@
 
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.1/handlebars.min.js"></script>
     <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
-    <script type='text/javascript' src='http://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/leaflet.markercluster.js'></script>
-
-    <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/MarkerCluster.css" />
-    <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css" />
 
     <script type="text/javascript" src="facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
@@ -148,18 +144,17 @@
                         maxZoom: 13
                     }).addTo(map);
                     options.mapObj = map;
-                    options.mapLayers = new Array();
+                    options.mapMarkers = new Array();
                 },
                 post_render_callback: function(options, context) {
                     // console.log(options);
                     // Show field studies on the map as markers
                     var records = options.data.records;
                     var map = options.mapObj;
-                    var markerClusters = L.markerClusterGroup();
                     // Empty previous marker layers
-                    if (options.mapLayers.length > 0) {
-                        for (i=0; i < options.mapLayers.length; i++) {
-                            map.removeLayer(options.mapLayers[i]);
+                    if (options.mapMarkers.length > 0) {
+                        for (i=0; i < options.mapMarkers.length; i++) {
+                            map.removeLayer(options.mapMarkers[i]);
                         }
                     }
                     var fieldStudyInfo = new Object();
@@ -219,15 +214,13 @@
                                     
                                     var popup = $("<div></div>").append(fieldSiteDiv).append(fieldStudyDiv);
                                     var coordinates = [fs.latitude, fs.longitude];
-                                    var marker = L.marker(coordinates);
-                                    marker.bindPopup(popup.html()).openPopup();
-                                    markerClusters.addLayer(marker);
+                                    var marker = L.marker(coordinates).addTo(map);
+                                    marker.bindPopup(popup.html());
+                                    options.mapMarkers.push(marker);
                                 }
                             });
                         }
                     });
-                    options.mapLayers.push(markerClusters);
-                    map.addLayer(markerClusters);
                 }
             });
         });
