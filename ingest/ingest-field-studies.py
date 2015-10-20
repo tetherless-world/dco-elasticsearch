@@ -389,7 +389,7 @@ def publish(bulk, endpoint, rebuild, mapping):
 
     # push current project document mapping
 
-    mapping_url = endpoint + "/dco/project/_mapping"
+    mapping_url = endpoint + "/dco/field-study/_mapping"
     with open(mapping) as mapping_file:
         r = requests.put(mapping_url, data=mapping_file)
         if r.status_code != requests.codes.ok:
