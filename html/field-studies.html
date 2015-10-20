@@ -103,7 +103,7 @@
         jQuery(document).ready(function($) {
             $('.facet-view-simple').facetview({
                 search_url: '//localhost:9200/dco/field-study/_search',
-                page_size: 20,
+                page_size: 100,
                 sort: [{"_score" : {"order" : "desc"}}],
                 sharesave_link: true,
                 search_button: true,
