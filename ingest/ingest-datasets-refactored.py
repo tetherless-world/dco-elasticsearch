@@ -3,21 +3,31 @@ import argparse
 import warnings
 import pprint
 
+
+# Import helper functions from ingestHelpersRefactored.py;
+# see ingestHelpersRefactored.py for details of functions and classes used.
 from ingestHelpersRefactored import *
 
-# THESE ARE THE ONLY CASE VARYING VALUES! ANOTHER ONE THE IS create_xxxxx_doc function in the helper file.
+# Directions:
+
+# First, change these case-varying variables below for: dataset ingest
+
 GET_OBJECTS_QUERY_LOCATION = "queries/listDatasets.rq"
 DESCRIBE_DATASET_OBJECT_LOCATION = "queries/describeDataset.rq"
 INDEX = "dco"
 TYPE = "dataset"
 VARIABLE_NAME_SPARQL = "?dataset"
 
+# Second, change the function name "create_xxxxx_doc" below to whatever fits this ingest process
+#       and then implement it in ingestHelpersRefactored.py. Existing examples are helpful.
 if __name__ == "__main__":
     Main(get_objects_query_location=GET_OBJECTS_QUERY_LOCATION,
          describe_object_query_location=DESCRIBE_DATASET_OBJECT_LOCATION,
          create_object_doc_function=create_dataset_doc,  # Need to create case-varying create_xxxxxx_doc in helper file
          object_index=INDEX, object_type=TYPE,
          variable_name_sparql=VARIABLE_NAME_SPARQL)
+
+# Finally, run the ingest process. See explanations and examples below.
 
 # Usage:
 #   Arguments:
@@ -32,31 +42,29 @@ if __name__ == "__main__":
 #   python3 ingest-datasets.py output4 --threads 2 --mapping mappings/XXXXX.json ...
 
 
-
-# SOME RUNNING SCRIPTS FOR THE INGEST PROCESS:
+# Sample line commands for the ingest process:
 #
-# To start elastic search: [elastic search folder]/bin/elasticsearch
+# 0)To start elastic search: [elastic search folder]/bin/elasticsearch
 #
-# 0) (HAVE CAUTION.) Delete existing data to avoid uploading error due to mismatching:
+# 1) (CAUTION!) Delete existing data to avoid uploading error due to mismatching:
 #       (For localhost) curl -XDELETE 'localhost:9200/dco/dataset'
 #       (For dcotest)   curl -XDELETE 'dcotest.tw.rpi.edu:49200/dco/dataset'
 #
-#
-# 1) Manually upload mapping:
+# 2) Manually upload mapping:
 #       (For localhost) curl -XPUT 'localhost:9200/dco/dataset/_mapping?pretty' --data-binary @mappings/dataset.json
 #       (For dcotest)   curl -XPUT 'dcotest.tw.rpi.edu:49200/dco/dataset/_mapping?pretty' --data-binary @mappings/dataset.json
 #
-# 2) Generate bulk data:
+# 3) Generate bulk data:
 #       python3 ingest-datasets.py output#
 #   and then upload bulk data manually
 #       (For localhost) curl -XPOST 'localhost:9200/_bulk' --data-binary @output#
 #       (For dcotest)   curl -XPOST 'dcotest.tw.rpi.edu:49200/_bulk' --data-binary @output#
 #
-# 2') Generate bulk data and upload bulk data automatically:
+# 3') Generate bulk data and upload bulk data automatically:
 #       (For localhost) python3 ingest-datasets.py --es 'localhost:9200' --publish output#
 #       (For dcotest)   python3 ingest-datasets.py --es 'dcotest.tw.rpi.edu/search/' --publish output#
 #
-# 3) To view and operate in Sense:
+# 4) To view and operate in Sense:
 #       GET dco/dataset/_mapping
 #       GET dco/dataset/_search
 #       DELETE /dco/dataset/

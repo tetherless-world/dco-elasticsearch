@@ -1,13 +1,15 @@
 __author__ = 'Hao'
 
 from rdflib import Namespace, RDF
-from Maybe import *
-from Ingest import *
-
 from itertools import chain
 import argparse
 # import warnings
 # import pprint
+
+# Auxilary class for those helper functions getting attributes of objects
+from Maybe import *
+# Auxilary class implementing the ingest process
+from Ingest import *
 
 
 PROV = Namespace("http://www.w3.org/ns/prov#")
@@ -25,9 +27,13 @@ non_empty_str = lambda s: True if s else False
 has_label = lambda o: True if o.label() else False
 
 
+#############################################
+#    Some helper functions
+#
 def load_file(filepath):
     with open(filepath) as _file:
         return _file.read().replace('\n', " ")
+
 
 def has_type(resource, type):
     for rtype in resource.objects(RDF.type):
@@ -35,9 +41,15 @@ def has_type(resource, type):
             return True
     return False
 
-# def get_metadata(index, type, id):
-#     return {"index": {"_index": index, "_type": type, "_id": id}}
 
+def get_metadata(index, type, id):
+    return {"index": {"_index": index, "_type": type, "_id": id}}
+
+
+
+###################################################
+#    Helper functions to get different attributes
+#
 
 def get_id(dco_id):
     return dco_id[dco_id.rfind('/') + 1:]
@@ -139,12 +151,15 @@ def get_distributions(ds):
     return distributions
 # end
 
+#############################################
+#    Implementation of Main(...):
+#
 
 def Main(get_objects_query_location, describe_object_query_location,
          create_object_doc_function, object_index, object_type, variable_name_sparql):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--threads', default=1, help='number of threads to use (default = 8)')
+    parser.add_argument('--threads', default=2, help='number of threads to use (default = 8)')
     parser.add_argument('--es', default="http://localhost:9200", help="elasticsearch service URL")
     parser.add_argument('--publish', default=False, action="store_true", help="publish to elasticsearch?")
     parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")
@@ -177,10 +192,11 @@ def Main(get_objects_query_location, describe_object_query_location,
         ingestSomething.publish(bulk=bulk_str, endpoint=args.es, rebuild=args.rebuild, mapping=args.mapping)
 
 
+#############################################
+#    Implementation of create_dataset_doc(...):
+#
 
-
-
-# describe: used by describe_object
+# describe: helper function for describe_object
 def describe(endpoint, query):
     sparql = SPARQLWrapper(endpoint)
     sparql.setQuery(query)
@@ -189,14 +205,15 @@ def describe(endpoint, query):
     except RuntimeWarning:
         pass
 
-# describe_object: used by create_XXXXXXXXXX_doc
+# describe_object: helper function for create_XXXXXXXXXX_doc
 def describe_object(endpoint, object, describe_object_query, variable_name_sparql):
     q = describe_object_query.replace(variable_name_sparql, "<" + object + ">")
     return describe(endpoint, q)
 
 
-
-# create_dataset_doc: used by Ingest.process_object
+# create_dataset_doc: case-varying;
+#       passed as an external argument of the function Ingest.generate
+#       (then passed to Ingest.process_object)
 def create_dataset_doc(dataset, endpoint, describe_object_query, variable_name_sparql):
     graph = describe_object(endpoint=endpoint, object=dataset,
                              describe_object_query=describe_object_query,
