@@ -28,12 +28,13 @@
       * (For dcotest)   `curl -XPUT 'dcotest.tw.rpi.edu:49200/dco/dataset/_mapping?pretty' --data-binary @mappings/dataset.json
 
 3. Generate bulk data:
+    1. Just generate bulk data:
       * `python3 ingest-datasets-old-2.py output`
   and then upload bulk data manually
       * (For localhost) `curl -XPOST 'localhost:9200/_bulk' --data-binary @[out]`
       * (For dcotest)   `curl -XPOST 'dcotest.tw.rpi.edu:49200/_bulk' --data-binary @[out]`
 
-3'. Generate bulk data and upload bulk data automatically:
+    2. Generate bulk data and upload bulk data automatically:
       * (For localhost) `python3 ingest-datasets-old-2.py --es 'localhost:9200' --publish @[out]`
       * (For dcotest)   `python3 ingest-datasets-old-2.py --es 'dcotest.tw.rpi.edu/search/' --publish @[out]`
 
