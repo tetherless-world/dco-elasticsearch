@@ -11,9 +11,7 @@
     --sparql', sparql endpoint (default='http://deepcarbon.tw.rpi.edu:3030/VIVO/query')
     [out]: file name of the elasticsearch bulk ingest file
 
-e.g.
-
-    `python3 ingest-datasets.py [out] --threads 4 --mapping mappings/dataset.json ...`
+e.g. `python3 ingest-datasets.py [out] --threads 4 --mapping mappings/dataset.json ...`
 
 
 ### Line command examples for the ingest process:
