@@ -1,20 +1,15 @@
 __author__ = 'Hao'
 
 from rdflib import Namespace, RDF
-import requests
-
-from Maybe import *
-
-from SPARQLWrapper import SPARQLWrapper, JSON
-import json
-import multiprocessing
-import itertools
 from itertools import chain
-# import functools
 import argparse
 # import warnings
 # import pprint
 
+# Auxilary class for those helper functions getting attributes of objects
+from Maybe import *
+# Auxilary class implementing the ingest process
+from Ingest import *
 
 
 PROV = Namespace("http://www.w3.org/ns/prov#")
@@ -31,6 +26,15 @@ DCAT = Namespace("http://www.w3.org/ns/dcat#")
 non_empty_str = lambda s: True if s else False
 has_label = lambda o: True if o.label() else False
 
+
+#############################################
+#    Some helper functions
+#
+def load_file(filepath):
+    with open(filepath) as _file:
+        return _file.read().replace('\n', " ")
+
+
 def has_type(resource, type):
     for rtype in resource.objects(RDF.type):
         if str(rtype.identifier) == str(type):
@@ -40,6 +44,12 @@ def has_type(resource, type):
 
 def get_metadata(index, type, id):
     return {"index": {"_index": index, "_type": type, "_id": id}}
+
+
+
+###################################################
+#    Helper functions to get different attributes
+#
 
 def get_id(dco_id):
     return dco_id[dco_id.rfind('/') + 1:]
@@ -141,69 +151,52 @@ def get_distributions(ds):
     return distributions
 # end
 
+#############################################
+#    Implementation of Main(...):
+#
+
+def Main(get_objects_query_location, describe_object_query_location,
+         create_object_doc_function, object_index, object_type, variable_name_sparql):
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--threads', default=4, help='number of threads to use (default = 4)')
+    parser.add_argument('--es', default="http://localhost:9200", help="elasticsearch service URL")
+    parser.add_argument('--publish', default=False, action="store_true", help="publish to elasticsearch?")
+    parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")
+    parser.add_argument('--mapping', default="mappings/dataset.json", help="dataset elasticsearch mapping document")
+    parser.add_argument('--sparql', default='http://deepcarbon.tw.rpi.edu:3030/VIVO/query', help='sparql endpoint')
+    parser.add_argument('out', metavar='OUT', help='elasticsearch bulk ingest file')
+    # Info:
+    #   local elasticsearch URL:          http://localhost:9200
+    #   dcotest elasticsearch URL:        https://dcotest.tw.rpi.edu/search
+    #   production sparql endpoint:       http://deepcarbon.tw.rpi.edu:3030/VIVO/query
+    #   test sparql endpoint:             http://udco.tw.rpi.edu/fuseki/vivo/query
+    args = parser.parse_args()
+
+    ingestSomething = Ingest(object_index=object_index, object_type=object_type,
+                             get_objects_query_location=get_objects_query_location,
+                             describe_object_query_location=describe_object_query_location,
+                             variable_name_sparql=variable_name_sparql)
+
+    # generate bulk import document for datasets
+    ingestSomething.generate(threads=int(args.threads), sparql=args.sparql,
+                             create_object_doc_function=create_object_doc_function)
+
+    # save generated bulk import file so it can be backed up or reviewed if there are publish errors
+    with open(args.out, "w") as bulk_file:
+        bulk_file.write('\n'.join(ingestSomething.records))
+
+    # publish the results to elasticsearch if "--publish" was specified on the command line
+    if args.publish:
+        bulk_str = '\n'.join(ingestSomething.records)
+        ingestSomething.publish(bulk=bulk_str, endpoint=args.es, rebuild=args.rebuild, mapping=args.mapping)
 
 
-def publish(bulk, endpoint, rebuild, mapping, index, tYPE):
-    # if configured to rebuild_index
-    # Delete and then re-create to publication index (via PUT request)
+#############################################
+#    Implementation of create_dataset_doc(...):
+#
 
-    index_url = endpoint + "/" + index
-
-    if rebuild:
-        requests.delete(index_url)
-        r = requests.put(index_url)
-        if r.status_code != requests.codes.ok:
-            print(r.url, r.status_code)
-            r.raise_for_status()
-
-    # push current publication document mapping
-
-    mapping_url = index_url + "/" + tYPE + "/_mapping"
-    with open(mapping) as mapping_file:
-        r = requests.put(mapping_url, data=mapping_file)
-        if r.status_code != requests.codes.ok:
-
-            # new mapping may be incompatible with previous
-            # delete current mapping and re-push
-
-            requests.delete(mapping_url)
-            r = requests.put(mapping_url, data=mapping_file)
-            if r.status_code != requests.codes.ok:
-                print(r.url, r.status_code)
-                r.raise_for_status()
-
-    # bulk import new publication documents
-    bulk_import_url = endpoint + "/_bulk"
-    r = requests.post(bulk_import_url, data=bulk)
-    if r.status_code != requests.codes.ok:
-        print(r.url, r.status_code)
-        r.raise_for_status()
-
-####################################################
-##
-####################################################
-
-def load_file(filepath):
-    with open(filepath) as _file:
-        return _file.read().replace('\n', " ")
-
-
-
-def select(endpoint, query):
-    sparql = SPARQLWrapper(endpoint)
-    sparql.setQuery(query)
-    sparql.setReturnFormat(JSON)
-    results = sparql.query().convert()
-    return results["results"]["bindings"]
-
-
-# get_datasets -> get_objects
-def get_objects(endpoint, get_objects_query, object_type):
-    r = select(endpoint, get_objects_query)
-    # return [rs["dataset"]["value"] for rs in r]
-    return [rs[object_type]["value"] for rs in r]
-
-
+# describe: helper function for describe_object
 def describe(endpoint, query):
     sparql = SPARQLWrapper(endpoint)
     sparql.setQuery(query)
@@ -212,48 +205,88 @@ def describe(endpoint, query):
     except RuntimeWarning:
         pass
 
-
-# process_dataset: used by generate
-def process_dataset(dataset, endpoint, create_object_doc_function, object_index, object_type):
-    # ds = create_dataset_doc(dataset=dataset, endpoint=endpoint) ==>
-    ds = create_object_doc_function(dataset=dataset, endpoint=endpoint)
-    if "dcoId" in ds and ds["dcoId"] is not None:
-        return [json.dumps(get_metadata(object_index, object_type, (ds["dcoId"]))), json.dumps(ds)]
-    else:
-        return []
+# describe_object: helper function for create_XXXXXXXXXX_doc
+def describe_object(endpoint, object, describe_object_query, variable_name_sparql):
+    q = describe_object_query.replace(variable_name_sparql, "<" + object + ">")
+    return describe(endpoint, q)
 
 
-def generate(threads, sparql, get_objects_query, process_object_function, create_object_doc_function, object_index, object_type):
-    pool = multiprocessing.Pool(threads)
-    # params = [(dataset, sparql) for dataset in get_datasets(endpoint=sparql)] ==>
-    params = [(object, sparql, create_object_doc_function, object_index, object_type) for object in get_objects(endpoint=sparql, get_objects_query=get_objects_query, object_type=object_type)]
-    return list(itertools.chain.from_iterable(pool.starmap(process_object_function, params)))
+# create_dataset_doc: case-varying;
+#       passed as an external argument of the function Ingest.generate
+#       (then passed to Ingest.process_object)
+def create_dataset_doc(dataset, endpoint, describe_object_query, variable_name_sparql):
+    graph = describe_object(endpoint=endpoint, object=dataset,
+                             describe_object_query=describe_object_query,
+                             variable_name_sparql=variable_name_sparql)
 
-def Main(get_objects_query, create_object_doc_function, object_index, object_type):
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--threads', default=1, help='number of threads to use (default = 8)')
-    parser.add_argument('--es', default="http://localhost:9200", help="elasticsearch service URL")
-    # parser.add_argument('--es', default="https://dcotest.tw.rpi.edu/search", help="elasticsearch service URL")
-    parser.add_argument('--publish', default=False, action="store_true", help="publish to elasticsearch?")
-    parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")
-    parser.add_argument('--mapping', default="mappings/dataset.json", help="dataset elasticsearch mapping document")
-    parser.add_argument('--sparql', default='http://deepcarbon.tw.rpi.edu:3030/VIVO/query', help='sparql endpoint')
-    # parser.add_argument('--sparql', default='http://udco.tw.rpi.edu/fuseki/vivo/query', help='sparql endpoint')
-    parser.add_argument('out', metavar='OUT', help='elasticsearch bulk ingest file')
+    ds = graph.resource(dataset)
 
-    args = parser.parse_args()
+    try:
+        title = ds.label().toPython()
+    except AttributeError:
+        print("missing title:", dataset)
+        return {}
 
-    # generate bulk import document for datasets
-    records = generate(threads=int(args.threads), sparql=args.sparql, get_objects_query=get_objects_query,
-                       process_object_function=process_dataset, create_object_doc_function=create_object_doc_function,
-                       object_index=object_index, object_type=object_type)
+    dco_id = list(ds.objects(DCO.hasDcoId))
+    dco_id = str(dco_id[0].identifier) if dco_id else None
 
-    # save generated bulk import file so it can be backed up or reviewed if there are publish errors
-    with open(args.out, "w") as bulk_file:
-        bulk_file.write('\n'.join(records))
+    doc = {"uri": dataset, "title": title, "dcoId": dco_id}
 
-    # publish the results to elasticsearch if "--publish" was specified on the command line
-    if args.publish:
-        bulk_str = '\n'.join(records)
-        publish(bulk=bulk_str, endpoint=args.es, rebuild=args.rebuild, mapping=args.mapping, index=object_index, tYPE=object_type)
-    print(get_objects_query)
+    doi = list(ds.objects(BIBO.doi))
+    doi = doi[0].toPython() if doi else None
+    if doi:
+        doc.update({"doi": doi})
+
+    abstract = list(ds.objects(BIBO.abstract))
+    abstract = abstract[0].toPython() if abstract else None
+    if abstract:
+        doc.update({"abstract": abstract})
+
+    most_specific_type = list(ds.objects(VITRO.mostSpecificType))
+    most_specific_type = most_specific_type[0].label().toPython() \
+        if most_specific_type and most_specific_type[0].label() \
+        else None
+    if most_specific_type:
+        doc.update({"mostSpecificType": most_specific_type})
+
+    publication_year = list(ds.objects(DCO.yearOfPublication))
+    publication_year = publication_year[0] if publication_year else None
+    if publication_year:
+        doc.update({"publicationYear": str(publication_year)})
+
+    dco_communities = get_dco_communities(ds)
+    if dco_communities:
+        doc.update({"dcoCommunities": dco_communities})
+
+    # portal_groups
+    portal_groups = get_portal_groups(ds)
+    if portal_groups:
+        doc.update({"portalGroups": portal_groups})
+
+    # projects
+    projects = get_projects_of_dataset(ds)
+    if projects:
+        doc.update({"projects": projects})
+
+    # dataType
+    data_types = get_data_types(ds)
+    if data_types:
+        doc.update({"dataTypes": data_types})
+
+    # cites
+    cites = get_cites(ds)
+    if cites:
+        doc.update({"citations": cites})
+
+    # authors: if none, will return an empty list []
+    authors = get_authors(ds)
+    doc.update({"authors": authors})
+
+    # distributions: if none, will return an empty list []
+    distributions = get_distributions(ds)
+    doc.update({"distributions": distributions})
+
+    return doc
+
+
+
