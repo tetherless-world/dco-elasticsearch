@@ -385,7 +385,7 @@ if __name__ == "__main__":
         publish(bulk=bulk_str, endpoint=args.es, rebuild=args.rebuild, mapping=args.mapping)
 
     # SOME RUNNING SCRIPTS:
-    # python3 ingest-datasets-old-2.py output
+    # python3 ingest-datasets.py output
     # GET dco/dataset/_mapping
     # DELETE /dco/dataset/_mapping
     # curl -XPUT 'localhost:9200/dco/dataset/_mapping?pretty' --data-binary @mappings/dataset.json
