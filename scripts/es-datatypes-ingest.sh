@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ofile=`date +"%Y%m%d-%H-%M-%S".people.bulk`
+ofile=`date +"%Y%m%d-%H-%M-%S".datatypes.bulk`
 
 cd /opt/dco/dco-elasticsearch/ingest
 
