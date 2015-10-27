@@ -72,8 +72,8 @@ def load_file(filepath):
 
 
 # Global variables for the ingest process for: ***dataType***
-get_dataTypes_query = load_file("queries/listdataTypes.rq")
-describe_dataType_query = load_file("queries/describedataType.rq")
+get_dataTypes_query = load_file("queries/listDataTypes.rq")
+describe_dataType_query = load_file("queries/describeDataType.rq")
 
 PROV = Namespace("http://www.w3.org/ns/prov#")
 BIBO = Namespace("http://purl.org/ontology/bibo/")
