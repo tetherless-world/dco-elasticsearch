@@ -26,8 +26,8 @@ class Ingest:
                  get_objects_query_location, describe_object_query_location, variable_name_sparql):
         """
         Constructor method of the Ingest class.
-        :param elasticsearch_index:                    object index
-        :param elasticsearch_type:                     object type
+        :param elasticsearch_index:                    elasticsearch index
+        :param elasticsearch_type:                     elasticsearch type
         :param get_objects_query_location:      the location of the .rq file to list all the objects
         :param describe_object_query_location:  the location of the .rq file to describe all the objects
         :param variable_name_sparql:            the variable name representing the object in the .rq files,
@@ -40,10 +40,6 @@ class Ingest:
         self.get_objects_query = Ingest.load_file(get_objects_query_location)
         self.describe_object_query = Ingest.load_file(describe_object_query_location)
         self.variable_name_sparql = variable_name_sparql
-
-
-    def test(self, x):
-        print("Hello World, " + str(x) + "!\n")
 
 
     def load_file(filepath):
