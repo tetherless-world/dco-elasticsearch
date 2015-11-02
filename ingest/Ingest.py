@@ -6,27 +6,44 @@ import itertools
 import json
 import requests
 
+from rdflib import Namespace, RDF
+
+PROV = Namespace("http://www.w3.org/ns/prov#")
+BIBO = Namespace("http://purl.org/ontology/bibo/")
+VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
+VIVO = Namespace('http://vivoweb.org/ontology/core#')
+VITRO = Namespace("http://vitro.mannlib.cornell.edu/ns/vitro/0.7#")
+OBO = Namespace("http://purl.obolibrary.org/obo/")
+DCO = Namespace("http://info.deepcarbon.net/schema#")
+FOAF = Namespace("http://xmlns.com/foaf/0.1/")
+DCAT = Namespace("http://www.w3.org/ns/dcat#")
+
+
 class Ingest:
     """Helper class governing an ingest process."""
 
-    def __init__(self, object_index, object_type,
+    def __init__(self, elasticsearch_index, elasticsearch_type,
                  get_objects_query_location, describe_object_query_location, variable_name_sparql):
         """
         Constructor method of the Ingest class.
-        :param object_index:                    object index
-        :param object_type:                     object type
+        :param elasticsearch_index:                    object index
+        :param elasticsearch_type:                     object type
         :param get_objects_query_location:      the location of the .rq file to list all the objects
         :param describe_object_query_location:  the location of the .rq file to describe all the objects
         :param variable_name_sparql:            the variable name representing the object in the .rq files,
                                                     e.g. "?dataset"
         :return:                                an instance of Ingest.
         """
-        self.object_index = object_index
-        self.object_type = object_type
+        self.elasticsearch_index = elasticsearch_index
+        self.elasticsearch_type = elasticsearch_type
         self.records = []
         self.get_objects_query = Ingest.load_file(get_objects_query_location)
         self.describe_object_query = Ingest.load_file(describe_object_query_location)
         self.variable_name_sparql = variable_name_sparql
+
+
+    def test(self, x):
+        print("Hello World, " + str(x) + "!\n")
 
 
     def load_file(filepath):
@@ -52,7 +69,7 @@ class Ingest:
         return {"index": {"_index": index, "_type": type, "_id": id}}
 
 
-    def process_object(self, object, endpoint, create_object_doc_function):
+    def process_object(self, object, endpoint):
         """
         Helper function used by generate() to process each object and generate the attribute
         :param object:      the object to be described
@@ -62,11 +79,11 @@ class Ingest:
             originally through Ingest.generate(...).
         :return:            An object entry in JSON
         """
-        ds = create_object_doc_function(dataset=object, endpoint=endpoint,
+        ds = self.create_x_doc(x=object, endpoint=endpoint,
                                         describe_object_query=self.describe_object_query,
                                         variable_name_sparql=self.variable_name_sparql)
         if "dcoId" in ds and ds["dcoId"] is not None:
-            return [json.dumps(Ingest.get_metadata(self.object_index, self.object_type, (ds["dcoId"]))), json.dumps(ds)]
+            return [json.dumps(Ingest.get_metadata(self.elasticsearch_index, self.elasticsearch_type, (ds["dcoId"]))), json.dumps(ds)]
         else:
             return []
 
@@ -87,20 +104,20 @@ class Ingest:
         return results["results"]["bindings"]
 
 
-    def get_objects(endpoint, get_objects_query, object_type):
+    def get_objects(endpoint, get_objects_query, elasticsearch_type):
         """
         Helper function used by Ingest.generate(...).
         :param endpoint:            SPARQL endpoint
         :param get_objects_query:   the SPARQL query to get the list of objects
-        :param object_type:         object type
+        :param elasticsearch_type:         object type
         :return:
             a list of all the objects' uri values
         """
         r = Ingest.select(endpoint, get_objects_query)
-        return [rs[object_type]["value"] for rs in r]
+        return [rs[elasticsearch_type]["value"] for rs in r]
 
 
-    def generate(self, threads, sparql, create_object_doc_function):
+    def generate(self, threads, sparql):
         """
         The major method to let an instance of Ingest generate the JSON records.
         :param threads:
@@ -110,11 +127,12 @@ class Ingest:
             the output JSON records of this Ingest process.
         """
         pool = multiprocessing.Pool(threads)
-        params = [(object, sparql, create_object_doc_function)
+        params = [(object, sparql)
                   for object in Ingest.get_objects(endpoint=sparql,
                                             get_objects_query=self.get_objects_query,
-                                            object_type=self.object_type)]
+                                            elasticsearch_type=self.elasticsearch_type)]
         self.records = list(itertools.chain.from_iterable(pool.starmap(self.process_object, params)))
+
         return self.records
 
 
@@ -129,7 +147,7 @@ class Ingest:
         # if configured to rebuild_index
         # Delete and then re-create to publication index (via PUT request)
 
-        index_url = endpoint + "/" + self.object_index
+        index_url = endpoint + "/" + self.elasticsearch_index
 
         if rebuild:
             requests.delete(index_url)
@@ -140,7 +158,7 @@ class Ingest:
 
         # push current publication document mapping
 
-        mapping_url = index_url + "/" + self.object_type + "/_mapping"
+        mapping_url = index_url + "/" + self.elasticsearch_type + "/_mapping"
         with open(mapping) as mapping_file:
             r = requests.put(mapping_url, data=mapping_file)
             if r.status_code != requests.codes.ok:
@@ -160,3 +178,47 @@ class Ingest:
         if r.status_code != requests.codes.ok:
             print(r.url, r.status_code)
             r.raise_for_status()
+
+
+    # describe: helper function for describe_object
+    def describe(self, endpoint, query):
+        sparql = SPARQLWrapper(endpoint)
+        sparql.setQuery(query)
+        try:
+            return sparql.query().convert()
+        except RuntimeWarning:
+            pass
+
+
+    # describe_object: helper function for create_x_doc
+    def describe_object(self, endpoint, object, describe_object_query, variable_name_sparql):
+        q = describe_object_query.replace(variable_name_sparql, "<" + object + ">")
+        return self.describe(endpoint, q)
+
+
+    def create_x_doc(self, x, endpoint, describe_object_query, variable_name_sparql):
+        graph = self.describe_object(endpoint=endpoint, object=x,
+                                 describe_object_query=describe_object_query,
+                                 variable_name_sparql=variable_name_sparql)
+
+        ds = graph.resource(x)
+
+        try:
+            title = ds.label().toPython()
+        except AttributeError:
+            print("missing title:", x)
+            return {}
+
+        dco_id = list(ds.objects(DCO.hasDcoId))
+        dco_id = str(dco_id[0].identifier) if dco_id else None
+
+        doc = {"uri": x, "title": title, "dcoId": dco_id}
+
+        most_specific_type = list(ds.objects(VITRO.mostSpecificType))
+        most_specific_type = most_specific_type[0].label().toPython() \
+            if most_specific_type and most_specific_type[0].label() \
+            else None
+        if most_specific_type:
+            doc.update({"mostSpecificType": most_specific_type})
+
+        return doc
