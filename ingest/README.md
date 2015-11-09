@@ -32,8 +32,8 @@
       * (For localhost) `curl -XPOST 'localhost:9200/_bulk' --data-binary @[out]`
       * (For dcotest)   `curl -XPOST 'dcotest.tw.rpi.edu:49200/_bulk' --data-binary @[out]`
     2. Generate bulk data and upload bulk data automatically:
-      * (For localhost) `python3 ingest-datasets-old-2.py --es 'localhost:9200' --publish @[out]`
-      * (For dcotest)   `python3 ingest-datasets-old-2.py --es 'dcotest.tw.rpi.edu/search/' --publish @[out]`
+      * (For localhost) `python3 ingest-datasets.py --es 'http://localhost:9200' --publish [out]`
+      * (For dcotest)   `python3 ingest-datasets.py --es 'http://dcotest.tw.rpi.edu/search' --publish [out]`
 
 4. To view and operate in Sense:
       - GET dco/dataset/_mapping

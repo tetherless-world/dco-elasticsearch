@@ -30,10 +30,12 @@ VARIABLE_NAME_SPARQL = "?dataset"
 
 class DatasetIngest(Ingest):
 
+    MAPPING = "mappings/dataset.json"
+
     def create_x_doc(self, x, endpoint, describe_object_query, variable_name_sparql):
         graph = self.describe_object(endpoint=endpoint, object=x,
-                                 describe_object_query=describe_object_query,
-                                 variable_name_sparql=variable_name_sparql)
+                                     describe_object_query=describe_object_query,
+                                     variable_name_sparql=variable_name_sparql)
 
         ds = graph.resource(x)
 

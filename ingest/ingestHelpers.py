@@ -127,9 +127,7 @@ def get_distributions(ds):
     return distributions
 
 
-#############################################
-#    Implementation of main(...):
-#
+
 def main(get_objects_query_location, describe_object_query_location,
          elasticsearch_index, elasticsearch_type, variable_name_sparql, XIngest):
 
@@ -138,7 +136,7 @@ def main(get_objects_query_location, describe_object_query_location,
     parser.add_argument('--es', default="http://localhost:9200", help="elasticsearch service URL")
     parser.add_argument('--publish', default=False, action="store_true", help="publish to elasticsearch?")
     parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")
-    parser.add_argument('--mapping', default="mappings/dataset.json", help="dataset elasticsearch mapping document")
+    parser.add_argument('--mapping', help="elasticsearch mapping document, e.g. mappings/dataset.json")
     parser.add_argument('--sparql', default='http://deepcarbon.tw.rpi.edu:3030/VIVO/query', help='sparql endpoint')
     parser.add_argument('out', metavar='OUT', help='elasticsearch bulk ingest file')
 
@@ -155,6 +153,10 @@ def main(get_objects_query_location, describe_object_query_location,
                              describe_object_query_location=describe_object_query_location,
                              variable_name_sparql=variable_name_sparql)
 
+    # if a mapping file is specified for the "publish" process later, use the specified mapping file
+    if args.mapping:
+        ingestSomething.setMapping(args.mapping)
+
     # generate bulk import document for xs
     ingestSomething.generate(threads=int(args.threads), sparql=args.sparql)
 
@@ -165,4 +167,4 @@ def main(get_objects_query_location, describe_object_query_location,
     # publish the results to elasticsearch if "--publish" was specified on the command line
     if args.publish:
         bulk_str = '\n'.join(ingestSomething.records)
-        ingestSomething.publish(bulk=bulk_str, endpoint=args.es, rebuild=args.rebuild, mapping=args.mapping)
+        ingestSomething.publish(bulk=bulk_str, endpoint=args.es, rebuild=args.rebuild)

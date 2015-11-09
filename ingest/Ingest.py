@@ -21,6 +21,7 @@ DCAT = Namespace("http://www.w3.org/ns/dcat#")
 
 class Ingest:
     """Helper class governing an ingest process."""
+    MAPPING = "x.json"
 
     def __init__(self, elasticsearch_index, elasticsearch_type,
                  get_objects_query_location, describe_object_query_location, variable_name_sparql):
@@ -40,6 +41,12 @@ class Ingest:
         self.get_objects_query = Ingest.load_file(get_objects_query_location)
         self.describe_object_query = Ingest.load_file(describe_object_query_location)
         self.variable_name_sparql = variable_name_sparql
+        self.mapping = self.MAPPING
+
+
+    def setMapping(self, m):
+        self.mapping = m
+        print("Setting mapping...\n")
 
 
     def load_file(filepath):
@@ -132,7 +139,7 @@ class Ingest:
         return self.records
 
 
-    def publish(self, bulk, endpoint, rebuild, mapping):
+    def publish(self, bulk, endpoint, rebuild):
         """
         The majar method to publish the result of the Ingest process.
         :param bulk:        the bulk file containing the ingest result
@@ -155,7 +162,7 @@ class Ingest:
         # push current publication document mapping
 
         mapping_url = index_url + "/" + self.elasticsearch_type + "/_mapping"
-        with open(mapping) as mapping_file:
+        with open(self.mapping) as mapping_file:
             r = requests.put(mapping_url, data=mapping_file)
             if r.status_code != requests.codes.ok:
 
