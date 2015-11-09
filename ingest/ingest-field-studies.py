@@ -435,11 +435,11 @@ if __name__ == "__main__":
 
     # save generated bulk import file so it can be backed up or reviewed if there are publish errors
     with open(args.out, "w") as bulk_file:
-        bulk_file.write('\n'.join(records))
+        bulk_file.write('\n'.join(records)+'\n')
 
     # publish the results to elasticsearch if "--publish" was specified on the command line
     if args.publish:
-        bulk_str = '\n'.join(records)
+        bulk_str = '\n'.join(records)+'\n'
         publish(bulk=bulk_str, endpoint=args.es, rebuild=args.rebuild, mapping=args.mapping)
 
 
