@@ -21,37 +21,41 @@ DCAT = Namespace("http://www.w3.org/ns/dcat#")
 
 class Ingest:
     """Helper class governing an ingest process."""
-    MAPPING = "x.json"
+
+    # MAPPING: class variable for the relative location of the mapping file for publishing;
+    #          its default value varies for different subclasses
+    MAPPING = "mappings/x.json"
 
     def __init__(self, elasticsearch_index, elasticsearch_type,
                  get_objects_query_location, describe_object_query_location, variable_name_sparql):
         """
-        Constructor method of the Ingest class.
-        :param elasticsearch_index:                    elasticsearch index
-        :param elasticsearch_type:                     elasticsearch type
-        :param get_objects_query_location:      the location of the .rq file to list all the objects
-        :param describe_object_query_location:  the location of the .rq file to describe all the objects
-        :param variable_name_sparql:            the variable name representing the object in the .rq files,
-                                                    e.g. "?dataset"
-        :return:                                an instance of Ingest.
+        __init__: constructor method of the Ingest class.
+        Member variables w/ value taken in by constructor:
+            self.elasticsearch_index:                   elasticsearch index
+            self.elasticsearch_type:                    elasticsearch type
+            self.get_objects_query_location:            location of the .rq file to list all the subject entities
+            self.describe_object_query_location:        location of the .rq file to describe an entity
+            self.variable_name_sparql:                  variable name of the subject entity in queries, e.g. "?dataset"
+        Member variables w/ default value given (may subject to later changes):
+            self.records                the output data of the ingest process
+            self.mapping                location of the mapping file w/ default value set to class attribute MAPPING
         """
         self.elasticsearch_index = elasticsearch_index
         self.elasticsearch_type = elasticsearch_type
-        self.records = []
         self.get_objects_query = Ingest.load_file(get_objects_query_location)
         self.describe_object_query = Ingest.load_file(describe_object_query_location)
         self.variable_name_sparql = variable_name_sparql
+        self.records = []
         self.mapping = self.MAPPING
 
 
-    def setMapping(self, m):
-        self.mapping = m
-        print("Setting mapping...\n")
+    def setMapping(self, m): self.mapping = m
 
+    def getMapping(self): return self.mapping
 
     def load_file(filepath):
         """
-        Helper function mainly used by the __init__ to load the .rq files.
+        Helper function to load the .rq files and return a String object w/ replacing '\n' by ' '.
         :param filepath:    file path
         :return:            file content in string format
         """
@@ -61,28 +65,27 @@ class Ingest:
 
     def get_metadata(index, type, id):
         """
-        Helper function to create the JSON string of the metadata of an object.
-        :param index:   object index
-        :param type:    object type
-        :param id:      unique identifier of the object
+        Helper function to create the JSON string of the metadata of an entity.
+        :param index:   elastic search index
+        :param type:    elastic search type
+        :param id:      unique identifier of the entity
         :return:
-            a JSON string representing the metadata information of the object,
-                            e.g. {"index": {"_id": "http://...", "_type": "dataset", "_index": "dco"}}
+            a JSON-format string representing the metadata information of the object,
+                e.g. {"index": {"_id": "http://...", "_type": "dataset", "_index": "dco"}}
         """
         return {"index": {"_index": index, "_type": type, "_id": id}}
 
 
-    def process_object(self, object, endpoint):
+    def process_entity(self, entity, endpoint):
         """
-        Helper function used by generate() to process each object and generate the attribute
-        :param object:      the object to be described
+        Helper function used by generate() to govern the processing of each subject entity and generate the attributes.
+        Note:   The core work here is to creating the JSON-format string describing the entity and is completed by
+                member function create_x_doc, which is to be overridden in subclass for different cases.
+        :param entity:      the subject entity to be described
         :param endpoint:    SPARQL endpoint
-        :param create_object_doc_function:
-            Externally defined, case-varying function to create the JSON document. The function name is passed in
-            originally through Ingest.generate(...).
-        :return:            An object entry in JSON
+        :return:            An entity entry in JSON
         """
-        ds = self.create_x_doc(x=object, endpoint=endpoint,
+        ds = self.create_x_doc(x=entity, endpoint=endpoint,
                                         describe_object_query=self.describe_object_query,
                                         variable_name_sparql=self.variable_name_sparql)
         if "dcoId" in ds and ds["dcoId"] is not None:
@@ -93,7 +96,7 @@ class Ingest:
 
     def select(endpoint, query):
         """
-        Helper function used by get_objects
+        Helper function used by get_entities
         :param endpoint:    SPARQL endpoint
         :param query:       the SPARQL query to get the list of objects
         :return:
@@ -107,14 +110,14 @@ class Ingest:
         return results["results"]["bindings"]
 
 
-    def get_objects(endpoint, get_objects_query, elasticsearch_type):
+    def get_entities(endpoint, get_objects_query, elasticsearch_type):
         """
-        Helper function used by Ingest.generate(...).
-        :param endpoint:            SPARQL endpoint
-        :param get_objects_query:   the SPARQL query to get the list of objects
-        :param elasticsearch_type:         object type
+        Helper function used by member function generate(...).
+        :param endpoint:                    SPARQL endpoint
+        :param get_objects_query:           SPARQL query to get the list of objects
+        :param elasticsearch_type:          elasticsearch type
         :return:
-            a list of all the objects' uri values
+            a list of all the entities' uri values
         """
         r = Ingest.select(endpoint, get_objects_query)
         return [rs[elasticsearch_type]["value"] for rs in r]
@@ -122,7 +125,7 @@ class Ingest:
 
     def generate(self, threads, sparql):
         """
-        The major method to let an instance of Ingest generate the JSON records.
+        The major method to let an instance of Ingest generate the JSON records and store in self.records.
         :param threads:
         :param sparql: SPARQL endpoint
         :param create_object_doc_function:
@@ -131,10 +134,10 @@ class Ingest:
         """
         pool = multiprocessing.Pool(threads)
         params = [(object, sparql)
-                  for object in Ingest.get_objects(endpoint=sparql,
+                  for object in Ingest.get_entities(endpoint=sparql,
                                             get_objects_query=self.get_objects_query,
                                             elasticsearch_type=self.elasticsearch_type)]
-        self.records = list(itertools.chain.from_iterable(pool.starmap(self.process_object, params)))
+        self.records = list(itertools.chain.from_iterable(pool.starmap(self.process_entity, params)))
 
         return self.records
 
@@ -145,8 +148,8 @@ class Ingest:
         :param bulk:        the bulk file containing the ingest result
         :param endpoint:    SPARQL endpoint
         :param rebuild:
-        :param mapping:     the mapping file
         """
+
         # if configured to rebuild_index
         # Delete and then re-create to publication index (via PUT request)
 
@@ -183,7 +186,7 @@ class Ingest:
             r.raise_for_status()
 
 
-    # describe: helper function for describe_object
+    # describe: helper function for describe_entity
     def describe(self, endpoint, query):
         sparql = SPARQLWrapper(endpoint)
         sparql.setQuery(query)
@@ -193,14 +196,14 @@ class Ingest:
             pass
 
 
-    # describe_object: helper function for create_x_doc
-    def describe_object(self, endpoint, object, describe_object_query, variable_name_sparql):
-        q = describe_object_query.replace(variable_name_sparql, "<" + object + ">")
+    # describe_entity: helper function for create_x_doc
+    def describe_entity(self, endpoint, entity, describe_object_query, variable_name_sparql):
+        q = describe_object_query.replace(variable_name_sparql, "<" + entity + ">")
         return self.describe(endpoint, q)
 
 
     def create_x_doc(self, x, endpoint, describe_object_query, variable_name_sparql):
-        graph = self.describe_object(endpoint=endpoint, object=x,
+        graph = self.describe_entity(endpoint=endpoint, entity=x,
                                  describe_object_query=describe_object_query,
                                  variable_name_sparql=variable_name_sparql)
 
