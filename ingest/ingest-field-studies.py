@@ -1,7 +1,8 @@
 __author__ = 'szednik'
-#Edited by Ahmed (am-e) to ingest projects
+# Edited by Han Wang to ingest field studies
 
 from SPARQLWrapper import SPARQLWrapper, JSON
+import re
 import json
 from rdflib import Namespace, RDF
 import multiprocessing
@@ -72,7 +73,7 @@ def load_file(filepath):
 
 
 # Global variables for the ingest process for: ***project***
-get_projects_query = load_file("queries/listProjects.rq")
+get_projects_query = load_file("queries/listFieldStudies.rq")
 describe_project_query = load_file("queries/describeProject.rq")
 
 PROV = Namespace("http://www.w3.org/ns/prov#")
@@ -88,7 +89,7 @@ FOAF = Namespace("http://xmlns.com/foaf/0.1/")
 
 # get_metadata: returns the index and type of the specified id
 def get_metadata(id):
-    return {"index": {"_index": "dco", "_type": "project", "_id": id}}
+    return {"index": {"_index": "dco", "_type": "field-study", "_id": id}}
 
 
 # get_id: returns dcoId of entity being ingested
@@ -334,6 +335,35 @@ def create_project_doc(project, endpoint):
     if thumbnail:
         doc.update({"thumbnail": thumbnail})
 
+    #field sites of this project (field study)
+    field_sites = []
+    sites = [faux for faux in prj.objects(DCO.hasPhysicalLocation) if has_type(faux, DCO.PhysicalLocation)]
+    if sites:
+        for site in sites:
+            name = site.label() if site else None
+            obj = {"uri": str(site.identifier), "name": name}
+
+            re_float = re.compile(r'([+-]?\d*\.?\d*)')
+            latitude = list(site.objects(DCO.hasLatitude))
+            latitude = latitude[0].toPython() if latitude else None
+            if latitude:
+                m = re_float.search(latitude)
+                if m:
+                    latitude = m.group(0)
+            longitude = list(site.objects(DCO.hasLongitude))
+            longitude = longitude[0].toPython() if longitude else None
+            if longitude:
+                m = re_float.search(longitude)
+                if m:
+                    longitude = m.group(0)
+
+            if latitude and longitude:
+                obj.update({"latitude": str(latitude), "longitude": str(longitude)})
+
+            field_sites.append(obj)
+
+    doc.update({"fieldSites": field_sites})
+
     return doc
 
 # has_type: asserts whether a resource if of a certain type
@@ -359,7 +389,7 @@ def publish(bulk, endpoint, rebuild, mapping):
 
     # push current project document mapping
 
-    mapping_url = endpoint + "/dco/project/_mapping"
+    mapping_url = endpoint + "/dco/field-study/_mapping"
     with open(mapping) as mapping_file:
         r = requests.put(mapping_url, data=mapping_file)
         if r.status_code != requests.codes.ok:
@@ -394,7 +424,7 @@ if __name__ == "__main__":
     parser.add_argument('--es', default="http://data.deepcarbon.net/es", help="elasticsearch service URL")
     parser.add_argument('--publish', default=False, action="store_true", help="publish to elasticsearch?")
     parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")
-    parser.add_argument('--mapping', default="mappings/project.json", help="project elasticsearch mapping document")
+    parser.add_argument('--mapping', default="mappings/field-study.json", help="field study elasticsearch mapping document")
     parser.add_argument('--sparql', default='http://deepcarbon.tw.rpi.edu:3030/VIVO/query', help='sparql endpoint')
     parser.add_argument('out', metavar='OUT', help='elasticsearch bulk ingest file')
 

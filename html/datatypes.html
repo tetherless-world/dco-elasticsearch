@@ -2,7 +2,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>Projects and File Studies Browser</title>
+    <title>DataType Browser</title>
 
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.1/handlebars.min.js"></script>
 
@@ -18,41 +18,31 @@
     <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/css/facetview.css">
     <link rel="stylesheet" href="/vivo/themes/dco/css/browsers.css">
 
-    <script id="project-template" type="text/x-handlebars-template">
+    <script id="dataType-template" type="text/x-handlebars-template">
         <tr>
             <td>
-                {{#if thumbnail}}
-                <div class="thumbnail">
-                    <img src="{{thumbnail}}">
-                </div>
-                {{/if}}
-                <div class="project-info span7">
-                    {{!-- Display title of this project and link to the project/field study summary page --}}
-                    {{#if (isMostSpecificTypeProject mostSpecificType)}}<div><a href="https://deepcarbon.net/dco_project_summary?uri={{uri}}" target="_blank">{{title}}</a></div>{{/if}}
+                <div class="dataType-info span7">
+                    {{!-- Display title of this dataType and link to the dataType's instance URI --}}
+                    <div><a href="https://deepcarbon.net/dco_datatype_summary?uri={{uri}}" target="_blank">{{title}}</a></div>
 
-                    {{#if (isMostSpecificTypeFieldStudy mostSpecificType)}}<div><a href="https://deepcarbon.net/dco_field_study_summary?uri={{uri}}" target="_blank">{{title}}</a></div>{{/if}}
-
-                    {{!-- Display this project's type --}}
-                    {{#if (showMostSpecificType mostSpecificType)}}<div><strong>Type: </strong><small>{{mostSpecificType}}</small></div>{{/if}}
-
-                    {{!-- List the science communities this project is related to, if any --}}
-                    {{#if dcoCommunities}}
-                    <div><strong>Communities:</strong> {{#expand dcoCommunities}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
+                    {{!-- list author(s) to whom this dataType was attributed--}}
+                    {{#if authors}}
+                    <div><strong>Author(s):</strong> {{#expand authors}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
                     {{/if}}
 
-                    {{!-- List what portal teams/groups this project is related to, if any --}}
-                    {{#if dcoPortalGroups}}
-                    <div><strong>Portal Groups:</strong> {{#expand dcoPortalGroups}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
+                    {{!-- Display this dataType's source standard --}}
+                    {{#if sourceStandard}}
+                    <div><strong>Source Standard: </strong><a href="{{sourceStandard.uri}}" target="_blank">{{sourceStandard.title}}</a></div>
                     {{/if}}
 
-                    {{!-- The list of DCO Members and non-DCO Members who participated in this project --}}
-                    {{#if participants}}
-                    <div><strong>Participants:</strong> {{#expand participants}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
+                    {{!-- Display this dataType's source datatype --}}
+                    {{#if sourceDataType}}
+                    <div><strong>Source Datatype: </strong><a href="{{sourceDataType.uri}}" target="_blank">{{sourceDataType.title}}</a></div>
                     {{/if}}
 
-                    {{!-- The grants that have funded this project --}}
-                    {{#if grants}}
-                    <div><strong>Grants:</strong> {{#expand grants}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
+                    {{!-- list subject area(s) of this dataType --}}
+                    {{#if subjectAreas}}
+                    <div><strong>Subject Areas(s):</strong> {{#expand subjectAreas}}<a href="{{uri}}" target="_blank">{{title}}</a>{{/expand}}</div>
                     {{/if}}
 
                     {{!-- BADGES --}}
@@ -74,15 +64,6 @@
             var escapedDCOID = encodeURIComponent(dcoId.substring(25));
             return "//dcotest.tw.rpi.edu/badges/badge?title=metadata&text="+escapedDCOID+"&color=D14719";
         });
-        Handlebars.registerHelper('showMostSpecificType', function(mostSpecificType) {
-            return (mostSpecificType);
-        });
-        Handlebars.registerHelper('isMostSpecificTypeProject', function(mostSpecificType) {
-            return (mostSpecificType == 'Project');
-        });
-        Handlebars.registerHelper('isMostSpecificTypeFieldStudy', function(mostSpecificType) {
-            return (mostSpecificType == 'Field Study');
-        });
         Handlebars.registerHelper('expand', function(items, options) {
             var out = "";
             var j = items.length - 1;
@@ -101,14 +82,16 @@
             }
             return out + "</ul>";
         });
-        var source = $("#project-template").html();
+        var source = $("#dataType-template").html();
         var template = Handlebars.compile(source);
     </script>
 
     <script type="text/javascript">
         jQuery(document).ready(function($) {
             $('.facet-view-simple').facetview({
-                search_url: '//data.deepcarbon.net/es/dco/project/_search',
+                //search_url: '//data.deepcarbon.net/es/dco/datatype/_search',
+                search_url: 'https://dcotest.tw.rpi.edu/search/dco/datatype/_search',
+                //search_url: '//localhost:9200/dco/datatype/_search',
                 page_size: 20,
                 sort: [{"_score" : {"order" : "desc"}}],
                 sharesave_link: true,
@@ -118,19 +101,16 @@
                 default_facet_order: "count",
                 default_facet_size: 15,
                 facets: [
-                  {'field': 'mostSpecificType', 'display': 'Project/Field Study'},
-                  {'field': 'dcoCommunities.name.exact', 'display': 'Community'},
-                  {'field': 'dcoPortalGroups.name.exact', 'display': 'Portal Group'},
-                  {'field': 'leader.name.exact', 'size': 20, 'display': 'Leader'},
-                  {'field': 'participants.name.exact', 'size': 20, 'display': 'Participants'},
-                  {'field': 'grants.name.exact', 'size': 20, 'display': 'Grants'},
-                  {'field': 'dateTimeInterval.startYear', 'size': 20, 'display': 'Start Year'},
-                  {'field': 'dateTimeInterval.endYear', 'size': 20, 'display': 'End Year'},
-                  {'field': 'reportingYear.year', 'size': 20, 'display': 'Reporting Year'}
+                  {'field': 'subjectAreas.title.exact', 'display': ' Subject Area'},
+                  {'field': 'parameters.title.exact', 'display': 'Parameter'},
+                  {'field': 'authors.name.exact', 'display': 'Creator'},
+                  {'field': 'creationYear', 'display': 'Creation Year', "order": "reverse_term"},
+                  {'field': 'sourceStandard.title.exact', 'display': 'Source Standard'},
+                  {'field': 'sourceDataType.title.exact', 'display': 'Source Datatype'}
                 ],
                 search_sortby: [
                     {'display':'Title','field':'title.exact'},
-                    {'display':'Reporting Year','field':'reportingYear.year'}
+                    {'display':'Creation Year','field':'creationYear'}
                 ],
                 render_result_record: function(options, record)
                 {
@@ -182,7 +162,7 @@
             border: none;
         }
 
-        .project-info {
+        .dataType-info {
             display: inline-block;
             vertical-align: top;
             clear: left;

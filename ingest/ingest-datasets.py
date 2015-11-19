@@ -116,4 +116,3 @@ if __name__ == "__main__":
          variable_name_sparql=VARIABLE_NAME_SPARQL, XIngest=DatasetIngest)
 
 # Finally, run the ingest process. See detailed usage and examples in ingest/README.md.
-

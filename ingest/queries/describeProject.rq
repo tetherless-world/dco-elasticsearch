@@ -12,7 +12,7 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX bibo: <http://purl.org/ontology/bibo/>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 
-DESCRIBE ?project ?dcoid ?mostSpecificType ?mainImage ?thumbImage ?thumbnail ?description ?leader ?community ?portalGroup ?submittedBy ?locationLabel ?role ?participant ?contributingRole ?contributor ?dateTimeInterval ?grant ?start ?end ?startDateTime ?endDateTime ?reportingYear ?pu
+DESCRIBE ?project ?dcoid ?mostSpecificType ?mainImage ?thumbImage ?thumbnail ?description ?leader ?community ?portalGroup ?submittedBy ?location ?locationLabel ?role ?participant ?contributingRole ?contributor ?dateTimeInterval ?grant ?start ?end ?startDateTime ?endDateTime ?reportingYear ?pu
 WHERE {
   ?project dco:hasDcoId ?dcoid .
   ?project vitro:mostSpecificType ?mostSpecificType .
@@ -36,7 +36,7 @@ WHERE {
   OPTIONAL { ?project vitro-pub:mainImage ?mainImage .
     ?mainImage vitro-pub:thumbnailImage ?thumbImage .
     ?thumbImage vitro-pub:downloadLocation ?thumbnail }
-  OPTIONAL { ?project dco:physicalLocation ?location .
+  OPTIONAL { ?project dco:hasPhysicalLocation ?location .
     ?location dco:hasLongitude ?longitude .
     ?location dco:hasLatitude ?latitude .
     ?location rdfs:label ?locationLabel .
