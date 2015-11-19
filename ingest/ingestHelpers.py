@@ -142,7 +142,7 @@ def main(get_objects_query_location, describe_object_query_location,
 
     # Info:
     #   local elasticsearch URL:          http://localhost:9200
-    #   dcotest elasticsearch URL:        https://dcotest.tw.rpi.edu/search
+    #   dcotest elasticsearch URL:        https://dcotest.tw.rpi.edu:49200
     #   production sparql endpoint:       http://deepcarbon.tw.rpi.edu:3030/VIVO/query
     #   test sparql endpoint:             http://udco.tw.rpi.edu/fuseki/vivo/query
 

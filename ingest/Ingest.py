@@ -128,7 +128,6 @@ class Ingest:
         The major method to let an instance of Ingest generate the JSON records and store in self.records.
         :param threads:
         :param sparql: SPARQL endpoint
-        :param create_object_doc_function:
         :return:
             the output JSON records of this Ingest process.
         """

@@ -25,7 +25,7 @@ VARIABLE_NAME_SPARQL = "?dataset"
 
 # Second, extend the Ingest base class to class 'XIngest' below, where X is the singular form, with capitalized
 # initial letter, of the 'type' of search document generated. E.g. DatasetIngest, ProjectIngest, etc.
-# Overwrite the create_x_doc method in the sub-class with appropriate implementations.
+# Overwrite the subclass attribute 'MAPPING' and the create_x_doc method with appropriate implementations.
 # (Existing examples are helpful.)
 
 class DatasetIngest(Ingest):
