@@ -28,7 +28,7 @@
 
 3. Generate bulk data:
     1. Just generate bulk data:
-      * `python3 ingest-datasets-old-2.py output` and then upload bulk data manually
+      * `python3 ingest-datasets.py output` and then upload bulk data manually
       * (For localhost) `curl -XPOST 'localhost:9200/_bulk' --data-binary @[out]`
       * (For dcotest)   `curl -XPOST 'dcotest.tw.rpi.edu:49200/_bulk' --data-binary @[out]`
     2. Generate bulk data and upload bulk data automatically:
