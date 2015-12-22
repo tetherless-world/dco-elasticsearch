@@ -38,9 +38,9 @@ def get_dco_communities(x):
         .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
-def get_portal_groups(x):
+def get_teams(x):
     return Maybe.of(x).stream() \
-        .flatmap(lambda p: p.objects(DCO.associatedDCOPortalGroup)) \
+        .flatmap(lambda p: p.objects(DCO.associatedDCOTeam)) \
         .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 

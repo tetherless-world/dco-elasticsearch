@@ -108,24 +108,32 @@
           }
         }
       },
-      "portalGroups": {
+      "teams": {
         "properties": {
-          "name": {
-            "type": "multi_field",
-            "fields": {
+          "team": {
+            "properties": {
               "name": {
-                "type": "string",
-                "index": "analyzed"
+                "type": "multi_field",
+                "fields": {
+                  "name": {
+                    "type": "string",
+                    "index": "analyzed"
+                  },
+                  "exact": {
+                    "type": "string",
+                    "index": "not_analyzed"
+                  }
+                }
               },
-              "exact": {
+              "uri": {
                 "type": "string",
-                "index": "not_analyzed"
+                "index": "no"
               }
             }
           },
-          "uri": {
+          "teamrole": {
             "type": "string",
-            "index": "no"
+            "index": "analyzed"
           }
         }
       },

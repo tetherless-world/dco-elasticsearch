@@ -41,8 +41,8 @@
                     {{/if}}
 
                     {{!-- List what portal teams/groups this project is related to, if any --}}
-                    {{#if dcoPortalGroups}}
-                    <div><strong>Portal Groups:</strong> {{#expand dcoPortalGroups}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
+                    {{#if teams}}
+                    <div><strong>Teams:</strong> {{#expand teams}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
                     {{/if}}
 
                     {{!-- The list of DCO Members and non-DCO Members who participated in this project --}}
@@ -120,7 +120,7 @@
                 facets: [
                   {'field': 'mostSpecificType', 'display': 'Project/Field Study'},
                   {'field': 'dcoCommunities.name.exact', 'display': 'Community'},
-                  {'field': 'dcoPortalGroups.name.exact', 'display': 'Portal Group'},
+                  {'field': 'teams.name.exact', 'display': 'Team'},
                   {'field': 'leader.name.exact', 'size': 20, 'display': 'Leader'},
                   {'field': 'participants.name.exact', 'size': 20, 'display': 'Participants'},
                   {'field': 'grants.name.exact', 'size': 20, 'display': 'Grants'},

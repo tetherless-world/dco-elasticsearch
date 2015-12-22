@@ -41,8 +41,8 @@
                     {{/if}}
 
                     {{!-- List what portal teams/groups this project is related to, if any --}}
-                    {{#if dcoPortalGroups}}
-                    <div><strong>Portal Groups:</strong> {{#expand dcoPortalGroups}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
+                    {{#if teams}}
+                    <div><strong>Teams:</strong> {{#expand teams}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
                     {{/if}}
 
                     {{!-- The list of DCO Members and non-DCO Members who participated in this project --}}
@@ -114,7 +114,7 @@
                 facets: [
                   <!--{'field': 'mostSpecificType', 'display': 'Type'},-->
                   {'field': 'dcoCommunities.name.exact', 'display': 'Community'},
-                  {'field': 'dcoPortalGroups.name.exact', 'display': 'Portal Group'},
+                  {'field': 'teams.name.exact', 'display': 'Teams'},
                   {'field': 'leader.name.exact', 'size': 20, 'display': 'Leader'},
                   {'field': 'participants.name.exact', 'size': 20, 'display': 'Participants'},
                   {'field': 'grants.name.exact', 'size': 20, 'display': 'Grants'},
@@ -284,13 +284,13 @@
                                         }
                                         fieldStudyTextHtml.append($("<p>DCO Communities: " + commHtml.join("; ") + "</p>"));
                                     }
-                                    if (fieldStudy.dcoPortalGroups && fieldStudy.dcoPortalGroups.length > 0) {
-                                        var groups = fieldStudy.dcoPortalGroups;
+                                    if (fieldStudy.teams && fieldStudy.teams.length > 0) {
+                                        var groups = fieldStudy.teams;
                                         var groupHtml = new Array();
                                         for (var i = 0; i < groups.length; i++) {
                                             groupHtml.push("<span><a href=\"" + groups[i].uri + "\">" + groups[i].name + "</a></span>");
                                         }
-                                        fieldStudyTextHtml.append($("<p>DCO Portal Groups: " + groupHtml.join("; ") + "</p>"));
+                                        fieldStudyTextHtml.append($("<p>DCO Teams: " + groupHtml.join("; ") + "</p>"));
                                     }
                                     if (fieldStudy.participants && fieldStudy.participants.length > 0) {
                                         var participants = fieldStudy.participants;

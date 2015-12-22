@@ -12,7 +12,7 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX bibo: <http://purl.org/ontology/bibo/>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 
-DESCRIBE ?project ?dcoid ?mostSpecificType ?mainImage ?thumbImage ?thumbnail ?description ?leader ?community ?portalGroup ?submittedBy ?location ?locationLabel ?role ?participant ?contributingRole ?contributor ?dateTimeInterval ?grant ?start ?end ?startDateTime ?endDateTime ?reportingYear ?pu
+DESCRIBE ?project ?dcoid ?mostSpecificType ?mainImage ?thumbImage ?thumbnail ?description ?leader ?community ?team ?submittedBy ?location ?locationLabel ?role ?participant ?contributingRole ?contributor ?dateTimeInterval ?grant ?start ?end ?startDateTime ?endDateTime ?reportingYear ?pu
 WHERE {
   ?project dco:hasDcoId ?dcoid .
   ?project vitro:mostSpecificType ?mostSpecificType .
@@ -20,7 +20,7 @@ WHERE {
   OPTIONAL { ?project vivo:hasFundingVehicle ?grant }
   OPTIONAL { ?project dco:fieldworkLeader ?leader }
   OPTIONAL { ?project dco:associatedDCOCommunity ?community }
-  OPTIONAL { ?project dco:associatedDCOPortalGroup ?portalGroup }
+  OPTIONAL { ?project dco:associatedDCOTeam ?team }
   OPTIONAL { ?project dco:submittedBy ?submittedBy }
   OPTIONAL { ?project dco:hasProjectUpdate ?pu .
     ?pu dco:forReportingYear ?reportingYear
