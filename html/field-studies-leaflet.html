@@ -8,17 +8,17 @@
     <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css" />
 
-    <script type="text/javascript" src="facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
-    <link rel="stylesheet" href="facetview2/vendor/bootstrap/css/bootstrap.min.css">
-    <script type="text/javascript" src="facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
-    <script type="text/javascript" src="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
 
-    <script type="text/javascript" src="facetview2/es.js"></script>
-    <script type="text/javascript" src="facetview2/bootstrap2.facetview.theme.js"></script>
-    <script type="text/javascript" src="facetview2/jquery.facetview2.js"></script>
-    <link rel="stylesheet" href="facetview2/css/facetview.css">
-    <link rel="stylesheet" href="browsers.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/es.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/bootstrap2.facetview.theme.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/jquery.facetview2.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/css/facetview.css">
+    <link rel="stylesheet" href="/vivo/themes/dco/css/browsers.css">
 
     <script id="project-template" type="text/x-handlebars-template">
         <tr>
@@ -113,8 +113,8 @@
                 default_facet_size: 15,
                 facets: [
                   <!--{'field': 'mostSpecificType', 'display': 'Type'},-->
-                  {'field': 'dcoCommunities.name.exact', 'display': 'Community'},
-                  {'field': 'teams.name.exact', 'display': 'Team'},
+                  {'field': 'dcoCommunities.name.exact', 'display': 'DCO Community'},
+                  {'field': 'teams.name.exact', 'display': 'DCO Team'},
                   {'field': 'leader.name.exact', 'size': 20, 'display': 'Leader'},
                   {'field': 'participants.name.exact', 'size': 20, 'display': 'Participants'},
                   {'field': 'grants.name.exact', 'size': 20, 'display': 'Grants'},

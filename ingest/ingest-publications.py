@@ -122,6 +122,13 @@ def create_publication_doc(publication, endpoint):
     elif dco_community:
         print("community label missing:", str(dco_community.identifier))
 
+    dco_team = list(pub.objects(DCO.associatedDCOTeam))
+    dco_team = dco_team[0] if dco_team else None
+    if dco_team and dco_team.label():
+        doc.update({"team": {"uri": str(dco_team.identifier), "name": dco_team.label().toPython()}})
+    elif dco_team:
+        print("team label missing:", str(dco_team.identifier))
+
     event = list(pub.objects(BIBO.presentedAt))
     event = event[0] if event else None
     if event and event.label():

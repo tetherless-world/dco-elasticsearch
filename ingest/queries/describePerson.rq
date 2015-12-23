@@ -32,7 +32,6 @@ WHERE {
              ?teamrole a vivo:MemberRole .
              ?teamrole vivo:roleContributesTo ?team .
              ?team a dco:Team . }
-  OPTIONAL { ?person dco:associatedDCOTeam ?team }
   OPTIONAL { ?person vitro-pub:mainImage ?main_image .
              ?main_image vitro-pub:thumbnailImage ?thumb_image .
              ?thumb_image vitro-pub:downloadLocation ?thumbnail }

@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <title>Publication Browser</title>
 
-    <script type="text/javascript" src="facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
-    <link rel="stylesheet" href="facetview2/vendor/bootstrap/css/bootstrap.min.css">
-    <script type="text/javascript" src="facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
-    <script type="text/javascript" src="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
 
-    <script type="text/javascript" src="facetview2/es.js"></script>
-    <script type="text/javascript" src="facetview2/bootstrap2.facetview.theme.js"></script>
-    <script type="text/javascript" src="facetview2/jquery.facetview2.js"></script>
-    <link rel="stylesheet" href="facetview2/css/facetview.css">
-    <link rel="stylesheet" href="browsers.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/es.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/bootstrap2.facetview.theme.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/jquery.facetview2.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/css/facetview.css">
+    <link rel="stylesheet" href="/vivo/themes/dco/css/browsers.css">
 
     <script type="text/javascript">
         jQuery(document).ready(function($) {
@@ -30,7 +30,8 @@
                 default_facet_size: 15,
                 facets: [
                     {'field': 'mostSpecificType', 'display': 'Type'},
-                    {'field': 'community.name.exact', 'display': 'Community'},
+                    {'field': 'community.name.exact', 'display': 'DCO Community'},
+                    {'field': 'team.name.exact', 'display': 'DCO Team'},
                     {'field': 'subjectArea.name.exact', 'display': 'Subject Area'},
                     {'field': 'authors.name.exact', 'size': 20, 'display': 'Author'},
                     {'field': 'publicationYear', 'display': 'Publication Year'},
@@ -71,6 +72,10 @@
 
                     if (record["community"]) {
                         html += "<br /><span>Community: <a href=\"" + record["community"]["uri"] + "\" target=\"_blank\">" + record["community"]["name"] + "</a></span>";
+                    }
+
+                    if (record["team"]) {
+                        html += "<br /><span>Team: <a href=\"" + record["team"]["uri"] + "\" target=\"_blank\">" + record["team"]["name"] + "</a></span>";
                     }
 
                     if (record["authors"]) {
