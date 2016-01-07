@@ -30,6 +30,9 @@ WHERE {
   OPTIONAL { ?person dco:associatedDCOCommunity ?dco_community }
   OPTIONAL { ?person obo:RO_0000053 ?teamrole .
              ?teamrole a vivo:MemberRole .
+             OPTIONAL { ?teamrole vivo:dateTimeInterval ?interval .
+                                  ?interval vivo:end ?end .}
+             FILTER( ! BOUND(?end))
              ?teamrole vivo:roleContributesTo ?team .
              ?team a dco:Team . }
   OPTIONAL { ?person vitro-pub:mainImage ?main_image .
