@@ -16,12 +16,10 @@
     <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/css/facetview.css">
     <link rel="stylesheet" href="/vivo/themes/dco/css/browsers.css">
 
-
     <script type="text/javascript">
         jQuery(document).ready(function($) {
             $('.facet-view-simple').facetview({
-//                search_url: '//localhost:9200/dco/dataset/_search',
-                search_url: '//dcotest.tw.rpi.edu/search/dco/dataset/_search',
+                search_url: '//data.deepcarbon.net/es/dco/dataset/_search',
                 page_size: 20,
                 sort: [
                     {"_score" : {'order' : 'asc'}}
@@ -57,7 +55,7 @@
                                                                             represents one or more of the DCO science
                                                                                 communities that a dataset is related to
 
-                    DCO Team            |   teams.name.exact            |   the group names are displayed in full and
+                    Team                |   teams.name.exact            |   the group names are displayed in full and
                                                                                 not separated into individual words
                                                                             represents one or more of the DCO teams
                                                                                 that a dataset is related to
@@ -78,7 +76,7 @@
                     {'field': 'authors.name.exact', 'size': 20, 'display': 'Author'},
                     {'field': 'authors.organization.name.exact', 'display': 'Author Organization'},
                     {'field': 'dcoCommunities.name.exact', 'display': 'DCO Community'},
-                    {'field': 'teams.name.exact', 'display': 'DCO Team'},
+                    {'field': 'teams.name.exact', 'display': 'Team'},
                     {'field': 'projects.name.exact', 'display': 'Project'},
                     {'field': 'dataTypes.name.exact', 'display': 'Data Type'}
                 ],
