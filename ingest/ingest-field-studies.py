@@ -241,9 +241,9 @@ def create_project_doc(project, endpoint):
 
             obj = {"uri": str(team.identifier), "name": name}
 
-            teams.append(obj)
+            associatedTeams.append(obj)
 
-    doc.update({"teams": teams})
+    doc.update({"teams": associatedTeams})
 
     #people who have participated in this project
     participants = []

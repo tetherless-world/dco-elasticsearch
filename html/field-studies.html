@@ -285,12 +285,12 @@
                                         fieldStudyTextHtml.append($("<p>DCO Communities: " + commHtml.join("; ") + "</p>"));
                                     }
                                     if (fieldStudy.teams && fieldStudy.teams.length > 0) {
-                                        var groups = fieldStudy.teams;
-                                        var groupHtml = new Array();
-                                        for (var i = 0; i < groups.length; i++) {
-                                            groupHtml.push("<span><a href=\"" + groups[i].uri + "\">" + groups[i].name + "</a></span>");
+                                        var teams = fieldStudy.teams;
+                                        var teamHtml = new Array();
+                                        for (var i = 0; i < teams.length; i++) {
+                                            teamHtml.push("<span><a href=\"" + teams[i].uri + "\">" + teams[i].name + "</a></span>");
                                         }
-                                        fieldStudyTextHtml.append($("<p>DCO Teams: " + groupHtml.join("; ") + "</p>"));
+                                        fieldStudyTextHtml.append($("<p>DCO Teams: " + teamHtml.join("; ") + "</p>"));
                                     }
                                     if (fieldStudy.participants && fieldStudy.participants.length > 0) {
                                         var participants = fieldStudy.participants;

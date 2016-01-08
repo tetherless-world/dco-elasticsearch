@@ -52,7 +52,7 @@
 
                     {{#if affiliations}}
                     <div><strong>Affiliations:</strong></div>
-                    {{#list affiliations}}{{position}} - <a href="{{org.uri}}">{{org.name}}</a>{{/list}}
+                    <div>{{#list affiliations}}{{position}} - <a href="{{org.uri}}">{{org.name}}</a>{{/list}}</div>
                     {{/if}}
 
                     {{#if researchArea}}
@@ -124,7 +124,7 @@
 
         jQuery(document).ready(function($) {
             $('.facet-view-simple').facetview({
-                search_url: '//localhost:9200/dco/person/_search',
+                search_url: '//data.deepcarbon.net/es/dco/person/_search',
                 page_size: 10,
                 sort: [
                     {"_score" : {"order" : "desc"}},
@@ -137,8 +137,8 @@
                 default_facet_order: "count",
                 default_facet_size: 15,
                 facets: [
-                    {'field': 'dcoCommunities.name.exact', 'display': 'DCO Community'},
-                    {'field': 'teams.team.name.exact', 'display': 'DCO Team'},
+                    {'field': 'dcoCommunities.name.exact', 'display': 'Community'},
+                    {'field': 'teams.team.name.exact', 'display': 'Team'},
                     {'field': 'organization.name.exact', 'display': 'Organization'},
                     {'field': 'researchArea.name.exact', 'display': 'Research Area'},
                     {'field': 'homeCountry.name.exact', 'display': 'Country'},
