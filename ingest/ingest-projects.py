@@ -229,20 +229,20 @@ def create_project_doc(project, endpoint):
 
     doc.update({"dcoCommunities": associatedCommunities})
 
-    #dcoPortalGroups associated with this project
-    associatedPortalGroups = []
-    portalGroups = [faux for faux in prj.objects(DCO.associatedDCOPortalGroup) if has_type(faux, DCO.PortalGroup)]
+    #teams associated with this project
+    associatedTeams = []
+    teams = [faux for faux in prj.objects(DCO.associatedDCOTeam) if has_type(faux, DCO.Team)]
 
-    if portalGroups:
-        for portalGroup in portalGroups:
+    if teams:
+        for team in teams:
 
-            name = portalGroup.label().toPython() if portalGroup else None
+            name = team.label().toPython() if team else None
 
-            obj = {"uri": str(portalGroup.identifier), "name": name}
+            obj = {"uri": str(team.identifier), "name": name}
 
-            associatedPortalGroups.append(obj)
+            associatedTeams.append(obj)
 
-    doc.update({"dcoPortalGroups": associatedPortalGroups})
+    doc.update({"teams": associatedTeams})
 
     #people who have participated in this project
     participants = []
@@ -391,7 +391,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--threads', default=2, help='number of threads to use (default = 8)')
-    parser.add_argument('--es', default="http://data.deepcarbon.net/es", help="elasticsearch service URL")
+    parser.add_argument('--es', default="http://localhost:9200", help="elasticsearch service URL")
     parser.add_argument('--publish', default=False, action="store_true", help="publish to elasticsearch?")
     parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")
     parser.add_argument('--mapping', default="mappings/project.json", help="project elasticsearch mapping document")

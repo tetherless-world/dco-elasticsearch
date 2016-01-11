@@ -200,11 +200,25 @@ def get_organizations(person):
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
 
-def get_portal_groups(person):
-    return Maybe.of(person).stream() \
-        .flatmap(lambda p: p.objects(DCO.associatedDCOPortalGroup)) \
-        .filter(has_label) \
-        .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
+def get_teams(person):
+    teams = []
+
+    teamroles = Maybe.of(person).stream() \
+        .flatmap(lambda per: per.objects(OBO.RO_0000053)) \
+        .filter(lambda related: has_type(related, VIVO.MemberRole)).list()
+
+    for teamrole in teamroles:
+        team = Maybe.of(teamrole).stream() \
+            .flatmap(lambda r: r.objects(VIVO.roleContributesTo)) \
+            .filter(lambda o: has_type(o, DCO.Team)) \
+            .filter(has_label) \
+            .map(lambda o: {"uri": str(o.identifier), "name": str(o.label())}) \
+            .one().value
+
+        if team:
+            teams.append({"teamrole": str(teamrole.label()), "team": team})
+
+    return teams
 
 
 def get_dco_communities(person):
@@ -303,9 +317,9 @@ def create_person_doc(person, endpoint):
     if organizations:
         doc.update({"organization": organizations})
 
-    portal_groups = get_portal_groups(per)
-    if portal_groups:
-        doc.update({"portalGroups": portal_groups})
+    teams = get_teams(per)
+    if teams:
+        doc.update({"teams": teams})
 
     dco_communities = get_dco_communities(per)
     if dco_communities:

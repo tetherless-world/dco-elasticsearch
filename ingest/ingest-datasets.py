@@ -76,10 +76,10 @@ class DatasetIngest(Ingest):
         if dco_communities:
             doc.update({"dcoCommunities": dco_communities})
 
-        # portal_groups
-        portal_groups = get_portal_groups(ds)
-        if portal_groups:
-            doc.update({"portalGroups": portal_groups})
+        # teams
+        teams = get_teams(ds)
+        if teams:
+            doc.update({"teams": teams})
 
         # projects
         projects = get_projects_of_dataset(ds)

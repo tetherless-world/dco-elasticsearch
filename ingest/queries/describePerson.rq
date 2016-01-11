@@ -13,7 +13,7 @@ PREFIX bibo: <http://purl.org/ontology/bibo/>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
 
-DESCRIBE ?person ?dcoid ?mostSpecificType ?org ?dco_community ?portal_group ?main_image ?thumb_image ?thumbnail ?research_area ?vcard ?email ?name ?position ?affiliation ?homeCountry
+DESCRIBE ?person ?dcoid ?mostSpecificType ?org ?dco_community ?teamrole ?team ?main_image ?thumb_image ?thumbnail ?research_area ?vcard ?email ?name ?position ?affiliation ?homeCountry
 WHERE {
   ?person a foaf:Person .
   ?person vitro:mostSpecificType ?mostSpecificType .
@@ -28,7 +28,13 @@ WHERE {
              ?affiliation a foaf:Organization }
   OPTIONAL { ?person dco:inOrganization ?org }
   OPTIONAL { ?person dco:associatedDCOCommunity ?dco_community }
-  OPTIONAL { ?person dco:associatedDCOPortalGroup ?portal_group }
+  OPTIONAL { ?person obo:RO_0000053 ?teamrole .
+             ?teamrole a vivo:MemberRole .
+             OPTIONAL { ?teamrole vivo:dateTimeInterval ?interval .
+                                  ?interval vivo:end ?end .}
+             FILTER( ! BOUND(?end))
+             ?teamrole vivo:roleContributesTo ?team .
+             ?team a dco:Team . }
   OPTIONAL { ?person vitro-pub:mainImage ?main_image .
              ?main_image vitro-pub:thumbnailImage ?thumb_image .
              ?thumb_image vitro-pub:downloadLocation ?thumbnail }

@@ -10,14 +10,14 @@ PREFIX vitro: <http://vitro.mannlib.cornell.edu/ns/vitro/0.7#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX bibo: <http://purl.org/ontology/bibo/>
 
-DESCRIBE ?dataset ?dcoid ?mostSpecificType ?label ?publicationYear ?community ?group ?project ?authorship ?author ?researchArea ?authorOrganization ?dataType ?citation ?distribution ?file ?fileURL
+DESCRIBE ?dataset ?dcoid ?mostSpecificType ?label ?publicationYear ?community ?team ?project ?authorship ?author ?researchArea ?authorOrganization ?dataType ?citation ?distribution ?file ?fileURL
 WHERE {
   ?dataset dco:hasDcoId ?dcoid .
   ?dataset vitro:mostSpecificType ?mostSpecificType .
   ?dataset rdfs:label ?label .
   OPTIONAL { ?dataset dco:yearOfPublication ?publicationYear . }
   OPTIONAL { ?dataset dco:associatedDCOCommunity ?community }
-  OPTIONAL { ?dataset dco:associatedDCOPortalGroup ?group }
+  OPTIONAL { ?dataset dco:associatedDCOTeam ?team }
   OPTIONAL { ?dataset dco:isDatasetOf ?project }
   OPTIONAL {
     ?dataset vivo:relatedBy ?authorship .

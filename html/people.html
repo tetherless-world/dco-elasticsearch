@@ -6,17 +6,17 @@
 
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.1/handlebars.min.js"></script>
 
-    <script type="text/javascript" src="facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
-    <link rel="stylesheet" href="facetview2/vendor/bootstrap/css/bootstrap.min.css">
-    <script type="text/javascript" src="facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
-    <script type="text/javascript" src="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
 
-    <script type="text/javascript" src="facetview2/es.js"></script>
-    <script type="text/javascript" src="facetview2/bootstrap2.facetview.theme.js"></script>
-    <script type="text/javascript" src="facetview2/jquery.facetview2.js"></script>
-    <link rel="stylesheet" href="facetview2/css/facetview.css">
-    <link rel="stylesheet" href="browsers.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/es.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/bootstrap2.facetview.theme.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/jquery.facetview2.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/css/facetview.css">
+    <link rel="stylesheet" href="/vivo/themes/dco/css/browsers.css">
 
     <script id="person-template" type="text/x-handlebars-template">
         <tr>
@@ -33,7 +33,7 @@
                         </small></h5>
                     </div>
                 </div>
-                <div class="person-info">
+                <div class="person-info span7">
                     {{#if (showMostSpecificType mostSpecificType)}}<div><em class="small">{{mostSpecificType}}</em></div>{{/if}}
                     {{#if email}}<div><strong>email: </strong><a href="mailto:{{email}}">{{email}}</a></div>{{/if}}
                     {{#if network_id}}<div><strong>network ID: </strong><small>{{network_id}}</small></div>{{/if}}
@@ -42,8 +42,8 @@
                     <div><strong>Communities:</strong> {{#expand dcoCommunities}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
                     {{/if}}
 
-                    {{#if portalGroups}}
-                    <div><strong>Portal Groups:</strong> {{#expand portalGroups}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
+                    {{#if teams}}
+                    <div><strong>Teams:</strong> {{#expand teams}}{{teamrole}} - <a href="{{team.uri}}" target="_blank">{{team.name}}</a>{{/expand}}</div>
                     {{/if}}
 
                     {{#if organization}}
@@ -52,7 +52,7 @@
 
                     {{#if affiliations}}
                     <div><strong>Affiliations:</strong></div>
-                    {{#list affiliations}}{{position}} - <a href="{{org.uri}}">{{org.name}}</a>{{/list}}
+                    <div>{{#list affiliations}}{{position}} - <a href="{{org.uri}}">{{org.name}}</a>{{/list}}</div>
                     {{/if}}
 
                     {{#if researchArea}}
@@ -138,7 +138,7 @@
                 default_facet_size: 15,
                 facets: [
                     {'field': 'dcoCommunities.name.exact', 'display': 'Community'},
-                    {'field': 'portalGroups.name.exact', 'display': 'Portal Group'},
+                    {'field': 'teams.team.name.exact', 'display': 'Team'},
                     {'field': 'organization.name.exact', 'display': 'Organization'},
                     {'field': 'researchArea.name.exact', 'display': 'Research Area'},
                     {'field': 'homeCountry.name.exact', 'display': 'Country'},

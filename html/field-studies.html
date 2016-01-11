@@ -8,17 +8,17 @@
     <link rel="stylesheet" href="//js.arcgis.com/3.14/esri/css/esri.css">
     <script src="//js.arcgis.com/3.14/"></script>
 
-    <script type="text/javascript" src="facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
-    <link rel="stylesheet" href="facetview2/vendor/bootstrap/css/bootstrap.min.css">
-    <script type="text/javascript" src="facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
-    <script type="text/javascript" src="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
 
-    <script type="text/javascript" src="facetview2/es.js"></script>
-    <script type="text/javascript" src="facetview2/bootstrap2.facetview.theme.js"></script>
-    <script type="text/javascript" src="facetview2/jquery.facetview2.js"></script>
-    <link rel="stylesheet" href="facetview2/css/facetview.css">
-    <link rel="stylesheet" href="browsers.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/es.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/bootstrap2.facetview.theme.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/jquery.facetview2.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/css/facetview.css">
+    <link rel="stylesheet" href="/vivo/themes/dco/css/browsers.css">
 
     <script id="project-template" type="text/x-handlebars-template">
         <tr>
@@ -41,8 +41,8 @@
                     {{/if}}
 
                     {{!-- List what portal teams/groups this project is related to, if any --}}
-                    {{#if dcoPortalGroups}}
-                    <div><strong>Portal Groups:</strong> {{#expand dcoPortalGroups}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
+                    {{#if teams}}
+                    <div><strong>Teams:</strong> {{#expand teams}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
                     {{/if}}
 
                     {{!-- The list of DCO Members and non-DCO Members who participated in this project --}}
@@ -102,7 +102,7 @@
     <script type="text/javascript">
         jQuery(document).ready(function($) {
             $('.facet-view-simple').facetview({
-                search_url: '//localhost:9200/dco/field-study/_search',
+                search_url: '//data.deepcarbon.net/es/dco/field-study/_search',
                 page_size: 1000,
                 sort: [{"_score" : {"order" : "desc"}}],
                 sharesave_link: true,
@@ -113,8 +113,8 @@
                 default_facet_size: 15,
                 facets: [
                   <!--{'field': 'mostSpecificType', 'display': 'Type'},-->
-                  {'field': 'dcoCommunities.name.exact', 'display': 'Community'},
-                  {'field': 'dcoPortalGroups.name.exact', 'display': 'Portal Group'},
+                  {'field': 'dcoCommunities.name.exact', 'display': 'DCO Community'},
+                  {'field': 'teams.name.exact', 'display': 'DCO Team'},
                   {'field': 'leader.name.exact', 'size': 20, 'display': 'Leader'},
                   {'field': 'participants.name.exact', 'size': 20, 'display': 'Participants'},
                   {'field': 'grants.name.exact', 'size': 20, 'display': 'Grants'},
@@ -284,13 +284,13 @@
                                         }
                                         fieldStudyTextHtml.append($("<p>DCO Communities: " + commHtml.join("; ") + "</p>"));
                                     }
-                                    if (fieldStudy.dcoPortalGroups && fieldStudy.dcoPortalGroups.length > 0) {
-                                        var groups = fieldStudy.dcoPortalGroups;
-                                        var groupHtml = new Array();
-                                        for (var i = 0; i < groups.length; i++) {
-                                            groupHtml.push("<span><a href=\"" + groups[i].uri + "\">" + groups[i].name + "</a></span>");
+                                    if (fieldStudy.teams && fieldStudy.teams.length > 0) {
+                                        var teams = fieldStudy.teams;
+                                        var teamHtml = new Array();
+                                        for (var i = 0; i < teams.length; i++) {
+                                            teamHtml.push("<span><a href=\"" + teams[i].uri + "\">" + teams[i].name + "</a></span>");
                                         }
-                                        fieldStudyTextHtml.append($("<p>DCO Portal Groups: " + groupHtml.join("; ") + "</p>"));
+                                        fieldStudyTextHtml.append($("<p>DCO Teams: " + teamHtml.join("; ") + "</p>"));
                                     }
                                     if (fieldStudy.participants && fieldStudy.participants.length > 0) {
                                         var participants = fieldStudy.participants;
@@ -418,6 +418,7 @@
             display: none;
         }
     </style>
+
 
 </head>
 <body>

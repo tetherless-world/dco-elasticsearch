@@ -38,9 +38,9 @@ def get_dco_communities(x):
         .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
-def get_portal_groups(x):
+def get_teams(x):
     return Maybe.of(x).stream() \
-        .flatmap(lambda p: p.objects(DCO.associatedDCOPortalGroup)) \
+        .flatmap(lambda p: p.objects(DCO.associatedDCOTeam)) \
         .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
@@ -162,9 +162,9 @@ def main(get_objects_query_location, describe_object_query_location,
 
     # save generated bulk import file so it can be backed up or reviewed if there are publish errors
     with open(args.out, "w") as bulk_file:
-        bulk_file.write('\n'.join(ingestSomething.records) + '\n')
+        bulk_file.write('\n'.join(ingestSomething.records) + '\n\n')
 
     # publish the results to elasticsearch if "--publish" was specified on the command line
     if args.publish:
-        bulk_str = '\n'.join(ingestSomething.records) + '\n'
+        bulk_str = '\n'.join(ingestSomething.records) + '\n\n'
         ingestSomething.publish(bulk=bulk_str, endpoint=args.es, rebuild=args.rebuild)

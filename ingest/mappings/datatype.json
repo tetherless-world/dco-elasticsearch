@@ -75,7 +75,7 @@
       "title": {
         "type": "multi_field",
         "fields": {
-          "name": {
+          "title": {
             "type": "string",
             "index": "analyzed"
           },
@@ -90,7 +90,7 @@
           "title": {
             "type": "multi_field",
             "fields": {
-              "name": {
+              "title": {
                 "type": "string",
                 "index": "analyzed"
               },

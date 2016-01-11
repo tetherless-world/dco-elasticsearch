@@ -4,18 +4,6 @@
     <meta charset="UTF-8">
     <title>Dataset Browser</title>
 
-    <!--<script type="text/javascript" src="facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>-->
-    <!--<link rel="stylesheet" href="facetview2/vendor/bootstrap/css/bootstrap.min.css">-->
-    <!--<script type="text/javascript" src="facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>-->
-    <!--<link rel="stylesheet" href="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">-->
-    <!--<script type="text/javascript" src="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>-->
-
-    <!--<script type="text/javascript" src="facetview2/es.js"></script>-->
-    <!--<script type="text/javascript" src="facetview2/bootstrap2.facetview.theme.js"></script>-->
-    <!--<script type="text/javascript" src="facetview2/jquery.facetview2.js"></script>-->
-    <!--<link rel="stylesheet" href="facetview2/css/facetview.css">-->
-    <!--<link rel="stylesheet" href="browsers.css">-->
-
     <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
     <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/bootstrap/css/bootstrap.min.css">
     <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
@@ -28,12 +16,10 @@
     <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/css/facetview.css">
     <link rel="stylesheet" href="/vivo/themes/dco/css/browsers.css">
 
-
     <script type="text/javascript">
         jQuery(document).ready(function($) {
             $('.facet-view-simple').facetview({
-//                search_url: '//localhost:9200/dco/dataset/_search',
-                search_url: '//dcotest.tw.rpi.edu/search/dco/dataset/_search',
+                search_url: '//data.deepcarbon.net/es/dco/dataset/_search',
                 page_size: 20,
                 sort: [
                     {"_score" : {'order' : 'asc'}}
@@ -69,7 +55,7 @@
                                                                             represents one or more of the DCO science
                                                                                 communities that a dataset is related to
 
-                    Portal Group        |   portalGroups.name.exact     |   the group names are displayed in full and
+                    Team                |   teams.name.exact            |   the group names are displayed in full and
                                                                                 not separated into individual words
                                                                             represents one or more of the DCO teams
                                                                                 that a dataset is related to
@@ -90,7 +76,7 @@
                     {'field': 'authors.name.exact', 'size': 20, 'display': 'Author'},
                     {'field': 'authors.organization.name.exact', 'display': 'Author Organization'},
                     {'field': 'dcoCommunities.name.exact', 'display': 'DCO Community'},
-                    {'field': 'portalGroups.name.exact', 'display': 'Portal Group'},
+                    {'field': 'teams.name.exact', 'display': 'Team'},
                     {'field': 'projects.name.exact', 'display': 'Project'},
                     {'field': 'dataTypes.name.exact', 'display': 'Data Type'}
                 ],
@@ -165,15 +151,15 @@
                         html += "</small></span>";
                     }
 
-                    // display portalGroups
-                    if (record["portalGroups"]) {
-                        html += "<br /><span><small>DCO Portal Groups: ";
-                        if (record["portalGroups"].length == 0) {
+                    // display teams
+                    if (record["teams"]) {
+                        html += "<br /><span><small>DCO Teams: ";
+                        if (record["teams"].length == 0) {
                             html += 'N/A'
                         } else {
-                            for (var i = 0; i < record["portalGroups"].length; i++) {
-                                html += "<a href=\"" + record["portalGroups"][i]["uri"] + "\" target=\"_blank\">" + record["portalGroups"][i]["name"] + "</a>";
-                                if (i < record["portalGroups"].length - 1) {
+                            for (var i = 0; i < record["teams"].length; i++) {
+                                html += "<a href=\"" + record["teams"][i]["uri"] + "\" target=\"_blank\">" + record["teams"][i]["name"] + "</a>";
+                                if (i < record["teams"].length - 1) {
                                     html += "; ";
                                 }
                             }

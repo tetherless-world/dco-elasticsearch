@@ -144,9 +144,9 @@ def get_dco_communities(dataset):
         .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
-def get_portal_groups(dataset):
+def get_teams(dataset):
     return Maybe.of(dataset).stream() \
-        .flatmap(lambda p: p.objects(DCO.associatedDCOPortalGroup)) \
+        .flatmap(lambda p: p.objects(DCO.associatedDCOTeam)) \
         .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
@@ -219,10 +219,10 @@ def create_dataset_doc(dataset, endpoint):
     if dco_communities:
         doc.update({"dcoCommunities": dco_communities})
 
-    # portal_groups
-    portal_groups = get_portal_groups(ds)
-    if portal_groups:
-        doc.update({"portalGroups": portal_groups})
+    # teams
+    teams = get_teams(ds)
+    if teams:
+        doc.update({"teams": teams})
 
     # projects NOT WORKING YET
     projects = get_projects(ds)

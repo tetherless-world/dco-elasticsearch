@@ -110,7 +110,7 @@
              }
           }
        },
-       "dcoPortalGroups": {
+       "teams": {
           "properties": {
              "name": {
                "type":"multi_field",
