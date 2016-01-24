@@ -222,10 +222,24 @@ def get_teams(person):
 
 
 def get_dco_communities(person):
-    return Maybe.of(person).stream() \
-        .flatmap(lambda p: p.objects(DCO.associatedDCOCommunity)) \
-        .filter(has_label) \
-        .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
+    comms = []
+
+    commroles = Maybe.of(person).stream() \
+        .flatmap(lambda p: p.objects(OBO.RO_0000053)) \
+        .filter(lambda related: has_type(related, VIVO.MemberRole)).list()
+
+    for commrole in commroles:
+        comm = Maybe.of(commrole).stream() \
+            .flatmap(lambda r: r.objects(VIVO.roleContributesTo)) \
+            .filter(lambda o: has_type(o, DCO.ResearchCommunity)) \
+            .filter(has_label) \
+            .map(lambda o: {"uri": str(o.identifier), "name": str(o.label())}) \
+            .one().value
+
+        if comm:
+            comms.append({"commrole": str(commrole.label()), "community": comm})
+
+    return comms
 
 
 def get_home_country(person):
