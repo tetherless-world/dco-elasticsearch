@@ -194,10 +194,24 @@ def get_research_areas(person):
 
 
 def get_organizations(person):
-    return Maybe.of(person).stream() \
-        .flatmap(lambda p: p.objects(DCO.inOrganization)) \
-        .filter(has_label) \
-        .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
+    orgs = []
+
+    orgroles = Maybe.of(person).stream() \
+        .flatmap(lambda per: per.objects(VIVO.relatedBy)) \
+        .filter(lambda related: has_type(related, VIVO.Position)).list()
+
+    for orgrole in orgroles:
+        org = Maybe.of(orgrole).stream() \
+            .flatmap(lambda r: r.objects(VIVO.relates)) \
+            .filter(lambda o: has_type(o, FOAF.Organization)) \
+            .filter(has_label) \
+            .map(lambda o: {"uri": str(o.identifier), "name": str(o.label())}) \
+            .one().value
+
+        if org:
+            orgs.append({"orgrole": str(orgrole.label()), "organization": org})
+
+    return orgs
 
 
 def get_teams(person):
@@ -247,27 +261,6 @@ def get_home_country(person):
         .flatmap(lambda p: p.objects(DCO.homeCountry)) \
         .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).one().value
-
-
-def get_affiliations(person):
-    affiliations = []
-
-    positions = Maybe.of(person).stream() \
-        .flatmap(lambda per: per.objects(VIVO.relatedBy)) \
-        .filter(lambda related: has_type(related, VIVO.Position)).list()
-
-    for position in positions:
-        organization = Maybe.of(position).stream() \
-            .flatmap(lambda r: r.objects(VIVO.relates)) \
-            .filter(lambda o: has_type(o, FOAF.Organization)) \
-            .filter(has_label) \
-            .map(lambda o: {"uri": str(o.identifier), "name": str(o.label())}) \
-            .one().value
-
-        if organization:
-            affiliations.append({"position": str(position.label()), "org": organization})
-
-    return affiliations
 
 
 def get_thumbnail(person):
@@ -329,7 +322,7 @@ def create_person_doc(person, endpoint):
 
     organizations = get_organizations(per)
     if organizations:
-        doc.update({"organization": organizations})
+        doc.update({"organizations": organizations})
 
     teams = get_teams(per)
     if teams:
@@ -342,10 +335,6 @@ def create_person_doc(person, endpoint):
     thumbnail = get_thumbnail(per)
     if thumbnail:
         doc.update({"thumbnail": thumbnail})
-
-    affiliations = get_affiliations(per)
-    if affiliations:
-        doc.update({"affiliations": affiliations})
 
     return doc
 

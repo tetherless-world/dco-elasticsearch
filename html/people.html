@@ -43,16 +43,13 @@
                     {{/if}}
 
                     {{#if teams}}
-                    <div><strong>Teams:</strong> {{#expand teams}}{{teamrole}} - <a href="{{team.uri}}" target="_blank">{{team.name}}</a>{{/expand}}</div>
+                    <div><strong>Teams:</strong></div>
+                    <div>{{#list teams}}{{teamrole}} - <a href="{{team.uri}}" target="_blank">{{team.name}}</a>{{/list}}</div>
                     {{/if}}
 
-                    {{#if organization}}
-                    <div><strong>Organizations:</strong> {{#expand organization}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
-                    {{/if}}
-
-                    {{#if affiliations}}
-                    <div><strong>Affiliations:</strong></div>
-                    <div>{{#list affiliations}}{{position}} - <a href="{{org.uri}}">{{org.name}}</a>{{/list}}</div>
+                    {{#if organizations}}
+                    <div><strong>Organizations:</strong></div>
+                    <div>{{#list organizations}}{{orgrole}} - <a href="{{organization.uri}}" target="_blank">{{organization.name}}</a>{{/list}}</div>
                     {{/if}}
 
                     {{#if researchArea}}
@@ -139,7 +136,7 @@
                 facets: [
                     {'field': 'dcoCommunities.community.name.exact', 'display': 'Community'},
                     {'field': 'teams.team.name.exact', 'display': 'Team'},
-                    {'field': 'organization.name.exact', 'display': 'Organization'},
+                    {'field': 'organizations.organization.name.exact', 'display': 'Organization'},
                     {'field': 'researchArea.name.exact', 'display': 'Research Area'},
                     {'field': 'homeCountry.name.exact', 'display': 'Country'},
                     {'field': 'isDcoMember', 'display': 'Show only DCO-members'}
