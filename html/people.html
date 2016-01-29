@@ -39,7 +39,8 @@
                     {{#if network_id}}<div><strong>network ID: </strong><small>{{network_id}}</small></div>{{/if}}
 
                     {{#if dcoCommunities}}
-                    <div><strong>Communities:</strong> {{#expand dcoCommunities}}{{commrole}} - <a href="{{community.uri}}" target="_blank">{{community.name}}</a>{{/expand}}</div>
+                    <div><strong>Communities:</strong></div>
+                    <div>{{#list dcoCommunities}}{{commrole}} - <a href="{{community.uri}}" target="_blank">{{community.name}}</a>{{/list}}</div>
                     {{/if}}
 
                     {{#if teams}}
