@@ -129,7 +129,8 @@
                 ],
                 render_result_record: function(options, record)
                 {
-                    return template(record).trim();
+                    // do not render HTML for result sets which are not shown
+                    return "";
                 },
                 selected_filters_in_facet: true,
                 show_filter_field : true,
