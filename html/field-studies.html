@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Field Studies Browser</title>
 
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.1/handlebars.min.js"></script>
     <link rel="stylesheet" href="//js.arcgis.com/3.14/esri/css/esri.css">
     <script src="//js.arcgis.com/3.14/"></script>
 
@@ -19,85 +18,6 @@
     <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/jquery.facetview2.js"></script>
     <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/css/facetview.css">
     <link rel="stylesheet" href="/vivo/themes/dco/css/browsers.css">
-
-    <script id="project-template" type="text/x-handlebars-template">
-        <tr>
-            <td>
-                {{#if thumbnail}}
-                <div class="thumbnail">
-                    <img src="{{thumbnail}}">
-                </div>
-                {{/if}}
-                <div class="project-info span7">
-                    {{!-- Display title of this project and link to the project's instance URI --}}
-                    <div><a href="https://deepcarbon.net/dco_project_summary?uri={{uri}}">{{title}}</a></div>
-
-                    {{!-- Display this project's type --}}
-                    <!--{{#if (showMostSpecificType mostSpecificType)}}<div><strong>Type: </strong><small>{{mostSpecificType}}</small></div>{{/if}}-->
-
-                    {{!-- List the science communities this project is related to, if any --}}
-                    {{#if dcoCommunities}}
-                    <div><strong>Communities:</strong> {{#expand dcoCommunities}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
-                    {{/if}}
-
-                    {{!-- List what portal teams/groups this project is related to, if any --}}
-                    {{#if teams}}
-                    <div><strong>Teams:</strong> {{#expand teams}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
-                    {{/if}}
-
-                    {{!-- The list of DCO Members and non-DCO Members who participated in this project --}}
-                    {{#if participants}}
-                    <div><strong>Participants:</strong> {{#expand participants}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
-                    {{/if}}
-
-                    {{!-- The grants that have funded this project --}}
-                    {{#if grants}}
-                    <div><strong>Grants:</strong> {{#expand grants}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
-                    {{/if}}
-
-                    {{!-- BADGES --}}
-
-                    <div>
-                        <a href="{{dcoId}}" target="_blank"><img class="badge" src="{{dcoIdBadgeURL dcoId}}"/></a>
-                    </div>
-
-                </div>
-            </td>
-        </tr>
-    </script>
-
-    <script type="text/javascript">
-        Handlebars.registerHelper('orcidURL', function(orcid) {
-            return "http://orcid.org/"+orcid;
-        });
-        Handlebars.registerHelper('dcoIdBadgeURL', function(dcoId) {
-            var escapedDCOID = encodeURIComponent(dcoId.substring(25));
-            return "//dcotest.tw.rpi.edu/badges/badge?title=metadata&text="+escapedDCOID+"&color=D14719";
-        });
-        Handlebars.registerHelper('showMostSpecificType', function(mostSpecificType) {
-            return (mostSpecificType);
-        });
-        Handlebars.registerHelper('expand', function(items, options) {
-            var out = "";
-            var j = items.length - 1;
-            for(var i = 0; i < items.length; i++) {
-                out += options.fn(items[i]);
-                if(i < j) {
-                    out += "; ";
-                }
-            }
-            return out;
-        });
-        Handlebars.registerHelper('list', function(items, options) {
-            var out = "<ul>";
-            for(var i=0, l=items.length; i<l; i++) {
-                out = out + "<li>" + options.fn(items[i]) + "</li>";
-            }
-            return out + "</ul>";
-        });
-        var source = $("#project-template").html();
-        var template = Handlebars.compile(source);
-    </script>
 
     <script type="text/javascript">
         jQuery(document).ready(function($) {
@@ -129,7 +49,8 @@
                 ],
                 render_result_record: function(options, record)
                 {
-                    return template(record).trim();
+                    // do not render HTML for result sets which are not shown
+                    return "";
                 },
                 selected_filters_in_facet: true,
                 show_filter_field : true,
