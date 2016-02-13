@@ -133,7 +133,8 @@ def get_dcoid(person):
     return Maybe.of(person).stream() \
         .flatmap(lambda p: p.objects(DCO.hasDcoId)) \
         .orElse(lambda: person.graph.subjects(DCO.dcoIdFor, person)) \
-        .map(lambda i: i.identifier).one().value
+        .map(lambda i: i.label()) \
+        .one().value
 
 
 def get_orcid(person):

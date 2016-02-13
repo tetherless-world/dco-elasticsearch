@@ -58,7 +58,7 @@
                     {{!-- BADGES --}}
 
                     <div>
-                        <a href="{{dcoId}}" target="_blank"><img class="badge" src="{{dcoIdBadgeURL dcoId}}"/></a>
+                        {{#if dcoId}}<a href="{{dcoidURL dcoId}}" target="_blank"><img class="badge" src="{{dcoIdBadgeURL dcoId}}"/></a>{{/if}}
                     </div>
 
                 </div>
@@ -70,10 +70,16 @@
         Handlebars.registerHelper('orcidURL', function(orcid) {
             return "http://orcid.org/"+orcid;
         });
-        Handlebars.registerHelper('dcoIdBadgeURL', function(dcoId) {
-            var escapedDCOID = encodeURIComponent(dcoId.substring(25));
-            return "//dcotest.tw.rpi.edu/badges/badge?title=metadata&text="+escapedDCOID+"&color=D14719";
+
+        Handlebars.registerHelper('dcoidURL', function(dcoid) {
+            return "https://dx.deepcarbon.net/"+dcoid;
         });
+
+        Handlebars.registerHelper('dcoIdBadgeURL', function(dcoId) {
+            var escapedDCOID = encodeURIComponent(dcoId);
+            return "//dcotest.tw.rpi.edu/badges/badge?title=profile&text="+escapedDCOID+"&color=D14719";
+        });
+
         Handlebars.registerHelper('showMostSpecificType', function(mostSpecificType) {
             return (mostSpecificType);
         });

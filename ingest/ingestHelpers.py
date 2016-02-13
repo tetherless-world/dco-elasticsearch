@@ -3,20 +3,79 @@ __author__ = 'Hao'
 from rdflib import Namespace, RDF
 from itertools import chain
 import argparse
-# import warnings
-# import pprint
+from SPARQLWrapper import SPARQLWrapper, JSON
+import json
+
+from rdflib import Namespace, RDF
+PROV = Namespace("http://www.w3.org/ns/prov#")
+BIBO = Namespace("http://purl.org/ontology/bibo/")
+VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
+VIVO = Namespace('http://vivoweb.org/ontology/core#')
+VITRO = Namespace("http://vitro.mannlib.cornell.edu/ns/vitro/0.7#")
+OBO = Namespace("http://purl.obolibrary.org/obo/")
+DCO = Namespace("http://info.deepcarbon.net/schema#")
+FOAF = Namespace("http://xmlns.com/foaf/0.1/")
+DCAT = Namespace("http://www.w3.org/ns/dcat#")
 
 # Auxilary class for those helper functions getting attributes of objects
 from Maybe import *
-
-# Auxilary class implementing the ingest process
-from Ingest import *
-
 
 # standard filters
 non_empty_str = lambda s: True if s else False
 has_label = lambda o: True if o.label() else False
 
+def load_file(filepath):
+    """
+    Helper function to load the .rq files and return a String object w/ replacing '\n' by ' '.
+    :param filepath:    file path
+    :return:            file content in string format
+    """
+    with open(filepath) as _file:
+        return _file.read().replace('\n', " ")
+
+def sparql_select(endpoint, query):
+    """
+    Helper function used to run a sparql select query
+    :param endpoint:    SPARQL endpoint
+    :param query:       the SPARQL query to get the list of objects
+    :return:
+        a list of objects with its type and uri values, e.g.
+            [{'dataset': {'value': 'http://...', 'type': 'uri'}}, ...]
+    """
+    sparql = SPARQLWrapper(endpoint)
+    sparql.setQuery(query)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+    return results["results"]["bindings"]
+
+# describe: helper function for describe_entity
+def sparql_describe( endpoint, query ):
+    """
+    Helper function used to run a sparql describe query
+    :param endpoint:    SPARQL endpoint
+    :param query:       the describe query to run
+    :return:
+        a json object representing the entity
+    """
+    sparql = SPARQLWrapper( endpoint )
+    sparql.setQuery( query )
+    try:
+        return sparql.query().convert()
+    except RuntimeWarning:
+        pass
+
+def get_id( es_id ):
+    return dco_id[dco_id.rfind('/') + 1:]
+
+def get_metadata( es_index, es_type, es_id ):
+    """
+    Helper function to create the JSON string of the metadata of an entity.
+    :param id:      unique identifier of the entity
+    :return:
+        a JSON-format string representing the metadata information of the object,
+            e.g. {"index": {"_id": "http://...", "_type": "dataset", "_index": "dco"}}
+    """
+    return {"index": {"_index": es_index, "_type": es_type, "_id": get_id( es_id )}}
 
 ###################################################
 #    Helper functions to get different attributes
@@ -126,45 +185,3 @@ def get_distributions(ds):
 
     return distributions
 
-
-
-def main(get_objects_query_location, describe_object_query_location,
-         elasticsearch_index, elasticsearch_type, variable_name_sparql, XIngest):
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--threads', default=4, help='number of threads to use (default = 4)')
-    parser.add_argument('--es', default="http://localhost:9200", help="elasticsearch service URL")
-    parser.add_argument('--publish', default=False, action="store_true", help="publish to elasticsearch?")
-    parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")
-    parser.add_argument('--mapping', help="elasticsearch mapping document, e.g. mappings/dataset.json")
-    parser.add_argument('--sparql', default='http://deepcarbon.tw.rpi.edu:3030/VIVO/query', help='sparql endpoint')
-    parser.add_argument('out', metavar='OUT', help='elasticsearch bulk ingest file')
-
-    # Info:
-    #   local elasticsearch URL:          http://localhost:9200
-    #   dcotest elasticsearch URL:        https://dcotest.tw.rpi.edu:49200
-    #   production sparql endpoint:       http://deepcarbon.tw.rpi.edu:3030/VIVO/query
-    #   test sparql endpoint:             http://udco.tw.rpi.edu/fuseki/vivo/query
-
-    args = parser.parse_args()
-
-    ingestSomething = XIngest(elasticsearch_index=elasticsearch_index, elasticsearch_type=elasticsearch_type,
-                             get_objects_query_location=get_objects_query_location,
-                             describe_object_query_location=describe_object_query_location,
-                             variable_name_sparql=variable_name_sparql)
-
-    # if a mapping file is specified for the "publish" process later, use the specified mapping file
-    if args.mapping:
-        ingestSomething.setMapping(args.mapping)
-
-    # generate bulk import document for xs
-    ingestSomething.generate(threads=int(args.threads), sparql=args.sparql)
-
-    # save generated bulk import file so it can be backed up or reviewed if there are publish errors
-    with open(args.out, "w") as bulk_file:
-        bulk_file.write('\n'.join(ingestSomething.records) + '\n\n')
-
-    # publish the results to elasticsearch if "--publish" was specified on the command line
-    if args.publish:
-        bulk_str = '\n'.join(ingestSomething.records) + '\n\n'
-        ingestSomething.publish(bulk=bulk_str, endpoint=args.es, rebuild=args.rebuild)

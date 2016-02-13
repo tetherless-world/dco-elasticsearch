@@ -149,7 +149,7 @@ def create_dataType_doc(dataType, endpoint):
 
     # dcoId of this dataType
     dco_id = list(dt.objects(DCO.hasDcoId))
-    dco_id = str(dco_id[0].identifier) if dco_id else None
+    dco_id = str(dco_id[0].label().toPython()) if dco_id else None
 
     doc = {"uri": dataType, "title": title, "dcoId": dco_id}
 

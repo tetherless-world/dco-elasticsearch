@@ -119,8 +119,8 @@
                         html += "<a href=\"" + doiUrl + "\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=DOI&text="+escapedDOI+"&color=66CCFF'/></a>&emsp;";
                     }
 
-                    var escapedDCOId= encodeURIComponent(record["dcoId"].substring(25));
-                    html += "<a href=\""+record["dcoId"]+"\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=metadata&text="+escapedDCOId+"&color=D14719'/></a>";
+                    var escapedDCOId= encodeURIComponent(record["dcoId"]);
+                    html += "<a href=\"https://dx.deepcarbon.net/"+record["dcoId"]+"\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=metadata&text="+escapedDCOId+"&color=D14719'/></a>";
 
                     html += "</td></tr>";
                     return html;
