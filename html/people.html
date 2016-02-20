@@ -26,7 +26,7 @@
                     <div class="caption">
                         <h5><small>
                             {{#if dcoId}}
-                            <a class="{{#if isDcoMember}}dco-logo{{/if}}" href="{{dcoId}}" target="_blank">{{name}}</a>
+                            <a class="{{#if isDcoMember}}dco-logo{{/if}}" href="{{dcoidURL dcoId}}" target="_blank">{{name}}</a>
                             {{else}}
                             <a class="{{#if isDcoMember}}dco-logo{{/if}}" href="{{uri}}" target="_blank">{{name}}</a>
                             {{/if}}
@@ -65,7 +65,7 @@
 
                     <div>
                         {{#if orcid}}<a href="{{orcidURL orcid}}" target="_blank"><img class="badge" src="{{orcidBadgeURL orcid}}"/></a>{{/if}}
-                        {{#if dcoId}}<a href="{{dcoId}}" target="_blank"><img class="badge" src="{{dcoIdBadgeURL dcoId}}"/></a>{{/if}}
+                        {{#if dcoId}}<a href="{{dcoidURL dcoId}}" target="_blank"><img class="badge" src="{{dcoIdBadgeURL dcoId}}"/></a>{{/if}}
                     </div>
 
                 </div>
@@ -79,13 +79,17 @@
             return "http://orcid.org/"+orcid;
         });
 
+        Handlebars.registerHelper('docidURL', function(dcoid) {
+            return "https://dx.deepcarbon.net/"+dcoid;
+        });
+
         Handlebars.registerHelper('orcidBadgeURL', function(orcid) {
             var escapedORCID = encodeURIComponent(orcid);
             return "//dcotest.tw.rpi.edu/badges/badge?title=ORCID&text="+escapedORCID+"&color=a6ce39";
         });
 
         Handlebars.registerHelper('dcoIdBadgeURL', function(dcoId) {
-            var escapedDCOID = encodeURIComponent(dcoId.substring(25));
+            var escapedDCOID = encodeURIComponent(dcoId);
             return "//dcotest.tw.rpi.edu/badges/badge?title=profile&text="+escapedDCOID+"&color=D14719";
         });
 

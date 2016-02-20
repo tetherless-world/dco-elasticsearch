@@ -4,7 +4,6 @@ import warnings
 import pprint
 import pydoc
 
-
 # Import helper functions from ingestHelpers.py;
 # see ingestHelpers.py for details of functions and classes used.
 from ingestHelpers import *
@@ -17,11 +16,11 @@ from Ingest import *
 
 # First, change these case-varying variables below for: dataset ingest
 
-GET_OBJECTS_QUERY_LOCATION = "queries/listDatasets.rq"
-DESCRIBE_DATASET_OBJECT_LOCATION = "queries/describeDataset.rq"
+LIST_QUERY_FILE = "queries/listDatasets.rq"
+DESCRIBE_QUERY_FILE = "queries/describeDataset.rq"
+SUBJECT_NAME = "?dataset"
 INDEX = "dco"
 TYPE = "dataset"
-VARIABLE_NAME_SPARQL = "?dataset"
 
 # Second, extend the Ingest base class to class 'XIngest' below, where X is the singular form, with capitalized
 # initial letter, of the 'type' of search document generated. E.g. DatasetIngest, ProjectIngest, etc.
@@ -30,25 +29,41 @@ VARIABLE_NAME_SPARQL = "?dataset"
 
 class DatasetIngest(Ingest):
 
+    def get_mapping( self ):
+        return MAPPING
+
+    def get_list_query_file(self):
+        return LIST_QUERY_FILE
+
+    def get_describe_query_file(self):
+        return DESCRIBE_QUERY_FILE
+
+    def get_subject_name(self):
+        return SUBJECT_NAME
+
+    def get_index(self):
+        return INDEX
+
+    def get_type(self):
+        return TYPE
+
     MAPPING = "mappings/dataset.json"
 
-    def create_x_doc(self, x, endpoint, describe_object_query, variable_name_sparql):
-        graph = self.describe_entity(endpoint=endpoint, entity=x,
-                                     describe_object_query=describe_object_query,
-                                     variable_name_sparql=variable_name_sparql)
+    def create_document( self, entity ):
+        graph = self.describe_entity( entity )
 
-        ds = graph.resource(x)
+        ds = graph.resource( entity )
 
         try:
             title = ds.label().toPython()
         except AttributeError:
-            print("missing title:", x)
+            print( "missing title:", entity )
             return {}
 
         dco_id = list(ds.objects(DCO.hasDcoId))
-        dco_id = str(dco_id[0].identifier) if dco_id else None
+        dco_id = str(dco_id[0].label().toPython()) if dco_id else None
 
-        doc = {"uri": x, "title": title, "dcoId": dco_id}
+        doc = {"uri": entity, "title": title, "dcoId": dco_id}
 
         most_specific_type = list(ds.objects(VITRO.mostSpecificType))
         most_specific_type = most_specific_type[0].label().toPython() \
@@ -110,9 +125,6 @@ class DatasetIngest(Ingest):
 # Third, pass the name of the sub-class just created above to argument 'XIngest=' below in the usage of main().
 #       E.g. main(..., XIngest=DatasetIngest)
 if __name__ == "__main__":
-    main(get_objects_query_location=GET_OBJECTS_QUERY_LOCATION,
-         describe_object_query_location=DESCRIBE_DATASET_OBJECT_LOCATION,
-         elasticsearch_index=INDEX, elasticsearch_type=TYPE,
-         variable_name_sparql=VARIABLE_NAME_SPARQL, XIngest=DatasetIngest)
+    ingestSomething = DatasetIngest()
+    ingestSomething.ingest()
 
-# Finally, run the ingest process. See detailed usage and examples in ingest/README.md.

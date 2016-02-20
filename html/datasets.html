@@ -129,12 +129,6 @@
                         html += "<br />Type: " + record["mostSpecificType"];
                     }
 
-                    // display dcoId with link to metadeta; disabled
-//                    if (record["dcoId"]){
-//                        var dcoIdString = decodeURIComponent(encodeURIComponent(record["dcoId"].substring(25)));
-//                        html += '<br /><span>DCO-ID: <a href=\"' + record["dcoId"] + '\" target="_black\">' + dcoIdString + "</a></span>";
-//                    }
-
                     // display dcoCommunities
                     if (record["dcoCommunities"]) {
                         html += "<br /><span><small>DCO Communites: ";
@@ -265,8 +259,8 @@
                     }
 
                     if (record["dcoId"]) {
-                        var escapedDCOId = encodeURIComponent(record["dcoId"].substring(25));
-                        html += "<a href=\"" + record["dcoId"] + "\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=metadata&text=" + escapedDCOId + "&color=D14719'/></a>";
+                        var escapedDCOId = encodeURIComponent(record["dcoId"]);
+                        html += "<a href=\"https://dx.deepcarbon.net/" + record["dcoId"] + "\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=metadata&text=" + escapedDCOId + "&color=D14719'/></a>";
                     }
 
                     html += "</td></tr>";

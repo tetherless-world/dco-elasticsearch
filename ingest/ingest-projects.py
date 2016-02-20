@@ -156,7 +156,7 @@ def create_project_doc(project, endpoint):
 
     #dcoId of this project
     dco_id = list(prj.objects(DCO.hasDcoId))
-    dco_id = str(dco_id[0].identifier) if dco_id else None
+    dco_id = str(dco_id[0].label().toPython()) if dco_id else None
 
     doc = {"uri": project, "title": title, "dcoId": dco_id}
 
