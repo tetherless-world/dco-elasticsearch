@@ -4,17 +4,29 @@
     <meta charset="UTF-8">
     <title>Publication Browser</title>
 
-    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
-    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/bootstrap/css/bootstrap.min.css">
-    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
-    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
+    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>-->
+    <!--<link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/bootstrap/css/bootstrap.min.css">-->
+    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>-->
+    <!--<link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">-->
+    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>-->
 
-    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/es.js"></script>
-    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/bootstrap2.facetview.theme.js"></script>
-    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/jquery.facetview2.js"></script>
-    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/css/facetview.css">
-    <link rel="stylesheet" href="/vivo/themes/dco/css/browsers.css">
+    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/es.js"></script>-->
+    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/bootstrap2.facetview.theme.js"></script>-->
+    <!--<script type="text/javascript" src="/vivo/themes/dco/js/facetview2/jquery.facetview2.js"></script>-->
+    <!--<link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/css/facetview.css">-->
+    <!--<link rel="stylesheet" href="/vivo/themes/dco/css/browsers.css">-->
+
+    <script type="text/javascript" src="facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
+    <link rel="stylesheet" href="facetview2/vendor/bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
+    <script type="text/javascript" src="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
+
+    <script type="text/javascript" src="facetview2/es.js"></script>
+    <script type="text/javascript" src="facetview2/bootstrap2.facetview.theme.js"></script>
+    <script type="text/javascript" src="facetview2/jquery.facetview2.js"></script>
+    <link rel="stylesheet" href="facetview2/css/facetview.css">
+    <link rel="stylesheet" href="browsers.css">
 
     <script type="text/javascript">
         jQuery(document).ready(function($) {
@@ -120,7 +132,13 @@
                     }
 
                     var escapedDCOId= encodeURIComponent(record["dcoId"]);
-                    html += "<a href=\"https://dx.deepcarbon.net/"+record["dcoId"]+"\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=metadata&text="+escapedDCOId+"&color=D14719'/></a>";
+                    html += "<a href=\"https://dx.deepcarbon.net/"+record["dcoId"]+"\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=metadata&text="+escapedDCOId+"&color=D14719'/></a>&emsp;";
+
+                    var citaionFormat= "PNAS";
+
+                    html += "<a href=\"javascript:window.open('https://dco.tw.rpi.edu/citation/" +record["dcoId"] + "','mywindowtitle','width=500,height=150,left=500,top=500')\" target=\"_self\">" +
+                            "<img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=citation&text="+citaionFormat+"&color=5C85D6'/>" +
+                            "</a>&emsp;";
 
                     html += "</td></tr>";
                     return html;
