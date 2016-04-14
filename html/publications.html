@@ -31,7 +31,7 @@
     <!--<link rel="stylesheet" href="browsers.css">-->
 
     <script id="publication-template" type="text/x-handlebars-template">
-    <tr>
+        <tr>
         <td>
             {{#if isDcoPublication}}
             <img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>&nbsp;
@@ -69,7 +69,7 @@
             <div>
                 {{#if doi}}<a href="{{doiUrl doi}}" target="_blank"><img class="badge" src="{{doiBadgeURL doi}}"/></a> {{/if}}
                 {{#if dcoId}}<a href="{{dcoidURL dcoId}}" target="_blank"><img class="badge" src="{{dcoIdBadgeURL dcoId}}"/></a>{{/if}}
-                {{#if dcoId}}<a id="{{id dcoId}}" href="#na" data-toggle="popover" data-trigger="manual" title="Recommended Citation" data-content="{{citationText}}" onclick="invokePopover(this)"><img class="badge" src="{{citationBadgeURL}}"/></a>{{/if}}
+                {{#if dcoId}}<a id="{{id dcoId}}" dcoid="{{dcoId}}" href="#na" data-toggle="popover" data-trigger="manual" title="Recommended Citation" data-content="{{citationText}}" onclick="invokePopover(this)" popover-status="off"><img class="badge" src="{{citationBadgeURL}}"/></a>{{/if}}
             </div>
         </td>
     </tr>
@@ -83,16 +83,44 @@
 
         Handlebars.registerHelper('id', gen_id);
 
-        var invokePopover = function(source) {
-            $('#'+source.id+'[data-toggle="popover"]').popover('toggle');
-        };
+        var loading_status = "Loading...";
 
-        Handlebars.registerHelper('citationText', function(source) {
-            var dcoId = source["data"]["root"]["dcoId"]
+        var invokePopover = function(source) {
+            var dcoId = $(source).attr("dcoId");
             var citation_service_url = "https://dco.tw.rpi.edu/citation/";
             var req_url = citation_service_url + dcoId;
             var _id = gen_id(dcoId);
 
+            $(source).popover('toggle');
+
+            if ($(source).attr('popover-status') == 'off'){
+                $(source).attr('popover-status', "on");
+            } else {
+                $(source).attr('popover-status', "off");
+            }
+
+            if ($(source).attr("data-content") == loading_status) {
+                $.ajax({
+                    type: "GET",
+                    crossOrigin: true,
+                    url: req_url,
+                    success: function(data) {
+                        $(source).attr("data-content", data);
+                        // if this particular popover remains on, then renew the content
+                        if ($(source).attr('popover-status') == 'on'){
+                            $('#'+source.id+'[data-toggle="popover"]').popover('show');
+                        }
+                    }
+                });
+            }
+        };
+
+        Handlebars.registerHelper('citationText', function(source) {
+            var dcoId = source["data"]["root"]["dcoId"];
+            var citation_service_url = "https://dco.tw.rpi.edu/citation/";
+            var req_url = citation_service_url + dcoId;
+            var _id = gen_id(dcoId);
+            /*
             $.ajax({
                 type: "GET",
                 crossOrigin: true,
@@ -101,9 +129,9 @@
                     $('#'+_id).attr("data-content", data);
                 }
             });
-
+            */
             // replaced by results from AJAX request
-            return "loading...";
+            return loading_status;
         });
 
         Handlebars.registerHelper('doiUrl', function(doi) {
@@ -213,6 +241,10 @@
                             });
                 },
                 post_render_callback: function(options, context) {
+
+                    // hide any open popovers when rendering the page
+                    $('div.popover').hide();
+
                     if(options.active_filters["isDcoPublication"] != null) {
                         // if the isDcoPublication filter is active set ensure the checkbox is checked
                         $("#is-dco-publication-checkbox").attr("checked", true);
