@@ -213,6 +213,10 @@
                             });
                 },
                 post_render_callback: function(options, context) {
+
+                    // hide any open popovers when rendering the page
+                    $('div.popover').hide();
+
                     if(options.active_filters["isDcoPublication"] != null) {
                         // if the isDcoPublication filter is active set ensure the checkbox is checked
                         $("#is-dco-publication-checkbox").attr("checked", true);
