@@ -230,6 +230,22 @@
       "doi": {
         "type":"string",
         "index":"not_analyzed"
+      },
+      "volume": {
+        "type":"string",
+        "index":"not_analyzed"
+      },
+      "issue": {
+        "type":"string",
+        "index":"not_analyzed"
+      },
+      "pageStart": {
+        "type":"string",
+        "index":"not_analyzed"
+      },
+      "pageEnd": {
+        "type":"string",
+        "index":"not_analyzed"
       }
     }
   }
