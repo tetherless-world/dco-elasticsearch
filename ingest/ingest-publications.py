@@ -98,6 +98,26 @@ def create_publication_doc(publication, endpoint):
     if doi:
         doc.update({"doi": doi})
 
+    volume = list(pub.objects(BIBO.volume))
+    volume = volume[0].toPython() if volume else None
+    if volume:
+        doc.update({"volume": volume})
+
+    issue = list(pub.objects(BIBO.issue))
+    issue = issue[0].toPython() if issue else None
+    if issue:
+        doc.update({"issue": issue})
+
+    pageStart = list(pub.objects(BIBO.pageStart))
+    pageStart = pageStart[0].toPython() if pageStart else None
+    if pageStart:
+        doc.update({"pageStart": pageStart})
+
+    pageEnd = list(pub.objects(BIBO.pageEnd))
+    pageEnd = pageEnd[0].toPython() if pageEnd else None
+    if pageEnd:
+        doc.update({"pageEnd": pageEnd})
+
     abstract = list(pub.objects(BIBO.abstract))
     abstract = abstract[0].toPython() if abstract else None
     if abstract:
