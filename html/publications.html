@@ -87,7 +87,7 @@
 
         var invokePopover = function(source) {
             var dcoId = $(source).attr("dcoId");
-            var citation_service_url = "https://dco.tw.rpi.edu/citation/";
+            var citation_service_url = "https://info.deepcarbon.net/citation/";
             var req_url = citation_service_url + dcoId;
             var _id = gen_id(dcoId);
 
@@ -117,7 +117,7 @@
 
         Handlebars.registerHelper('citationText', function(source) {
             var dcoId = source["data"]["root"]["dcoId"];
-            var citation_service_url = "https://dco.tw.rpi.edu/citation/";
+            var citation_service_url = "https://info.deepcarbon.net/citation/";
             var req_url = citation_service_url + dcoId;
             var _id = gen_id(dcoId);
             /*
