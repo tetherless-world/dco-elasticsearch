@@ -69,7 +69,7 @@
             <div>
                 {{#if doi}}<a href="{{doiUrl doi}}" target="_blank"><img class="badge" src="{{doiBadgeURL doi}}"/></a> {{/if}}
                 {{#if dcoId}}<a href="{{dcoidURL dcoId}}" target="_blank"><img class="badge" src="{{dcoIdBadgeURL dcoId}}"/></a>{{/if}}
-                {{#if dcoId}}<a id="{{id dcoId}}" dcoid="{{dcoId}}" href="#na" data-toggle="popover" data-trigger="manual" title="Recommended Citation" data-content="{{citationText}}" onclick="invokePopover(this)" popover-status="off"><img class="badge" src="{{citationBadgeURL}}"/></a>{{/if}}
+                {{#if dcoId}}<a id="{{id dcoId}}" dcoid="{{dcoId}}" href="#na" data-toggle="popover" data-trigger="manual" title="Citation" data-content="{{citationText}}" onclick="invokePopover(this)" popover-status="off"><img class="badge" src="{{citationBadgeURL}}"/></a>{{/if}}
             </div>
         </td>
     </tr>
@@ -168,7 +168,7 @@
         });
 
         Handlebars.registerHelper('citationBadgeURL', function() {
-            return "//dcotest.tw.rpi.edu/badges/badge?title=citation&text=PNAS&color=5C85D6";
+            return "//dcotest.tw.rpi.edu/badges/badge?title=citation&text=%2B&color=5C85D6";
         });
 
         Handlebars.registerHelper('expand', function(items, options) {
