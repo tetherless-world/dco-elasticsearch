@@ -89,7 +89,8 @@ def create_publication_doc(publication, endpoint):
     dco_id = str(dco_id[0].label().toPython()) if dco_id else None
 
     is_dco_publication = list(pub.objects(DCO.isContributionToDCO))
-    is_dco_publication = True if is_dco_publication and is_dco_publication[0].toPython() == "YES" else False
+    is_dco_publication_str = is_dco_publication[0].toPython() if is_dco_publication else ""
+    is_dco_publication = True if is_dco_publication_str.lower() == "yes" or is_dco_publication_str.lower() == "true" else False
 
     doc = {"uri": publication, "title": title, "dcoId": dco_id, "isDcoPublication": is_dco_publication}
 
