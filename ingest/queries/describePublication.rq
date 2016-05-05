@@ -10,7 +10,7 @@ PREFIX vitro: <http://vitro.mannlib.cornell.edu/ns/vitro/0.7#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX bibo: <http://purl.org/ontology/bibo/>
 
-DESCRIBE ?publication ?dcoid ?mostSpecificType ?subjectArea ?venue ?event ?community ?team ?authorship ?author ?researchArea ?authorOrganization
+DESCRIBE ?publication ?dcoid ?mostSpecificType ?subjectArea ?venue ?event ?community ?team ?authorship ?author ?researchArea ?orgrole ?org ?interval ?end
 WHERE {
   ?publication dco:hasDcoId ?dcoid .
   ?publication vitro:mostSpecificType ?mostSpecificType .
@@ -23,5 +23,12 @@ WHERE {
     ?authorship vivo:relates ?author .
     ?author a foaf:Person .
     OPTIONAL { ?author vivo:hasResearchArea ?researchArea }
-    OPTIONAL { ?author dco:inOrganization ?authorOrganization } }
+    OPTIONAL { ?author vivo:relatedBy ?orgrole .
+               ?orgrole a vivo:Position .
+               OPTIONAL { ?orgrole vivo:dateTimeInterval ?interval .
+                          ?interval vivo:end ?end . }
+               FILTER( ! BOUND(?end))
+               ?orgrole vivo:relates ?org .
+               ?org a foaf:Organization }
+  }
 }
