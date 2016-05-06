@@ -143,12 +143,12 @@ def get_authors(ds):
         if research_areas:
             obj.update({"researchArea": research_areas})
 
-        authors.append(obj)
-
-        org = list(author.objects(DCO.inOrganization))
-        org = org[0] if org else None
-        if org and org.label():
+        positions = [orgfaux for orgfaux in author.objects(VIVO.relatedBy) if has_type(orgfaux, VIVO.Position)]
+        for position in positions:
+            org = [organization for organization in position.objects(VIVO.relates) if has_type(organization, FOAF.Organization)][0]
             obj.update({"organization": {"uri": str(org.identifier), "name": org.label().toPython()}})
+
+        authors.append(obj)
 
     try:
         authors = sorted(authors, key=lambda a: a["rank"]) if len(authors) > 1 else authors
