@@ -57,6 +57,13 @@
     </script>
 
     <script type="text/javascript">
+
+        var build_badge_url = function(label, value, color) {
+            label = encodeURIComponent(label).replace(/-/g, "--");
+            value = encodeURIComponent(value).replace(/-/g, "--");
+            return "//img.shields.io/badge/"+label+"-"+value+"-"+color+".svg";
+        };
+
         Handlebars.registerHelper('orcidURL', function(orcid) {
             return "http://orcid.org/"+orcid;
         });
@@ -66,8 +73,7 @@
         });
 
         Handlebars.registerHelper('dcoIdBadgeURL', function(dcoId) {
-            var escapedDCOID = encodeURIComponent(dcoId);
-            return "//dcotest.tw.rpi.edu/badges/badge?title=profile&text="+escapedDCOID+"&color=D14719";
+            return build_badge_url("profile", dcoId, "D14719");
         });
 
         Handlebars.registerHelper('expand', function(items, options) {
@@ -81,6 +87,7 @@
             }
             return out;
         });
+
         Handlebars.registerHelper('list', function(items, options) {
             var out = "<ul>";
             for(var i=0, l=items.length; i<l; i++) {
@@ -88,6 +95,7 @@
             }
             return out + "</ul>";
         });
+
         var source = $("#dataType-template").html();
         var template = Handlebars.compile(source);
     </script>

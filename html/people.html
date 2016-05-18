@@ -75,6 +75,12 @@
 
     <script type="text/javascript">
 
+        var build_badge_url = function(label, value, color) {
+            label = encodeURIComponent(label).replace(/-/g, "--");
+            value = encodeURIComponent(value).replace(/-/g, "--");
+            return "//img.shields.io/badge/"+label+"-"+value+"-"+color+".svg";
+        };
+
         Handlebars.registerHelper('orcidURL', function(orcid) {
             return "http://orcid.org/"+orcid;
         });
@@ -84,13 +90,11 @@
         });
 
         Handlebars.registerHelper('orcidBadgeURL', function(orcid) {
-            var escapedORCID = encodeURIComponent(orcid);
-            return "//dcotest.tw.rpi.edu/badges/badge?title=ORCID&text="+escapedORCID+"&color=a6ce39";
+            return build_badge_url("ORCID", orcid, "a6ce39");
         });
 
         Handlebars.registerHelper('dcoIdBadgeURL', function(dcoId) {
-            var escapedDCOID = encodeURIComponent(dcoId);
-            return "//dcotest.tw.rpi.edu/badges/badge?title=profile&text="+escapedDCOID+"&color=D14719";
+            return build_badge_url("profile", dcoId, "D14719");
         });
 
         Handlebars.registerHelper('showMostSpecificType', function(mostSpecificType) {
