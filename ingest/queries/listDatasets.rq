@@ -4,6 +4,8 @@ PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
 PREFIX owl:   <http://www.w3.org/2002/07/owl#>
 PREFIX vitro: <http://vitro.mannlib.cornell.edu/ns/vitro/0.7#>
 PREFIX dco: <http://info.deepcarbon.net/schema#>
+PREFIX dcodata: <http://info.deepcarbon.net/data/schema#>
+PREFIX dcosample: <http://info.deepcarbon.net/sample/schema#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX vitro-public: <http://vitro.mannlib.cornell.edu/ns/vitro/public#>
@@ -13,5 +15,5 @@ PREFIX bibo: <http://purl.org/ontology/bibo/>
 
 SELECT DISTINCT ?dataset
 WHERE {
-    { ?dataset a vivo:Dataset . }
+    { ?dataset a dcodata:Dataset . }
 }

@@ -29,7 +29,7 @@ TYPE = "dataset"
 
 class DatasetIngest(Ingest):
 
-    def get_mapping( self ):
+    def get_mapping(self):
         return MAPPING
 
     def get_list_query_file(self):
@@ -127,4 +127,3 @@ class DatasetIngest(Ingest):
 if __name__ == "__main__":
     ingestSomething = DatasetIngest()
     ingestSomething.ingest()
-

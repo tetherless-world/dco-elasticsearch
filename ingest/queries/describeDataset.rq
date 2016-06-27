@@ -2,7 +2,10 @@ PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
 PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX dco: <http://info.deepcarbon.net/schema#>
+PREFIX dcodata: <http://info.deepcarbon.net/data/schema#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX vivo: <http://vivoweb.org/ontology/core#>
@@ -10,15 +13,16 @@ PREFIX vitro: <http://vitro.mannlib.cornell.edu/ns/vitro/0.7#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX bibo: <http://purl.org/ontology/bibo/>
 
-DESCRIBE ?dataset ?dcoid ?mostSpecificType ?label ?publicationYear ?community ?team ?project ?authorship ?author ?researchArea ?orgrole ?org ?interval ?end ?dataType ?citation ?distribution ?file ?fileURL
+DESCRIBE ?dataset ?dcoid ?mostSpecificType ?label ?description ?publicationYear ?community ?team ?project ?authorship ?author ?researchArea ?orgrole ?org ?interval ?end ?dataType ?citation ?distribution ?file ?fileURL
 WHERE {
   ?dataset dco:hasDcoId ?dcoid .
-  ?dataset vitro:mostSpecificType ?mostSpecificType .
+  ?dataset vitro:mostSpecificType dcodata:Dataset .
   ?dataset rdfs:label ?label .
-  OPTIONAL { ?dataset dco:yearOfPublication ?publicationYear . }
+  OPTIONAL { ?dataset dct:description ?description . }
+  OPTIONAL { ?dataset dct:issued ?publicationYear . }
   OPTIONAL { ?dataset dco:associatedDCOCommunity ?community }
   OPTIONAL { ?dataset dco:associatedDCOTeam ?team }
-  OPTIONAL { ?dataset dco:isDatasetOf ?project }
+  OPTIONAL { ?dataset dco:relatedProject ?project }
   OPTIONAL {
     ?dataset vivo:relatedBy ?authorship .
     ?authorship vivo:relates ?author .
@@ -35,12 +39,11 @@ WHERE {
     }
   }
   OPTIONAL {
-        ?dataset dco:hasDistribution ?distribution .
-        ?distribution dco:hasFile ?file .
+        ?dataset dcat:distribution ?distribution .
         ?distribution rdfs:label ?distributionLabel .
-        ?distribution dco:accessURL ?distributionURL .
+        ?distribution dcat:accessURL ?distributionURL .
         ?file rdfs:label ?fileLabel .
-        ?file dco:downloadURL ?fileURL .
+        ?file dcat:downloadURL ?fileURL .
   }
   OPTIONAL { ?dataset dco:hasDataType ?dataType }
   OPTIONAL { ?dataset bibo:cites ?citation }

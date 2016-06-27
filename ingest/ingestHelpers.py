@@ -16,6 +16,8 @@ OBO = Namespace("http://purl.obolibrary.org/obo/")
 DCO = Namespace("http://info.deepcarbon.net/schema#")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
+DCODATA = Namespace("http://info.deepcarbon.net/data/schema#")
+DCT = Namespace("http://purl.org/dc/terms/")
 
 # Auxilary class for those helper functions getting attributes of objects
 from Maybe import *
@@ -117,7 +119,7 @@ def get_cites(x):
 
 def get_projects_of_dataset(x):
     return Maybe.of(x).stream() \
-        .flatmap(lambda p: p.objects(DCO.isDatasetOf)) \
+        .flatmap(lambda p: p.objects(DCO.relatedProject)) \
         .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
@@ -125,7 +127,7 @@ def get_projects_of_dataset(x):
 # get_authors: object -> [authors] for objects such as: datasets, publications, ...
 def get_authors(ds):
     authors = []
-    authorships = [faux for faux in ds.objects(VIVO.relatedBy) if has_type(faux, VIVO.Authorship)]
+    authorships = [faux for faux in ds.objects(VIVO.relatedBy) if has_type(faux, DCODATA.Creator)]
     for authorship in authorships:
 
         author = [person for person in authorship.objects(VIVO.relates) if has_type(person, FOAF.Person)][0]
@@ -161,27 +163,27 @@ def get_authors(ds):
 # get_distributions: object -> [distributions] for objects such as: datasets, publications, ...
 def get_distributions(ds):
     distributions = []
-    distributionList = [faux for faux in ds.objects(DCO.hasDistribution) if has_type(faux, DCAT.Distribution)]
+    distributionList = [faux for faux in ds.objects(DCAT.distribution) if has_type(faux, DCODATA.Distribution)]
     for distribution in distributionList:
-        accessURL = str(list(distribution.objects(DCO.accessURL))[0])
+        accessURL = str(list(distribution.objects(DCAT.accessURL))[0])
+        downloadURL = str(list(distribution.objects(DCAT.downloadURL))[0])
         name = distribution.label().toPython() if distribution else None
-        obj = {"uri": str(distribution.identifier), "accessURL": accessURL, "name": name}
+        obj = {"uri": str(distribution.identifier), "accessURL": accessURL, "downloadURL": downloadURL, "name": name}
 
-        fileList = list(distribution.objects(DCO.hasFile))
-        fileList = fileList if fileList else None
-        files = []
-        for file in fileList:
-            downloadURL = list(file.objects(DCO.downloadURL))
-            downloadURL = str(downloadURL[0]) if downloadURL else None
-            fileObj = {"uri": str(file.identifier),
-                       "name": file.label().toPython()}
-            fileObj.update({"downloadURL": downloadURL})
-            files.append(fileObj)
-
-        if files:
-            obj.update({"files": files})
+        # fileList = list(distribution.objects(DCO.hasFile))
+        # fileList = fileList if fileList else None
+        # files = []
+        # for file in fileList:
+        #     downloadURL = list(file.objects(DCT.downloadURL))
+        #     downloadURL = str(downloadURL[0]) if downloadURL else None
+        #     fileObj = {"uri": str(file.identifier),
+        #                "name": file.label().toPython()}
+        #     fileObj.update({"downloadURL": downloadURL})
+        #     files.append(fileObj)
+        #
+        # if files:
+        #     obj.update({"files": files})
 
         distributions.append(obj)
 
     return distributions
-
