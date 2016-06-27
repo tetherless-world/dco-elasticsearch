@@ -21,6 +21,7 @@ DESCRIBE_QUERY_FILE = "queries/describeDataset.rq"
 SUBJECT_NAME = "?dataset"
 INDEX = "dco"
 TYPE = "dataset"
+MAPPING = "mappings/dataset.json"
 
 # Second, extend the Ingest base class to class 'XIngest' below, where X is the singular form, with capitalized
 # initial letter, of the 'type' of search document generated. E.g. DatasetIngest, ProjectIngest, etc.
@@ -28,6 +29,7 @@ TYPE = "dataset"
 # (Existing examples are helpful.)
 
 class DatasetIngest(Ingest):
+
 
     def get_mapping(self):
         return MAPPING
@@ -46,8 +48,6 @@ class DatasetIngest(Ingest):
 
     def get_type(self):
         return TYPE
-
-    MAPPING = "mappings/dataset.json"
 
     def create_document( self, entity ):
         graph = self.describe_entity( entity )
