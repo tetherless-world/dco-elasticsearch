@@ -18,6 +18,7 @@ FOAF = Namespace("http://xmlns.com/foaf/0.1/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
 DCODATA = Namespace("http://info.deepcarbon.net/data/schema#")
 DCT = Namespace("http://purl.org/dc/terms/")
+PROV = Namespace("http://www.w3.org/ns/prov#")
 
 # Auxilary class for those helper functions getting attributes of objects
 from Maybe import *
@@ -113,7 +114,7 @@ def get_data_types(x):
 
 def get_cites(x):
     return Maybe.of(x).stream() \
-        .flatmap(lambda p: p.objects(BIBO.cites)) \
+        .flatmap(lambda p: p.objects(PROV.wasQuotedFrom)) \
         .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
