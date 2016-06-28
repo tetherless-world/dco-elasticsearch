@@ -166,24 +166,15 @@ def get_distributions(ds):
     distributions = []
     distributionList = [faux for faux in ds.objects(DCAT.distribution) if has_type(faux, DCODATA.Distribution)]
     for distribution in distributionList:
-        accessURL = str(list(distribution.objects(DCAT.accessURL))[0])
-        downloadURL = str(list(distribution.objects(DCAT.downloadURL))[0])
+
+        accessURL = list(distribution.objects(DCAT.accessURL))[0]
+        accessURL = accessURL.identifier
+        
+        downloadURL = list(distribution.objects(DCAT.downloadURL))[0]
+        downloadURL = downloadURL.identifier
+
         name = distribution.label().toPython() if distribution else None
         obj = {"uri": str(distribution.identifier), "accessURL": accessURL, "downloadURL": downloadURL, "name": name}
-
-        # fileList = list(distribution.objects(DCO.hasFile))
-        # fileList = fileList if fileList else None
-        # files = []
-        # for file in fileList:
-        #     downloadURL = list(file.objects(DCT.downloadURL))
-        #     downloadURL = str(downloadURL[0]) if downloadURL else None
-        #     fileObj = {"uri": str(file.identifier),
-        #                "name": file.label().toPython()}
-        #     fileObj.update({"downloadURL": downloadURL})
-        #     files.append(fileObj)
-        #
-        # if files:
-        #     obj.update({"files": files})
 
         distributions.append(obj)
 
