@@ -82,7 +82,7 @@ class DatasetIngest(Ingest):
         if abstract:
             doc.update({"abstract": abstract})
 
-        publication_year = list(ds.objects(DCO.yearOfPublication))
+        publication_year = list(ds.objects(DCT.issued))
         publication_year = publication_year[0] if publication_year else None
         if publication_year:
             doc.update({"publicationYear": str(publication_year)})

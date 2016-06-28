@@ -71,7 +71,6 @@
                                                                                 that this dataset contains
                     ====================================================================================================
                     */
-                    {'field': 'mostSpecificType', 'display': 'Type'},
                     {'field': 'publicationYear', 'display': 'Publication Year'},
                     {'field': 'authors.name.exact', 'size': 20, 'display': 'Author'},
                     {'field': 'authors.organization.name.exact', 'display': 'Author Organization'},
@@ -232,14 +231,9 @@
                                 html += ("<a href=\"" + record["distributions"][i]["accessURL"] + "\" target=\"_blank\">"
                                         + record["distributions"][i]["name"] + "</a>");
                                 html += " (Direct access: ";
-                                for (var j = 0; j < record["distributions"][i]["files"].length; j++){
-                                    html += ("<a href=\"" + record["distributions"][i]["files"][j]["downloadURL"]
-                                            + "\" target=\"_blank\">"
-                                            + record["distributions"][i]["files"][j]["name"] + "</a>");
-                                    if (j < record["distributions"][i]["files"].length - 1) {
-                                        html += "; ";
-                                    }
-                                }
+                                html += ("<a href=\"" + record["distributions"][i]["downloadURL"]
+                                        + "\" target=\"_blank\">"
+                                        + record["distributions"][i]["name"] + "</a>");
                                 html += ")";
                                 if (i < record["distributions"].length - 1) {
                                     html += "; <br /> &emsp;&emsp;&emsp;&emsp;";

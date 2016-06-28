@@ -17,7 +17,7 @@ PREFIX prov: <http://www.w3.org/ns/prov#>
 DESCRIBE ?dataset ?dcoid ?mostSpecificType ?label ?description ?publicationYear ?community ?team ?project ?authorship ?author ?researchArea ?orgrole ?org ?interval ?end ?dataType ?citation ?distribution ?file ?fileURL
 WHERE {
   ?dataset dco:hasDcoId ?dcoid .
-  ?dataset vitro:mostSpecificType dcodata:Dataset .
+  ?dataset vitro:mostSpecificType ?mostSpecificType .
   ?dataset rdfs:label ?label .
   OPTIONAL { ?dataset dct:description ?description . }
   OPTIONAL { ?dataset dct:issued ?publicationYear . }
