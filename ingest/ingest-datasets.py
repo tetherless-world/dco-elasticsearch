@@ -85,7 +85,8 @@ class DatasetIngest(Ingest):
         publication_year = list(ds.objects(DCT.issued))
         publication_year = publication_year[0] if publication_year else None
         if publication_year:
-            doc.update({"publicationYear": str(publication_year)})
+            doc.update({"publicationYear": str(publication_year)[0:4]})
+
 
         dco_communities = get_dco_communities(ds)
         if dco_communities:
