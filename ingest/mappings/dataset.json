@@ -163,18 +163,8 @@
           "accessURL": {
             "type": "string"
           },
-          "files": {
-            "properties": {
-              "downloadURL": {
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "uri": {
-                "type": "string"
-              }
-            }
+          "downloadURL": {
+            "type": "string"
           },
           "name": {
             "type": "string"
