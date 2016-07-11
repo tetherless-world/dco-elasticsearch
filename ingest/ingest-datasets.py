@@ -113,8 +113,8 @@ class DatasetIngest(Ingest):
             doc.update({"citations": cites})
 
         # authors: if none, will return an empty list []
-        authors = get_authors(ds)
-        doc.update({"authors": authors})
+        creators = get_creators(ds)
+        doc.update({"creators": creators})
 
         # distributions: if none, will return an empty list []
         distributions = get_distributions(ds)

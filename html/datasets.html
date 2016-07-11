@@ -40,13 +40,13 @@
                     Publication Year    |   publicationYear             |   the year in which the publication was
                                                                         |       published and made available for access
                     ----------------------------------------------------------------------------------------------------
-                    Author              |   authors.name.exact          |   authors names are displayed in full and
+                    Creator              |   creators.name.exact          |   creators names are displayed in full and
                                         |                               |       not separated into first, last
 
-                    Author Organization |   authors.organization        |   the organization names are displayed in
+                    Creator Organization |   creators.organization        |   the organization names are displayed in
                                                     .name.exact                 full and not separated into indifidual
                                                                                 words
-                                                                            represents the organization that the author
+                                                                            represents the organization that the creator
                                                                                 worked at the time of the publication of
                                                                                 the dataset
                     ----------------------------------------------------------------------------------------------------
@@ -72,8 +72,8 @@
                     ====================================================================================================
                     */
                     {'field': 'publicationYear', 'display': 'Publication Year'},
-                    {'field': 'authors.name.exact', 'size': 20, 'display': 'Author'},
-                    {'field': 'authors.organization.name.exact', 'display': 'Author Organization'},
+                    {'field': 'creators.name.exact', 'size': 20, 'display': 'Creator'},
+                    {'field': 'creators.organization.name.exact', 'display': 'Creator Organization'},
                     {'field': 'dcoCommunities.name.exact', 'display': 'DCO Community'},
                     {'field': 'teams.name.exact', 'display': 'Team'},
                     {'field': 'projects.name.exact', 'display': 'Project'},
@@ -161,12 +161,12 @@
                     }
 
                     // display authors
-                    if (record["authors"]) {
-                        if (record["authors"].length != 0) {
-                            html += "<br /><span><small>Authors: ";
-                            for (var i = 0; i < record["authors"].length; i++) {
-                                html += "<a href=\"" + record["authors"][i]["uri"] + "\" target=\"_blank\">" + record["authors"][i]["name"] + "</a>";
-                                if (i < record["authors"].length - 1) {
+                    if (record["creators"]) {
+                        if (record["creators"].length != 0) {
+                            html += "<br /><span><small>creators: ";
+                            for (var i = 0; i < record["creators"].length; i++) {
+                                html += "<a href=\"" + record["creators"][i]["uri"] + "\" target=\"_blank\">" + record["creators"][i]["name"] + "</a>";
+                                if (i < record["creators"].length - 1) {
                                     html += "; ";
                                 }
                             }

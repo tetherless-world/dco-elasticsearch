@@ -14,23 +14,20 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX bibo: <http://purl.org/ontology/bibo/>
 PREFIX prov: <http://www.w3.org/ns/prov#>
 
-DESCRIBE ?dataset ?dcoid ?mostSpecificType ?publicationYear ?community ?team ?project ?authorship ?author ?researchArea ?orgrole ?org ?interval ?end ?dataType ?citation ?distribution
+DESCRIBE ?dataset ?dcoid ?mostSpecificType ?community ?team ?project ?authorship ?creator ?researchArea ?orgrole ?org ?interval ?end ?dataType ?citation ?distribution
 WHERE {
   ?dataset dco:hasDcoId ?dcoid .
   ?dataset vitro:mostSpecificType ?mostSpecificType .
-  ?dataset rdfs:label ?label .
-  OPTIONAL { ?dataset dct:description ?description . }
-  OPTIONAL { ?dataset dct:issued ?publicationYear . }
   OPTIONAL { ?dataset dco:associatedDCOCommunity ?community }
   OPTIONAL { ?dataset dco:associatedDCOTeam ?team }
   OPTIONAL { ?dataset dco:relatedProject ?project }
   OPTIONAL {
     ?dataset vivo:relatedBy ?authorship .
-    ?authorship vivo:relates ?author .
-    ?author a foaf:Person .
-    OPTIONAL { ?author vivo:hasResearchArea ?researchArea }
-    OPTIONAL { ?author dco:inOrganization ?authorOrganization }
-    OPTIONAL { ?author vivo:relatedBy ?orgrole .
+    ?authorship vivo:relates ?creator .
+    ?creator a foaf:Person .
+    OPTIONAL { ?creator vivo:hasResearchArea ?researchArea }
+    OPTIONAL { ?creator dco:inOrganization ?authorOrganization }
+    OPTIONAL { ?creator vivo:relatedBy ?orgrole .
                ?orgrole a vivo:Position .
                OPTIONAL { ?orgrole vivo:dateTimeInterval ?interval .
                           ?interval vivo:end ?end . }
@@ -39,13 +36,7 @@ WHERE {
                ?org a foaf:Organization
     }
   }
-  OPTIONAL {
-        ?dataset dcat:distribution ?distribution .
-        ?distribution rdfs:label ?distributionLabel .
-        ?distribution dcat:accessURL ?distributionURL .
-        ?file rdfs:label ?fileLabel .
-        ?file dcat:downloadURL ?fileURL .
-  }
+  OPTIONAL { ?dataset dcat:distribution ?distribution }
   OPTIONAL { ?dataset dco:hasDataType ?dataType }
   OPTIONAL { ?dataset prov:wasQuotedFrom ?citation }
 }

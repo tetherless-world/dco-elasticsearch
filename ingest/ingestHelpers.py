@@ -160,6 +160,40 @@ def get_authors(ds):
 
     return authors
 
+def get_creators(ds):
+    creators = []
+    authorships = [faux for faux in ds.objects(VIVO.relatedBy) if has_type(faux, DCODATA.Creator)]
+    for authorship in authorships:
+
+        creator = [person for person in authorship.objects(VIVO.relates) if has_type(person, FOAF.Person)][0]
+        name = creator.label().toPython() if creator else None
+
+        obj = {"uri": str(creator.identifier), "name": name}
+
+        rank = list(authorship.objects(VIVO.rank))
+        rank = str(rank[0].toPython()) if rank else None # added the str()
+        if rank:
+            obj.update({"rank": rank})
+
+        research_areas = [research_area.label().toPython() for research_area in creator.objects(VIVO.hasResearchArea) if research_area.label()]
+
+        if research_areas:
+            obj.update({"researchArea": research_areas})
+
+        positions = [orgfaux for orgfaux in creator.objects(VIVO.relatedBy) if has_type(orgfaux, VIVO.Position)]
+        for position in positions:
+            org = [organization for organization in position.objects(VIVO.relates) if has_type(organization, FOAF.Organization)][0]
+            obj.update({"organization": {"uri": str(org.identifier), "name": org.label().toPython()}})
+
+        creators.append(obj)
+
+    try:
+        creators = sorted(creators, key=lambda a: a["rank"]) if len(creators) > 1 else creators
+    except KeyError:
+        print("missing rank for one or more creators of:", ds)
+
+    return creators
+
 
 # get_distributions: object -> [distributions] for objects such as: datasets, publications, ...
 def get_distributions(ds):
@@ -167,11 +201,11 @@ def get_distributions(ds):
     distributionList = [faux for faux in ds.objects(DCAT.distribution) if has_type(faux, DCODATA.Distribution)]
     for distribution in distributionList:
 
-        accessURL = list(distribution.objects(DCAT.accessURL))[0]
-        accessURL = accessURL.identifier
-        
-        downloadURL = list(distribution.objects(DCAT.downloadURL))[0]
-        downloadURL = downloadURL.identifier
+        accessURL = list(distribution.objects(DCAT.accessURL))
+        accessURL = accessURL[0].identifier if accessURL else None
+
+        downloadURL = list(distribution.objects(DCAT.downloadURL))
+        downloadURL = downloadURL[0].identifier if downloadURL else None
 
         name = distribution.label().toPython() if distribution else None
         obj = {"uri": str(distribution.identifier), "accessURL": accessURL, "downloadURL": downloadURL, "name": name}
