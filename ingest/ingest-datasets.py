@@ -107,10 +107,10 @@ class DatasetIngest(Ingest):
         if data_types:
             doc.update({"dataTypes": data_types})
 
-        # cites
-        cites = get_cites(ds)
-        if cites:
-            doc.update({"citations": cites})
+        # dataset wasQuotedFrom
+        wasQuotedFrom = get_wasQuotedFrom(ds)
+        if wasQuotedFrom:
+            doc.update({"wasQuotedFrom": wasQuotedFrom})
 
         # authors: if none, will return an empty list []
         creators = get_creators(ds)

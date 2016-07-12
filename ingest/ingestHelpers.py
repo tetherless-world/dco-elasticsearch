@@ -112,7 +112,7 @@ def get_data_types(x):
         .filter(has_label) \
         .map(lambda r: {"uri": str(r.identifier), "name": str(r.label())}).list()
 
-def get_cites(x):
+def get_wasQuotedFrom(x):
     return Maybe.of(x).stream() \
         .flatmap(lambda p: p.objects(PROV.wasQuotedFrom)) \
         .filter(has_label) \
