@@ -21,6 +21,7 @@ DESCRIBE_QUERY_FILE = "queries/describeDataset.rq"
 SUBJECT_NAME = "?dataset"
 INDEX = "dco"
 TYPE = "dataset"
+MAPPING = "mappings/dataset.json"
 
 # Second, extend the Ingest base class to class 'XIngest' below, where X is the singular form, with capitalized
 # initial letter, of the 'type' of search document generated. E.g. DatasetIngest, ProjectIngest, etc.
@@ -29,7 +30,8 @@ TYPE = "dataset"
 
 class DatasetIngest(Ingest):
 
-    def get_mapping( self ):
+
+    def get_mapping(self):
         return MAPPING
 
     def get_list_query_file(self):
@@ -46,8 +48,6 @@ class DatasetIngest(Ingest):
 
     def get_type(self):
         return TYPE
-
-    MAPPING = "mappings/dataset.json"
 
     def create_document( self, entity ):
         graph = self.describe_entity( entity )
@@ -82,10 +82,11 @@ class DatasetIngest(Ingest):
         if abstract:
             doc.update({"abstract": abstract})
 
-        publication_year = list(ds.objects(DCO.yearOfPublication))
+        publication_year = list(ds.objects(DCT.issued))
         publication_year = publication_year[0] if publication_year else None
         if publication_year:
-            doc.update({"publicationYear": str(publication_year)})
+            doc.update({"publicationYear": str(publication_year)[0:4]})
+
 
         dco_communities = get_dco_communities(ds)
         if dco_communities:
@@ -106,14 +107,14 @@ class DatasetIngest(Ingest):
         if data_types:
             doc.update({"dataTypes": data_types})
 
-        # cites
-        cites = get_cites(ds)
-        if cites:
-            doc.update({"citations": cites})
+        # dataset wasQuotedFrom
+        wasQuotedFrom = get_wasQuotedFrom(ds)
+        if wasQuotedFrom:
+            doc.update({"wasQuotedFrom": wasQuotedFrom})
 
         # authors: if none, will return an empty list []
-        authors = get_authors(ds)
-        doc.update({"authors": authors})
+        creators = get_creators(ds)
+        doc.update({"creators": creators})
 
         # distributions: if none, will return an empty list []
         distributions = get_distributions(ds)
@@ -127,4 +128,3 @@ class DatasetIngest(Ingest):
 if __name__ == "__main__":
     ingestSomething = DatasetIngest()
     ingestSomething.ingest()
-

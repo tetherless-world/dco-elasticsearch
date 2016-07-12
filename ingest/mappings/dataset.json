@@ -4,7 +4,7 @@
       "abstract": {
         "type": "string"
       },
-      "authors":{
+      "creators":{
         "properties":{
           "name":{
             "type":"multi_field",
@@ -146,7 +146,7 @@
           }
         }
       },
-      "citations": {
+      "wasQuotedFrom": {
         "properties": {
           "name": {
             "type": "string",
@@ -163,18 +163,8 @@
           "accessURL": {
             "type": "string"
           },
-          "files": {
-            "properties": {
-              "downloadURL": {
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "uri": {
-                "type": "string"
-              }
-            }
+          "downloadURL": {
+            "type": "string"
           },
           "name": {
             "type": "string"
