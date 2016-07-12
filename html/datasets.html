@@ -253,14 +253,20 @@
 
                     html += "<br />";
 
+                    var build_badge_url = function(label, value, color) {
+                        label = encodeURIComponent(label).replace(/-/g, "--");
+                        value = encodeURIComponent(value).replace(/-/g, "--");
+                        return "//img.shields.io/badge/"+label+"-"+value+"-"+color+".svg";
+                    };
+
                     if (record["doi"]) {
-                        var escapedDOI = encodeURIComponent(record["doi"]);
-                        html += "<a href=\"" + doiUrl + "\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=DOI&text="+escapedDOI+"&color=66CCFF'/></a>&emsp;";
+                        var badge_url = build_badge_url("DOI", record["doi"], "66CCFF");
+                        html += "<a href=\"" + doiUrl + "\" target=\"_blank\"><img style='vertical-align: middle' src='"+badge_url+"'/></a>&emsp;";
                     }
 
                     if (record["dcoId"]) {
-                        var escapedDCOId = encodeURIComponent(record["dcoId"]);
-                        html += "<a href=\"https://dx.deepcarbon.net/" + record["dcoId"] + "\" target=\"_blank\"><img style='vertical-align: middle' src='//dcotest.tw.rpi.edu/badges/badge?title=metadata&text=" + escapedDCOId + "&color=D14719'/></a>";
+                        var badge_url = build_badge_url("metadata", record["dcoId"], "D14719");
+                        html += "<a href=\"https://dx.deepcarbon.net/" + record["dcoId"] + "\" target=\"_blank\"><img style='vertical-align: middle' src='"+badge_url+"'/></a>";
                     }
 
                     html += "</td></tr>";
