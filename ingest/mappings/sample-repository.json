@@ -54,7 +54,7 @@
          }
        },
        "sampleCurationPractice": {
-         "type": "multi_field",
+         "sampleCurationPractice": "multi_field",
          "fields": {
            "title": {
              "type": "string",
