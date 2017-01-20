@@ -1,5 +1,5 @@
 {
-  "sampleRepository": {
+  "sample_repository": {
     "properties": {
       "dcoCommunities":{
         "properties":{
@@ -54,7 +54,8 @@
          }
        },
        "uri": {
-          "type": "string"
+          "type": "string",
+          "index": "not_analyzed"
        }
     }
   }
