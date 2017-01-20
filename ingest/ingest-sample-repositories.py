@@ -197,7 +197,7 @@ def create_sample_repository_doc(sample_repository, endpoint):
     #sample curation practice for this sample repository
     sample_curation_practice = list(repo.objects(DCOSAMPLE.sampleCurationPractice))
     sample_curation_practice = sample_curation_practice[0] if sample_curation_practice else None
-    doc.update({"sample_curation_practice": sample_curation_practice})
+    doc.update({"sampleCurationPractice": sample_curation_practice})
 
     #thumbnail for this sample repository if found
     thumbnail = get_thumbnail(repo)

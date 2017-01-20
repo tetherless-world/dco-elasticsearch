@@ -68,10 +68,11 @@
                                                                                 that this sampleRepository contains
                     ====================================================================================================
                     */
-                    {'field': 'sample_curation_practice.name.exact', 'display': 'DCO Community'}
+                    {'field': 'sampleCurationPractice', 'display': 'DCO Community'}
                 ],
                 search_sortby: [
-                    {'display':'Title','field':'title.exact', 'order':'desc'}
+                    {'display':'Title','field':'title.exact', 'order':'desc'},
+                    {'display':'Sample Curation Practice','field':'sampleCurationPractice', 'order':'desc'}
                 ],
                 render_result_record: function(options, record)
                 {
@@ -113,8 +114,8 @@
                         html += "<br />"+website;
                     }
                     // display sample curation practice
-                    if (record["sample_curation_practice"]) {
-                        html += "<br /><strong>Sample Curation Practice:</strong><span>" + record["sample_curation_practice"] + "</span>";
+                    if (record["sampleCurationPractice"]) {
+                        html += "<br /><strong>Sample Curation Practice:</strong><span>" + record["sampleCurationPractice"] + "</span>";
                     }
                     // Badges
                     html += "<br />";
