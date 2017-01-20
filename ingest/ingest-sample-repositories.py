@@ -89,7 +89,7 @@ FOAF = Namespace("http://xmlns.com/foaf/0.1/")
 
 # get_metadata: returns the index and type of the specified id
 def get_metadata(id):
-    return {"index": {"_index": "dco", "_type": "sample_repository", "_id": id}}
+    return {"index": {"_index": "dco", "_type": "sample-repository", "_id": id}}
 
 
 # get_id: returns dcoId of entity being ingested
@@ -229,7 +229,7 @@ def publish(bulk, endpoint, rebuild, mapping):
 
     # push current sample_repository document mapping
 
-    mapping_url = endpoint + "/dco/sample_repository/_mapping"
+    mapping_url = endpoint + "/dco/sample-repository/_mapping"
     with open(mapping) as mapping_file:
         r = requests.put(mapping_url, data=mapping_file)
         if r.status_code != requests.codes.ok:
@@ -264,7 +264,7 @@ if __name__ == "__main__":
     parser.add_argument('--es', default="http://localhost:9200", help="elasticsearch service URL")
     parser.add_argument('--publish', default=False, action="store_true", help="publish to elasticsearch?")
     parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")
-    parser.add_argument('--mapping', default="mappings/sample_repository.json", help="sample_repository elasticsearch mapping document")
+    parser.add_argument('--mapping', default="mappings/sample_repository.json", help="sample-repository elasticsearch mapping document")
     parser.add_argument('--sparql', default='http://deepcarbon.tw.rpi.edu:3030/VIVO/query', help='sparql endpoint')
     parser.add_argument('out', metavar='OUT', help='elasticsearch bulk ingest file')
 

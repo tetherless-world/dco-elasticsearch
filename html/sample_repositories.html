@@ -19,7 +19,7 @@
     <script type="text/javascript">
         jQuery(document).ready(function($) {
             $('.facet-view-simple').facetview({
-                search_url: '//data.deepcarbon.net/es/dco/sampleRepository/_search',
+                search_url: '//data.deepcarbon.net/es/dco/sample-repository/_search',
                 page_size: 20,
                 sort: [
                     {"_score" : {'order' : 'asc'}}
@@ -68,7 +68,7 @@
                                                                                 that this sampleRepository contains
                     ====================================================================================================
                     */
-                    // {'field': 'community.name.exact', 'display': 'DCO Community'}
+                    {'field': 'sample_curation_practice.name.exact', 'display': 'DCO Community'}
                 ],
                 search_sortby: [
                     {'display':'Title','field':'title.exact', 'order':'desc'}
@@ -114,7 +114,7 @@
                     }
                     // display sample curation practice
                     if (record["sample_curation_practice"]) {
-                        html += "<br />Sample Curation Practice: <span>" + record["sample_curation_practice"] + "</span>";
+                        html += "<br /><strong>Sample Curation Practice:</strong><span>" + record["sample_curation_practice"] + "</span>";
                     }
                     // Badges
                     html += "<br />";
