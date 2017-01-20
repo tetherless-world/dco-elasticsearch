@@ -68,7 +68,7 @@
                                                                                 that this sampleRepository contains
                     ====================================================================================================
                     */
-                    {'field': 'dcoCommunities.name.exact', 'display': 'DCO Community'}
+                    // {'field': 'community.name.exact', 'display': 'DCO Community'}
                 ],
                 search_sortby: [
                     {'display':'Title','field':'title.exact', 'order':'desc'}
@@ -103,42 +103,18 @@
                     // display title with link to sampleRepository summary page
                     html += "<strong><a href=\""+ sampleRepositorySummaryUrl + "\" target=\"_blank\">" + record["title"] + "</a></strong>";
                     // display onlineCatalog
+                    var onlineCatalog = "<strong>Online Catalog: <a href=\"" + record["onlineCatalog"] + "\" target=\"_blank\">(link)</a></strong>";
                     if (record["onlineCatalog"]) {
-                        html += "&emsp;<small>(" + record["onlineCatalog"] + ")</small>";
+                        html += "<br />"+onlineCatalog;
                     }
                     // display website
+                    var website = "<strong>Website: <a href=\"" + record["website"] + "\" target=\"_blank\">(link)</a></strong>";
                     if (record["website"]) {
-                        html += "<br />Type: " + record["website"];
+                        html += "<br />"+website;
                     }
-                    // display dcoCommunities
-                    if (record["dcoCommunities"]) {
-                        html += "<br /><span><small>DCO Communites: ";
-                        if (record["dcoCommunities"].length == 0) {
-                            html += 'N/A'
-                        } else {
-                            for (var i = 0; i < record["dcoCommunities"].length; i++) {
-                                html += "<a href=\"" + record["dcoCommunities"][i]["uri"] + "\" target=\"_blank\">" + record["dcoCommunities"][i]["name"] + "</a>";
-                                if (i < record["dcoCommunities"].length - 1) {
-                                    html += "; ";
-                                }
-                            }
-                        }
-                        html += "</small></span>";
-                    }
-                    // display teams
-                    if (record["teams"]) {
-                        html += "<br /><span><small>DCO Teams: ";
-                        if (record["teams"].length == 0) {
-                            html += 'N/A'
-                        } else {
-                            for (var i = 0; i < record["teams"].length; i++) {
-                                html += "<a href=\"" + record["teams"][i]["uri"] + "\" target=\"_blank\">" + record["teams"][i]["name"] + "</a>";
-                                if (i < record["teams"].length - 1) {
-                                    html += "; ";
-                                }
-                            }
-                        }
-                        html += "</small></span>";
+                    // display sample curation practice
+                    if (record["sample_curation_practice"]) {
+                        html += "<br />Sample Curation Practice: <span>" + record["sample_curation_practice"] + "</span>";
                     }
                     // Badges
                     html += "<br />";
