@@ -169,6 +169,21 @@ def create_sample_repository_doc(sample_repository, endpoint):
     if most_specific_type:
         doc.update({"mostSpecificType": most_specific_type})
 
+    #description(s) of this sample_repository
+    repository_descriptions = []
+    descriptions = list(repo.objects(VIVO.description))
+
+    if descriptions:
+        for description in descriptions:
+            # print(description)
+            text = description if description else None
+
+            obj = {"description": text}
+
+            repository_descriptions.append(obj)
+
+    doc.update({"repository_descriptions": repository_descriptions})
+
     #dcoCommunities associated with this sample_repository
     associatedCommunities = []
     communities = [faux for faux in repo.objects(DCO.associatedDCOCommunity) if has_type(faux, DCO.ResearchCommunity)]

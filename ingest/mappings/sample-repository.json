@@ -66,6 +66,10 @@
            }
          }
        },
+       "description": {
+          "type": "string",
+          "index": "analyzed"
+       },
        "uri": {
           "type": "string",
           "index": "not_analyzed"

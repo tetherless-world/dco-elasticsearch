@@ -13,7 +13,7 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX bibo: <http://purl.org/ontology/bibo/>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 
-DESCRIBE ?sampleRepository ?dcoid ?mostSpecificType ?community ?repositoryOnlineCatalog ?repositoryWebsite ?sampleCurationPractice
+DESCRIBE ?sampleRepository ?dcoid ?mostSpecificType ?description ?community ?repositoryOnlineCatalog ?repositoryWebsite ?sampleCurationPractice
 WHERE {
   ?sampleRepository dco:hasDcoId ?dcoid .
   ?sampleRepository vitro:mostSpecificType ?mostSpecificType .
