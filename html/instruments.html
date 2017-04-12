@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Instrument Browser</title>
+
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.1/handlebars.min.js"></script>
+
+    <!-- <script type="text/javascript" src="facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
+    <link rel="stylesheet" href="facetview2/vendor/bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
+    <script type="text/javascript" src="facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
+
+    <script type="text/javascript" src="facetview2/es.js"></script>
+    <script type="text/javascript" src="facetview2/bootstrap2.facetview.theme.js"></script>
+    <script type="text/javascript" src="facetview2/jquery.facetview2.js"></script>
+    <link rel="stylesheet" href="facetview2/css/facetview.css">
+    <link rel="stylesheet" href="browsers.css"> -->
+
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery/1.7.1/jquery-1.7.1.min.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css">
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/vendor/jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js"></script>
+
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/es.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/bootstrap2.facetview.theme.js"></script>
+    <script type="text/javascript" src="/vivo/themes/dco/js/facetview2/jquery.facetview2.js"></script>
+    <link rel="stylesheet" href="/vivo/themes/dco/js/facetview2/css/facetview.css">
+    <link rel="stylesheet" href="/vivo/themes/dco/css/browsers.css">
+
+    <script id="instrument-template" type="text/x-handlebars-template">
+        <tr>
+            <td>
+                {{#if thumbnail}}
+                <div class="thumbnail">
+                    <img src="{{thumbnail}}">
+                </div>
+                {{/if}}
+                <div class="instrument-info span7">
+                    {{!-- Display title of this instrument and link to the instrument/field study summary page --}}
+                    <div><a href="https://deepcarbon.net/dco_instrument_summary?uri={{uri}}" target="_blank">{{title}}</a></div>
+
+                    {{!-- Display this instrument's description --}}
+                    <div><strong>Description: </strong><small>{{description}}</small></div>
+
+                    {{!-- List the science communities this instrument is related to, if any --}}
+                    {{#if dcoCommunities}}
+                    <div><strong>Communities:</strong> {{#expand dcoCommunities}}<a href="{{uri}}" target="_blank">{{name}}</a>{{/expand}}</div>
+                    {{/if}}
+
+                    {{!-- Display this instrument's initiative --}}
+                    <div><strong>Description: </strong><a href="{{initiative.uri}}" target="_blank">{{initiative.name}}</a></div>
+
+                    {{!-- BADGES --}}
+
+                    <div>
+                        {{#if dcoId}}<a href="{{dcoidURL dcoId}}" target="_blank"><img class="badge" src="{{dcoIdBadgeURL dcoId}}"/></a>{{/if}}
+                    </div>
+
+                </div>
+            </td>
+        </tr>
+    </script>
+
+    <script type="text/javascript">
+
+        var build_badge_url = function(label, value, color) {
+            label = encodeURIComponent(label).replace(/-/g, "--");
+            value = encodeURIComponent(value).replace(/-/g, "--");
+            return "//img.shields.io/badge/"+label+"-"+value+"-"+color+".svg";
+        };
+
+        Handlebars.registerHelper('orcidURL', function(orcid) {
+            return "http://orcid.org/"+orcid;
+        });
+
+        Handlebars.registerHelper('dcoidURL', function(dcoid) {
+            return "https://dx.deepcarbon.net/"+dcoid;
+        });
+
+        Handlebars.registerHelper('dcoIdBadgeURL', function(dcoId) {
+            return build_badge_url("profile", dcoId, "D14719");
+        });
+
+        Handlebars.registerHelper('showMostSpecificType', function(mostSpecificType) {
+            return (mostSpecificType);
+        });
+        Handlebars.registerHelper('isMostSpecificTypeProject', function(mostSpecificType) {
+            return (mostSpecificType == 'Project');
+        });
+        Handlebars.registerHelper('isMostSpecificTypeFieldStudy', function(mostSpecificType) {
+            return (mostSpecificType == 'Field Study');
+        });
+        Handlebars.registerHelper('expand', function(items, options) {
+            var out = "";
+            var j = items.length - 1;
+            for(var i = 0; i < items.length; i++) {
+                out += options.fn(items[i]);
+                if(i < j) {
+                    out += "; ";
+                }
+            }
+            return out;
+        });
+        Handlebars.registerHelper('list', function(items, options) {
+            var out = "<ul>";
+            for(var i=0, l=items.length; i<l; i++) {
+                out = out + "<li>" + options.fn(items[i]) + "</li>";
+            }
+            return out + "</ul>";
+        });
+        var source = $("#instrument-template").html();
+        var template = Handlebars.compile(source);
+    </script>
+
+    <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            $('.facet-view-simple').facetview({
+                search_url: '//data.deepcarbon.net/es/dco/instrument/_search',
+                page_size: 20,
+                sort: [{"_score" : {"order" : "desc"}}],
+                sharesave_link: true,
+                search_button: true,
+                default_freetext_fuzzify: "*",
+                default_facet_operator: "AND",
+                default_facet_order: "count",
+                default_facet_size: 15,
+                facets: [
+                  {'field': 'mostSpecificType', 'display': 'Project/Field Study'},
+                  {'field': 'dcoCommunities.name.exact', 'display': 'DCO Community'},
+                  {'field': 'teams.name.exact', 'display': 'DCO Team'},
+                  {'field': 'leader.name.exact', 'size': 20, 'display': 'Leader'},
+                  {'field': 'participants.name.exact', 'size': 20, 'display': 'Participants'},
+                  {'field': 'grants.name.exact', 'size': 20, 'display': 'Grants'},
+                  {'field': 'dateTimeInterval.startYear', 'size': 20, 'display': 'Start Year'},
+                  {'field': 'dateTimeInterval.endYear', 'size': 20, 'display': 'End Year'},
+                  {'field': 'reportingYear.year', 'size': 20, 'display': 'Reporting Year'}
+                ],
+                search_sortby: [
+                    {'display':'Title','field':'title.exact'},
+                    {'display':'Reporting Year','field':'reportingYear.year'}
+                ],
+                render_result_record: function(options, record)
+                {
+                    return template(record).trim();
+                },
+                selected_filters_in_facet: true,
+                show_filter_field : true,
+                show_filter_logic: true,
+                post_init_callback: function(options, context) {
+                  //None for now
+                },
+                post_render_callback: function(options, context) {
+                  //None for now
+                }
+            });
+        });
+    </script>
+
+
+    <style type="text/css">
+        .facet-view-simple{
+            width:100%;
+            height:100%;
+            margin:20px auto 0 auto;
+        }
+
+        .facetview_freetext.span4 {
+           width: 290px;
+           height: 12px;
+        }
+
+        legend {
+            display: none;
+        }
+
+        #wrapper-content {
+          padding-top: 0px;
+        }
+
+        input {
+            -webkit-box-shadow: none;
+            box-shadow: none;
+        }
+
+        .thumbnail {
+            display: inline-block;
+            width: 100px;
+            box-shadow: none;
+            border: none;
+        }
+
+        .instrument-info {
+            display: inline-block;
+            vertical-align: top;
+            clear: left;
+            margin-left: 0 !important;
+        }
+    </style>
+
+</head>
+<body>
+<div class="facet-view-simple"></div>
+</body>
+</html>
