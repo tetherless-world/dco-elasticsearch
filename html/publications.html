@@ -242,7 +242,7 @@
 
                     // add the 'dco publication' checkbox to the UI
                     $(".facetview_search_options_container")
-                            .after("<input id='is-dco-publication-checkbox' type='checkbox'>&nbsp;Only show contributions to the DCO</input>&nbsp;<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>");
+                            .after("<input id='is-dco-publication-checkbox' type='checkbox'>&nbsp;Only show contributions to the DCO</input>&nbsp;<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'><div><input type='button' class='bulk-export' value='Export Citations'></input></div><div><input type='checkbox' class='select-all'> Select All</input></div>");
 
                     // set checkbox to control isDcoPublication filter on selection/deselection
                     $("#is-dco-publication-checkbox")
@@ -272,6 +272,70 @@
                         $("#is-dco-publication-checkbox").attr("disabled", false);
                     }
                 }
+            });
+            
+            $('.select-all').on('change', function(e) {
+
+                $('.select-for-export').each(function () {
+                    this.checked = $('.select-all').prop('checked');
+                });
+
+            });
+
+            $('.bulk-export').on('click', function(e) {
+                
+                var citations = [];
+
+                var promise; // undefined is a resolved promise to $.when
+
+                $('.select-for-export:checked').each(function () {
+                    var dcoId = $(this).attr("id");
+                    // console.log(dcoId);
+                    var citation_service_url = "https://info.deepcarbon.net/citation/";
+                    var req_url = citation_service_url + dcoId;
+                    var _id = gen_id(dcoId);
+                    promise = $.when(promise, $.ajax({
+                        type: "GET",
+                        crossOrigin: true,
+                        url: req_url,
+                        success: function(data) {
+                            citations.push(data);
+                            // console.log(data)
+                        }
+                    }));
+                })
+
+                // var out = window.open();
+
+                function strip(html)
+                {
+                   var tmp = document.createElement("DIV");
+                   tmp.innerHTML = html;
+                   return tmp.textContent || tmp.innerText || "";
+                }
+                
+                promise.done(function(data){
+                    // console.log(citations);
+                    // console.log(data);
+
+                    var output = 'data:text/plain;charset=UTF-8,';
+                    
+                    $.each(citations,function(ind,val){
+                        // console.log(val);
+                        val += '\n\n'
+                        output += strip(val);
+                    });
+
+                    var encodedOutput = encodeURI(output);
+
+                    var link = document.createElement("a");
+                    link.setAttribute("href", encodedOutput);
+                    link.setAttribute("download", "citations");
+                    document.body.appendChild(link);
+
+                    link.click();
+                    
+                });
             });
         });
 
