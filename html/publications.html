@@ -241,9 +241,12 @@
                     // on initial load activate the isDcoPublication filter
                     options.active_filters = {'isDcoPublication': ['T']};
 
+                    // add citation export controls to the UI
+                    $(".facetview_search_options_container").after("<div style='margin-top: 1%;margin-bottom:1%; padding:1%;'><p style='font-size: 110%;'>Citations</p><div><input type='button' class='bulk-export btn' style='margin-bottom:10px;' value='export citations'></input></div><div><input type='checkbox' class='select-all'> Select All </input></div><p style='margin-top:10px;font-size: 110%;'>or select individual publications..</p></div>")
+
                     // add the 'dco publication' checkbox to the UI
                     $(".facetview_search_options_container")
-                            .after("<input id='is-dco-publication-checkbox' type='checkbox'>&nbsp;Only show contributions to the DCO</input>&nbsp;<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'><div><input type='button' class='bulk-export' value='Export Citations'></input></div><div><input type='checkbox' class='select-all'> Select All</input></div>");
+                            .after("<input id='is-dco-publication-checkbox' type='checkbox'>&nbsp;Only show contributions to the DCO</input>&nbsp;<img style='vertical-align: middle' src='//deepcarbon.net/sites/default/files/images/dco-icon-footer_0.png' height='15' width='15'>");
 
                     // set checkbox to control isDcoPublication filter on selection/deselection
                     $("#is-dco-publication-checkbox")
@@ -308,11 +311,23 @@
 
                 // var out = window.open();
 
-                function strip(html)
+                function parseCitation(citation)
                 {
-                   var tmp = document.createElement("DIV");
-                   tmp.innerHTML = html;
-                   return tmp.textContent || tmp.innerText || "";
+                   var tmp = document.createElement("div");
+                   // var tmp = $("<div>");
+                 
+                   // tmp.innerHTML = citation;
+
+                   var hrefRegex = /<a class="citationlink" href="(.*?)"/g;
+                   var link = hrefRegex.exec(citation);
+                   
+                   // console.log(tmp.innerHTML);
+
+                   tmp.innerHTML = citation.replace(/<[^>]*>/g, "");
+
+                   return link[1] != null ? (tmp.textContent || tmp.innerText || "") + ' ' + link[1] : tmp.textContent || tmp.innerText || "";
+
+                   // return tmp.textContent + ' ' + link[1] != null ? link[1] : '';
                 }
                 
                 promise.done(function(data){
@@ -323,11 +338,12 @@
                     
                     $.each(citations,function(ind,val){
                         // console.log(val);
-                        val += '\n\n'
-                        output += strip(val);
+                        output += parseCitation(val)+'\n\n';
                     });
 
                     var encodedOutput = encodeURI(output);
+
+                    // window.open(encodedOutput);
 
                     var link = document.createElement("a");
                     link.setAttribute("href", encodedOutput);
