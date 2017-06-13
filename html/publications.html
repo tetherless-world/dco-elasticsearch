@@ -242,7 +242,7 @@
                     options.active_filters = {'isDcoPublication': ['T']};
 
                     // add citation export controls to the UI
-                    $(".facetview_search_options_container").after("<div style='margin-top: 1%;margin-bottom:1%; padding:1%;'><p style='font-size: 110%;'>Citations</p><div><input type='button' class='bulk-export btn' style='margin-bottom:10px;' value='export citations'></input></div><div><input type='checkbox' class='select-all'> Select All </input></div><p style='margin-top:10px;font-size: 110%;'>or select individual publications..</p></div>")
+                    $(".facetview_search_options_container").after('<div style="margin-top: 1%;margin-bottom:1%; padding:1%;border:1px solid #ddd;"><p style="font-size: 110%;">Citations</p><div><input type="button" class="bulk-export btn" style="margin-bottom:10px;" value="export citations"></div><div><input type="checkbox" class="select-all"> Select All <span style="margin-top:10px;font-size: 75%;">(or select individual publications below).</span></div></div>')
 
                     // add the 'dco publication' checkbox to the UI
                     $(".facetview_search_options_container")
@@ -260,6 +260,8 @@
                             });
                 },
                 post_render_callback: function(options, context) {
+
+                    $(".select-all").attr("checked", false);
 
                     // hide any open popovers when rendering the page
                     $('div.popover').hide();
@@ -290,7 +292,7 @@
                 
                 var citations = [];
 
-                var promise; // undefined is a resolved promise to $.when
+                var promise;
 
                 $('.select-for-export:checked').each(function () {
                     var dcoId = $(this).attr("id");
@@ -329,30 +331,32 @@
 
                    // return tmp.textContent + ' ' + link[1] != null ? link[1] : '';
                 }
-                
-                promise.done(function(data){
-                    // console.log(citations);
-                    // console.log(data);
 
-                    var output = 'data:text/plain;charset=UTF-8,';
-                    
-                    $.each(citations,function(ind,val){
-                        // console.log(val);
-                        output += parseCitation(val)+'\n\n';
+                if (promise) {
+                    promise.done(function(data){
+                        // console.log(citations);
+                        // console.log(data);
+
+                        var output = 'data:text/plain;charset=UTF-8,';
+                        
+                        $.each(citations,function(ind,val){
+                            // console.log(val);
+                            output += parseCitation(val)+'\n\n';
+                        });
+
+                        var encodedOutput = encodeURI(output);
+
+                        // window.open(encodedOutput);
+
+                        var link = document.createElement("a");
+                        link.setAttribute("href", encodedOutput);
+                        link.setAttribute("download", "citations");
+                        document.body.appendChild(link);
+
+                        link.click();
+                        
                     });
-
-                    var encodedOutput = encodeURI(output);
-
-                    // window.open(encodedOutput);
-
-                    var link = document.createElement("a");
-                    link.setAttribute("href", encodedOutput);
-                    link.setAttribute("download", "citations");
-                    document.body.appendChild(link);
-
-                    link.click();
-                    
-                });
+                }
             });
         });
 
