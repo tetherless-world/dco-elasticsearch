@@ -134,3 +134,12 @@ Then add a ``div`` with the HTML class referenced in the script to the HTML body
 That should be it!
 
 See the webpages in /html for examples of more complex facetview2 configurations and for how to use JS or templates to specify the HTML shown for result set entries.
+
+### Currently installed and running elasticsearch facetviews
+We have several faceted search browsers available at our DCO data portal (https://info.deepcarbon.net/vivo)
+
+https://info.deepcarbon.net/vivo/people
+https://info.deepcarbon.net/vivo/publications
+https://info.deepcarbon.net/vivo/projects
+https://info.deepcarbon.net/vivo/field-studies (includes a map)
+https://info.deepcarbon.net/vivo/datasets
