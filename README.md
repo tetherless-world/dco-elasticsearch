@@ -138,8 +138,8 @@ See the webpages in /html for examples of more complex facetview2 configurations
 ### Currently installed and running elasticsearch facetviews
 We have several faceted search browsers available at our DCO data portal (https://info.deepcarbon.net/vivo)
 
-https://info.deepcarbon.net/vivo/people
-https://info.deepcarbon.net/vivo/publications
-https://info.deepcarbon.net/vivo/projects
-https://info.deepcarbon.net/vivo/field-studies (includes a map)
-https://info.deepcarbon.net/vivo/datasets
+* https://info.deepcarbon.net/vivo/people
+* https://info.deepcarbon.net/vivo/publications
+* https://info.deepcarbon.net/vivo/projects
+* https://info.deepcarbon.net/vivo/field-studies (includes a map)
+* https://info.deepcarbon.net/vivo/datasets
