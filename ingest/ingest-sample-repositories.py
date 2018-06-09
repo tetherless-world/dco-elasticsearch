@@ -143,7 +143,7 @@ def get_thumbnail(sample_repository):
         .one().value
 
 # create_sample_repository_doc: used by process_sample_repository
-# creates a document to insert into elasticsearch based on the mapping in mappings/sample_repository.json
+# creates a document to insert into elasticsearch based on the mapping in mappings/sample-repository.json
 def create_sample_repository_doc(sample_repository, endpoint):
     graph = describe_sample_repository(endpoint=endpoint, sample_repository=sample_repository)
 
@@ -274,7 +274,7 @@ if __name__ == "__main__":
     parser.add_argument('--es', default="http://localhost:9200", help="elasticsearch service URL")
     parser.add_argument('--publish', default=False, action="store_true", help="publish to elasticsearch?")
     parser.add_argument('--rebuild', default=False, action="store_true", help="rebuild elasticsearch index?")
-    parser.add_argument('--mapping', default="mappings/sample_repository.json", help="sample-repository elasticsearch mapping document")
+    parser.add_argument('--mapping', default="mappings/sample-repository.json", help="sample-repository elasticsearch mapping document")
     parser.add_argument('--sparql', default='http://deepcarbon.tw.rpi.edu:3030/VIVO/query', help='sparql endpoint')
     parser.add_argument('out', metavar='OUT', help='elasticsearch bulk ingest file')
 
