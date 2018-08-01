@@ -14,7 +14,7 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX bibo: <http://purl.org/ontology/bibo/>
 PREFIX prov: <http://www.w3.org/ns/prov#>
 
-DESCRIBE ?dataset ?dcoid ?mostSpecificType ?community ?team ?project ?authorship ?creator ?researchArea ?orgrole ?org ?interval ?end ?dataType ?citation ?distribution
+DESCRIBE ?dataset ?dcoid ?mostSpecificType ?community ?team ?project ?authorship ?creator ?researchArea ?orgrole ?org ?interval ?end ?dataType ?citation ?sourceDataset ?derivedDataset ?distribution
 WHERE {
   ?dataset dco:hasDcoId ?dcoid .
   ?dataset vitro:mostSpecificType ?mostSpecificType .
@@ -39,4 +39,6 @@ WHERE {
   OPTIONAL { ?dataset dcat:distribution ?distribution }
   OPTIONAL { ?dataset dco:hasDataType ?dataType }
   OPTIONAL { ?dataset prov:wasQuotedFrom ?citation }
+  OPTIONAL { ?dataset prov:wasDerivedFrom ?sourceDataset }
+  OPTIONAL { ?derivedDataset prov:wasDerivedFrom ?dataset }
 }

@@ -112,6 +112,27 @@ class DatasetIngest(Ingest):
         if wasQuotedFrom:
             doc.update({"wasQuotedFrom": wasQuotedFrom})
 
+        # "source" datasets for the current dataset.
+        wasDerivedFrom = []
+        for sourceDataset in ds.objects(PROV.wasDerivedFrom):
+            print("sourceDataset: ", sourceDataset)
+            if has_type(sourceDataset, DCODATA.Dataset):
+                name = sourceDataset.label().toPython() if sourceDataset else None
+                obj = {"uri": str(sourceDataset.identifier), "name": name}
+                wasDerivedFrom.append(obj)
+        doc.update({"wasDerivedFrom": wasDerivedFrom})
+
+        # all datasets whose `wasDerivedFrom` link points to the current dataset.
+        # This is an implied reverse link, no specific predicate exists.
+        derivedTo = []
+        for derivedDataset in ds.subjects(PROV.wasDerivedFrom):
+            print("derivedDataset: ", derivedDataset)
+            if has_type(derivedDataset, DCODATA.Dataset):
+                name = derivedDataset.label().toPython() if derivedDataset else None
+                obj = {"uri": str(derivedDataset.identifier), "name": name}
+                derivedTo.append(obj)
+        doc.update({"derivedTo": derivedTo})
+
         # authors: if none, will return an empty list []
         creators = get_creators(ds)
         doc.update({"creators": creators})

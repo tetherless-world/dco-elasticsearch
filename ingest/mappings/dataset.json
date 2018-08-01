@@ -158,6 +158,30 @@
           }
         }
       },
+      "wasDerivedFrom": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "index": "not_analyzed"
+          },
+          "uri": {
+            "type": "string",
+            "index": "not_analyzed"
+          }
+        }
+      },
+      "derivedTo": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "index": "not_analyzed"
+          },
+          "uri": {
+            "type": "string",
+            "index": "not_analyzed"
+          }
+        }
+      },
       "distributions": {
         "properties": {
           "accessURL": {

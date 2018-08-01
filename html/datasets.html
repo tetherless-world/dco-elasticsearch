@@ -206,6 +206,36 @@
                         }
                         html += "</small></span>";
                     }
+                    // display source datasets
+                    if (record["wasDerivedFrom"]) {
+                        if (record["wasDerivedFrom"].length != 0) {
+                            html += "<br /><span><small>Derived from: ";
+                            html += "<br /> &emsp;&emsp;&emsp;&emsp;";
+                            for (var i = 0; i < record["wasDerivedFrom"].length; i++) {
+                                html += ("<a href=\"" + record["wasDerivedFrom"][i]["uri"] + "\" target=\"_blank\">"
+                                        + record["wasDerivedFrom"][i]["name"] + "</a>");
+                                if (i < record["wasDerivedFrom"].length - 1) {
+                                    html += "; <br /> &emsp;&emsp;&emsp;&emsp;";
+                                }
+                            }
+                            html += "</small></span>";
+                        }
+                    }
+                    // display derived datasets
+                    if (record["derivedTo"]) {
+                        if (record["derivedTo"].length != 0) {
+                            html += "<br /><span><small>Derived to: ";
+                            html += "<br /> &emsp;&emsp;&emsp;&emsp;";
+                            for (var i = 0; i < record["derivedTo"].length; i++) {
+                                html += ("<a href=\"" + record["derivedTo"][i]["uri"] + "\" target=\"_blank\">"
+                                        + record["derivedTo"][i]["name"] + "</a>");
+                                if (i < record["derivedTo"].length - 1) {
+                                    html += "; <br /> &emsp;&emsp;&emsp;&emsp;";
+                                }
+                            }
+                            html += "</small></span>";
+                        }
+                    }
                     // display distributions
                     if (record["distributions"]) {
                         if (record["distributions"].length != 0) {
