@@ -115,7 +115,6 @@ class DatasetIngest(Ingest):
         # "source" datasets for the current dataset.
         wasDerivedFrom = []
         for sourceDataset in ds.objects(PROV.wasDerivedFrom):
-            print("sourceDataset: ", sourceDataset)
             if has_type(sourceDataset, DCODATA.Dataset):
                 name = sourceDataset.label().toPython() if sourceDataset else None
                 obj = {"uri": str(sourceDataset.identifier), "name": name}
@@ -126,7 +125,6 @@ class DatasetIngest(Ingest):
         # This is an implied reverse link, no specific predicate exists.
         derivedTo = []
         for derivedDataset in ds.subjects(PROV.wasDerivedFrom):
-            print("derivedDataset: ", derivedDataset)
             if has_type(derivedDataset, DCODATA.Dataset):
                 name = derivedDataset.label().toPython() if derivedDataset else None
                 obj = {"uri": str(derivedDataset.identifier), "name": name}
